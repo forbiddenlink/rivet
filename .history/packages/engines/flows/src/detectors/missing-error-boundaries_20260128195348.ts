@@ -69,8 +69,12 @@ export function detectMissingErrorBoundaries(context: AnalysisContext): Detectio
     return false
   }
 
-  if (parseResult.ast) {
-    visit(parseResult.ast, parseResult.filePath)
+  if (parseResult.files) {
+    for (const file of parseResult.files) {
+      if (file.ast) {
+        visit(file.ast, file.filePath)
+      }
+    }
   }
 
   return detections

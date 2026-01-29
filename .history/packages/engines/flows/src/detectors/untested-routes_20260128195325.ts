@@ -55,9 +55,13 @@ export function detectUntestedRoutes(context: AnalysisContext): Detection[] {
     }
   }
 
-  // Analyze the file
-  if (parseResult.ast) {
-    visit(parseResult.ast, parseResult.filePath)
+  // Analyze each file
+  if (parseResult.files) {
+    for (const file of parseResult.files) {
+      if (file.ast) {
+        visit(file.ast, file.filePath)
+      }
+    }
   }
 
   return detections

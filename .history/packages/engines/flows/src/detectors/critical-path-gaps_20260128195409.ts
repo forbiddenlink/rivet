@@ -12,7 +12,7 @@ export function detectCriticalPathGaps(context: AnalysisContext): Detection[] {
   function visit(node: ASTNode, filePath: string): void {
     // Detect async functions without try-catch
     if ((node.type === 'FunctionDeclaration' || node.type === 'ArrowFunctionExpression') && 
-        node.raw.type === 'FunctionDeclaration' && (node.raw as any).async) {
+        node.raw.type === 'FunctionDeclaration' && node.raw.async) {
       const body = node.children?.find((child) => child.type === 'BlockStatement')
       if (body && !hasTryCatch(body) && node.loc) {
         detections.push({
@@ -36,28 +36,31 @@ export function detectCriticalPathGaps(context: AnalysisContext): Detection[] {
     }
 
     // Detect API calls without error handling
-    if (node.type === 'CallExpression' && node.raw.type === 'CallExpression') {
-      const callee = node.raw.callee
-      if (callee && callee.type === 'Identifier' && callee.name === 'fetch' && node.loc) {
-        // Check if fetch is wrapped in try-catch or has .catch()
-        if (!hasErrorHandling(node) && !isInTryCatch(node)) {
-          detections.push({
-            id: `critical-path-gap-${++detectionCounter}`,
-            ruleId: 'fetch-without-error-handling',
-            filePath,
-            loc: {
-              start: { line: node.loc.start.line, column: node.loc.start.column },
-              end: { line: node.loc.end.line, column: node.loc.end.column },
-            },
-            severity: 'high',
-            category: 'flows',
-            message: 'fetch() call without error handling',
-            metadata: {
-              pattern: 'fetch-without-catch',
-              explanation: 'Network requests can fail and should be wrapped in error handling',
-              recommendation: 'Add .catch() handler or wrap in try-catch block',
-            },
-          })
+    if (node.type === 'CallExpression' && node.children) {
+      const callee = node.children.find((child) => child.type === 'MemberExpression')
+      if (callee && callee.raw.type === 'MemberExpression') {
+        const property = callee.property
+        if (property && property.name === 'fetch' && node.loc) {
+          // Check if fetch is wrapped in try-catch or has .catch()
+          if (!hasErrorHandling(node) && !isInTryCatch(node)) {
+            detections.push({
+              id: `critical-path-gap-${++detectionCounter}`,
+              ruleId: 'fetch-without-error-handling',
+              filePath,
+              loc: {
+                start: { line: node.loc.start.line, column: node.loc.start.column },
+                end: { line: node.loc.end.line, column: node.loc.end.column },
+              },
+              severity: 'high',
+              category: 'flows',
+              message: 'fetch() call without error handling',
+              metadata: {
+                pattern: 'fetch-without-catch',
+                explanation: 'Network requests can fail and should be wrapped in error handling',
+                recommendation: 'Add .catch() handler or wrap in try-catch block',
+              },
+            })
+          }
         }
       }
     }
@@ -84,8 +87,12 @@ export function detectCriticalPathGaps(context: AnalysisContext): Detection[] {
     return false // Simplified for now
   }
 
-  if (parseResult.ast) {
-    visit(parseResult.ast, parseResult.filePath)
+  if (parseResult.files) {
+    for (const file of parseResult.files) {
+      if (file.ast) {
+        visit(file.ast, file.filePath)
+      }
+    }
   }
 
   return detections
