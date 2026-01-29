@@ -106,8 +106,8 @@ async function runAnalysis(
 
     // Format and output results
     const format = options.format as string
-    if (format === 'json' || format === 'sarif' || format === 'html') {
-      const formatter = createFormatter(format as 'json' | 'sarif' | 'html')
+    if (format === 'json' || format === 'sarif') {
+      const formatter = createFormatter(format as 'json' | 'sarif')
       const output = formatter.format(enhancedResult.detections)
       
       if (options.output) {

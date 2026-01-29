@@ -106,8 +106,8 @@ async function runAnalysis(
 
     // Format and output results
     const format = options.format as string
-    if (format === 'json' || format === 'sarif' || format === 'html') {
-      const formatter = createFormatter(format as 'json' | 'sarif' | 'html')
+    if (format === 'json' || format === 'sarif') {
+      const formatter = createFormatter(format as 'json' | 'sarif')
       const output = formatter.format(enhancedResult.detections)
       
       if (options.output) {
@@ -136,8 +136,8 @@ async function runAnalysis(
 export const scanCommand = new Command('scan')
   .description('Analyze codebase for issues')
   .argument('[path]', 'Directory or file to scan', '.')
-  .option('--format <format>', 'Output format (cli, json, sarif, html)', 'cli')
-  .option('--output <path>', 'Output file path (for json/sarif/html formats)')
+  .option('--format <format>', 'Output format (cli, json, sarif)', 'cli')
+  .option('--output <path>', 'Output file path (for json/sarif formats)')
   .option('--severity <level>', 'Minimum severity level (critical, high, medium, low, info)', 'info')
   .option('--max-issues <number>', 'Maximum number of issues to report', '100')
   .option('--ai', 'Enable AI-powered explanations and suggestions (requires OPENAI_API_KEY)')
@@ -157,63 +157,6 @@ export const scanCommand = new Command('scan')
       // Run initial analysis
       const result = await runAnalysis(projectRoot, options, config)
 
-      // Watch mode
-      if (options.watch) {
-        console.log(chalk.cyan('👀 Watch mode enabled - monitoring for changes...'))
-        console.log(chalk.dim('   Press Ctrl+C to stop'))
-        console.log('')
-
-        let isAnalyzing = false
-        let pendingChange = false
-
-        const watcher = chokidar.watch(projectRoot, {
-          ignored: [
-            '**/node_modules/**',
-            '**/.git/**',
-            '**/dist/**',
-            '**/build/**',
-            '**/.next/**',
-            '**/coverage/**',
-          ],
-          persistent: true,
-          ignoreInitial: true,
-        })
-
-        const runChange = async () => {
-          if (isAnalyzing) {
-            pendingChange = true
-            return
-          }
-
-          isAnalyzing = true
-          pendingChange = false
-
-          console.log(chalk.dim('─'.repeat(60)))
-          console.log(chalk.cyan('🔄 Changes detected, re-analyzing...'))
-          console.log('')
-
-          try {
-            await runAnalysis(projectRoot, options, config)
-          } catch (error) {
-            console.error(chalk.red('Error during re-analysis:'), error instanceof Error ? error.message : error)
-          }
-
-          isAnalyzing = false
-
-          if (pendingChange) {
-            // Run again if changes occurred during analysis
-            setTimeout(runChange, 100)
-          }
-        }
-
-        watcher.on('change', runChange)
-        watcher.on('add', runChange)
-        watcher.on('unlink', runChange)
-
-        // Keep process alive
-        await new Promise(() => {})
-      }
-
       // Exit with error code if critical or high severity issues found
       const hasCriticalIssues = result.detections.some(
         (d) => d.severity === 'critical' || d.severity === 'high'
@@ -222,7 +165,7 @@ export const scanCommand = new Command('scan')
         process.exit(1)
       }
     } catch (error) {
-      console.error(chalk.red('Error during analysis:'), error instanceof Error ? error.message : error)
+      console.error('Error during analysis:', error instanceof Error ? error.message : error)
       process.exit(1)
     }
   })

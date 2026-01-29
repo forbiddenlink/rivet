@@ -106,8 +106,8 @@ async function runAnalysis(
 
     // Format and output results
     const format = options.format as string
-    if (format === 'json' || format === 'sarif' || format === 'html') {
-      const formatter = createFormatter(format as 'json' | 'sarif' | 'html')
+    if (format === 'json' || format === 'sarif') {
+      const formatter = createFormatter(format as 'json' | 'sarif')
       const output = formatter.format(enhancedResult.detections)
       
       if (options.output) {
@@ -136,8 +136,8 @@ async function runAnalysis(
 export const scanCommand = new Command('scan')
   .description('Analyze codebase for issues')
   .argument('[path]', 'Directory or file to scan', '.')
-  .option('--format <format>', 'Output format (cli, json, sarif, html)', 'cli')
-  .option('--output <path>', 'Output file path (for json/sarif/html formats)')
+  .option('--format <format>', 'Output format (cli, json, sarif)', 'cli')
+  .option('--output <path>', 'Output file path (for json/sarif formats)')
   .option('--severity <level>', 'Minimum severity level (critical, high, medium, low, info)', 'info')
   .option('--max-issues <number>', 'Maximum number of issues to report', '100')
   .option('--ai', 'Enable AI-powered explanations and suggestions (requires OPENAI_API_KEY)')

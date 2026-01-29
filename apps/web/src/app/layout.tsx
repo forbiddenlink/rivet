@@ -78,10 +78,10 @@ export default function RootLayout({
         background: '#0a0a0f',
         minHeight: '100vh',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
         position: 'relative',
-        overflow: 'hidden',
+        overflowX: 'hidden',
       }}>
         {/* Aurora Background Container */}
         <div style={{

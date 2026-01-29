@@ -674,8 +674,6 @@ export function createFormatter(format: 'json' | 'sarif' | 'html'): OutputFormat
       return new JSONFormatter()
     case 'sarif':
       return new SARIFFormatter()
-    case 'html':
-      return new HTMLFormatter()
     default:
       throw new Error(`Unknown format: ${format}`)
   }
