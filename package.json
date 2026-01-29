@@ -1,0 +1,63 @@
+{
+  "name": "rivet",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI-powered code quality platform for modern development teams",
+  "keywords": [
+    "code-quality",
+    "static-analysis",
+    "security",
+    "linting",
+    "refactoring",
+    "ai",
+    "developer-tools"
+  ],
+  "homepage": "https://github.com/elizabethstein/rivet#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/elizabethstein/rivet.git"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Elizabeth Stein",
+    "email": "elizabeth@example.com"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "test:watch": "turbo run test:watch",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,md,json}\"",
+    "typecheck": "turbo run typecheck",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "turbo run build && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.1",
+    "@types/node": "^20.11.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-security": "^2.1.0",
+    "prettier": "^3.2.5",
+    "tsup": "^8.0.1",
+    "turbo": "^2.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}

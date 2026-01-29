@@ -1,0 +1,27 @@
+{
+  "name": "@rivet/engine-practices",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean --external @rivet/core --external @rivet/parsers --external typescript",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch --external @rivet/core --external @rivet/parsers --external typescript"
+  },
+  "dependencies": {
+    "@rivet/core": "workspace:*",
+    "@rivet/parsers": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  }
+}

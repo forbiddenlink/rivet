@@ -1,0 +1,44 @@
+import type { AnalysisContext, AnalysisEngine, Detection } from '@rivet/core'
+import { detectSQLInjection } from './detectors/sql-injection.js'
+import { detectXSS } from './detectors/xss.js'
+import { detectCommandInjection } from './detectors/command-injection.js'
+import { detectPathTraversal } from './detectors/path-traversal.js'
+import { detectInsecureCrypto } from './detectors/insecure-crypto.js'
+
+export class SecurityEngine implements AnalysisEngine {
+  name = 'SecurityEngine'
+  category = 'security' as const
+
+  async analyze(context: AnalysisContext): Promise<Detection[]> {
+    try {
+      const { parseResult } = context
+      const { ast, filePath } = parseResult
+
+      // Run all security detectors in parallel
+      const [sqlInjection, xss, commandInjection, pathTraversal, insecureCrypto] =
+        await Promise.all([
+          Promise.resolve(detectSQLInjection(ast, filePath)),
+          Promise.resolve(detectXSS(ast, filePath)),
+          Promise.resolve(detectCommandInjection(ast, filePath)),
+          Promise.resolve(detectPathTraversal(ast, filePath)),
+          Promise.resolve(detectInsecureCrypto(ast, filePath)),
+        ])
+
+      return [
+        ...sqlInjection,
+        ...xss,
+        ...commandInjection,
+        ...pathTraversal,
+        ...insecureCrypto,
+      ]
+    } catch (error) {
+      return []
+    }
+  }
+}
+
+export * from './detectors/sql-injection.js'
+export * from './detectors/xss.js'
+export * from './detectors/command-injection.js'
+export * from './detectors/path-traversal.js'
+export * from './detectors/insecure-crypto.js'

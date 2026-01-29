@@ -1,0 +1,39 @@
+{
+  "name": "@rivet/parsers",
+  "version": "0.1.0",
+  "description": "AST parsing and type extraction for multiple languages",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@typescript-eslint/parser": "^7.0.0",
+    "@typescript-eslint/utils": "^7.0.0",
+    "typescript": "^5.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "tsup": "^8.0.1",
+    "vitest": "^2.1.0"
+  },
+  "keywords": [
+    "ast",
+    "parser",
+    "typescript",
+    "javascript"
+  ]
+}

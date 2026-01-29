@@ -1,0 +1,63 @@
+name: Question / Help
+description: Ask a question or get help using RIVET
+title: "[Question]: "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have a question? We're here to help!
+        
+        **Note**: For general discussions, consider using [GitHub Discussions](https://github.com/elizabethstein/rivet/discussions) instead.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your Question
+      description: What do you need help with?
+      placeholder: How do I...? Why does...? Can RIVET...?
+    validations:
+      required: true
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: What I've Tried
+      description: What have you already tried?
+      placeholder: |
+        I tried...
+        I looked at the documentation...
+        I searched for...
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Provide any relevant context
+      placeholder: |
+        I'm trying to integrate RIVET into...
+        My project uses...
+        I'm running into this issue...
+
+  - type: input
+    id: rivet-version
+    attributes:
+      label: RIVET Version
+      placeholder: "0.1.0"
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Configuration (if relevant)
+      description: Share your .rivetrc.json
+      render: json
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have checked the [documentation](https://github.com/elizabethstein/rivet/tree/main/docs)
+          required: true
+        - label: I have searched existing issues/discussions
+          required: true

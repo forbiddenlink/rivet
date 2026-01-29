@@ -1,0 +1,42 @@
+{
+  "name": "@rivet/cli",
+  "version": "0.1.0",
+  "description": "Command-line interface for RIVET code quality analysis",
+  "bin": {
+    "rivet": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs --dts --clean --external @rivet/core --external @rivet/parsers --external @rivet/ai --external @rivet/engine-smells --external @rivet/engine-security --external @rivet/engine-bugs --external @rivet/engine-performance --external @rivet/engine-architecture --external @rivet/engine-practices --external @rivet/engine-dependencies",
+    "dev": "tsup src/index.ts --format cjs --dts --watch --external @rivet/core --external @rivet/parsers --external @rivet/ai --external @rivet/engine-smells --external @rivet/engine-security --external @rivet/engine-bugs --external @rivet/engine-performance --external @rivet/engine-architecture --external @rivet/engine-practices --external @rivet/engine-dependencies",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@rivet/ai": "workspace:*",
+    "@rivet/core": "workspace:*",
+    "@rivet/engine-architecture": "workspace:*",
+    "@rivet/engine-bugs": "workspace:^",
+    "@rivet/engine-dependencies": "workspace:*",
+    "@rivet/engine-performance": "workspace:*",
+    "@rivet/engine-practices": "workspace:*",
+    "@rivet/engine-security": "workspace:*",
+    "@rivet/engine-smells": "workspace:*",
+    "@rivet/parsers": "workspace:*",
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "tsup": "^8.0.1",
+    "vitest": "^2.1.0"
+  },
+  "keywords": [
+    "cli",
+    "code-quality",
+    "linting"
+  ]
+}
