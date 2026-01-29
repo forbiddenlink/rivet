@@ -1,6 +1,7 @@
 import { parseTypeScript } from '@rivet/parsers'
 import { glob } from 'glob'
 import { readFile } from 'node:fs/promises'
+import path from 'node:path'
 
 import type {
   AnalysisContext,
@@ -16,8 +17,8 @@ import type {
  * Main orchestration engine for RIVET analysis
  */
 export class RivetEngine {
-  private readonly engines: Map<Category, AnalysisEngine[]> = new Map()
-  private readonly config: RivetConfig
+  private engines: Map<Category, AnalysisEngine[]> = new Map()
+  private config: RivetConfig
 
   constructor(config: RivetConfig = {}) {
     this.config = {
@@ -207,15 +208,19 @@ export class RivetEngine {
     const summary: AnalysisResult['summary'] = {}
 
     for (const detection of detections) {
-      summary[detection.category] ??= {
-        count: 0,
-        bySeverity: {},
+      if (!summary[detection.category]) {
+        summary[detection.category] = {
+          count: 0,
+          bySeverity: {},
+        }
       }
 
       const categorySummary = summary[detection.category]!
       categorySummary.count++
 
-      categorySummary.bySeverity[detection.severity] ??= 0
+      if (!categorySummary.bySeverity[detection.severity]) {
+        categorySummary.bySeverity[detection.severity] = 0
+      }
       categorySummary.bySeverity[detection.severity]!++
     }
 
