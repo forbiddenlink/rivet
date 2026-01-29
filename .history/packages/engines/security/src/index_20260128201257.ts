@@ -24,7 +24,7 @@ export class SecurityEngine implements AnalysisEngine {
           Promise.resolve(detectCommandInjection(ast, filePath)),
           Promise.resolve(detectPathTraversal(ast, filePath)),
           Promise.resolve(detectInsecureCrypto(ast, filePath)),
-          Promise.resolve(detectHardcodedSecrets(context)),
+          Promise.resolve(detectHardcodedSecrets({ parseResult })),
         ])
 
       return [
@@ -46,4 +46,3 @@ export * from './detectors/xss.js'
 export * from './detectors/command-injection.js'
 export * from './detectors/path-traversal.js'
 export * from './detectors/insecure-crypto.js'
-export * from './detectors/hardcoded-secrets.js'
