@@ -1,5 +1,0 @@
-{
-  "buildCommand": "pnpm --filter @rivet/web build",
-  "outputDirectory": "apps/web/out",
-  "installCommand": "pnpm install"
-}

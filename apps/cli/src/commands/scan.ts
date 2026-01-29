@@ -10,6 +10,8 @@ import { AIEnhancer, TechDebtCalculator, type AIConfig } from '@rivet/ai'
 import { Command } from 'commander'
 import { resolve } from 'node:path'
 import chalk from 'chalk'
+import ora from 'ora'
+import chokidar from 'chokidar'
 
 import { formatResults, formatTechDebt } from '../formatter'
 import { createFormatter } from '../formatters'
@@ -24,6 +26,7 @@ export const scanCommand = new Command('scan')
   .option('--ai', 'Enable AI-powered explanations and suggestions (requires OPENAI_API_KEY)')
   .option('--ai-model <model>', 'AI model to use (gpt-4, gpt-3.5-turbo)', 'gpt-4')
   .option('--tech-debt', 'Show technical debt metrics with time estimates')
+  .option('--watch', 'Watch mode - re-run analysis when files change')
   .action(async (targetPath: string, options: Record<string, string | boolean>) => {
     try {
       const projectRoot = resolve(process.cwd(), targetPath)

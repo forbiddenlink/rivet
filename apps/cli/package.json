@@ -27,7 +27,9 @@
     "@rivet/engine-smells": "workspace:*",
     "@rivet/parsers": "workspace:*",
     "chalk": "^4.1.2",
-    "commander": "^11.1.0"
+    "chokidar": "^5.0.0",
+    "commander": "^11.1.0",
+    "ora": "^9.1.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
