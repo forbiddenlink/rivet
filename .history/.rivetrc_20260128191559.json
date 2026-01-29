@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json.schemastore.org/rivetrc.json",
+  "version": "0.1.0",
+  "engines": {
+    "enabled": ["smells", "security", "bugs", "performance", "architecture", "practices", "dependencies"],
+    "disabled": ["flows"]
+  },
+  "severity": {
+    "minimum": "medium",
+    "failOn": ["critical", "high"]
+  },
+  "ignore": {
+    "paths": [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/*.test.ts",
+      "**/*.spec.ts",
+      "**/__tests__/**"
+    ],
+    "rules": []
+  },
+  "ai": {
+    "enabled": true,
+    "model": "gpt-4",
+    "maxConcurrent": 5,
+    "features": {
+      "explanations": true,
+      "suggestions": true,
+      "analogies": true,
+      "techDebt": true
+    }
+  },
+  "autofix": {
+    "enabled": false,
+    "safe": true,
+    "rules": [
+      "dead-code-removal",
+      "callback-to-async",
+      "consistent-naming",
+      "missing-error-handling"
+    ]
+  },
+  "output": {
+    "format": "cli",
+    "verbose": false,
+    "showProgress": true,
+    "colorize": true
+  },
+  "integrations": {
+    "github": {
+      "enabled": false,
+      "commentOnPR": true,
+      "createIssues": false
+    },
+    "vscode": {
+      "enabled": false,
+      "inlineWarnings": true
+    }
+  }
+}
