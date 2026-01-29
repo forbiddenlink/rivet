@@ -246,6 +246,18 @@ function FeatureCard({ icon, title, description }: { icon: React.ReactNode; titl
       borderRadius: '12px',
       padding: '2rem',
       border: '1px solid rgba(255, 255, 255, 0.15)',
+      transition: 'transform 0.2s, box-shadow 0.2s, background 0.2s',
+      cursor: 'default',
+    }}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.transform = 'translateY(-4px)'
+      e.currentTarget.style.boxShadow = '0 12px 24px rgba(0,0,0,0.2)'
+      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)'
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.transform = 'translateY(0)'
+      e.currentTarget.style.boxShadow = 'none'
+      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'
     }}>
       <div style={{
         marginBottom: '1rem',
