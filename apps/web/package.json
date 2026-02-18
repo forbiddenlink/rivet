@@ -10,6 +10,15 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@rivet/core": "workspace:*",
+    "@rivet/engine-architecture": "workspace:*",
+    "@rivet/engine-bugs": "workspace:*",
+    "@rivet/engine-dependencies": "workspace:*",
+    "@rivet/engine-performance": "workspace:*",
+    "@rivet/engine-practices": "workspace:*",
+    "@rivet/engine-security": "workspace:*",
+    "@rivet/engine-smells": "workspace:*",
+    "@rivet/parsers": "workspace:*",
     "next": "^15.1.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

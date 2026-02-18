@@ -105,6 +105,33 @@ importers:
 
   apps/web:
     dependencies:
+      '@rivet/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@rivet/engine-architecture':
+        specifier: workspace:*
+        version: link:../../packages/engines/architecture
+      '@rivet/engine-bugs':
+        specifier: workspace:*
+        version: link:../../packages/engines/bugs
+      '@rivet/engine-dependencies':
+        specifier: workspace:*
+        version: link:../../packages/engines/dependencies
+      '@rivet/engine-performance':
+        specifier: workspace:*
+        version: link:../../packages/engines/performance
+      '@rivet/engine-practices':
+        specifier: workspace:*
+        version: link:../../packages/engines/practices
+      '@rivet/engine-security':
+        specifier: workspace:*
+        version: link:../../packages/engines/security
+      '@rivet/engine-smells':
+        specifier: workspace:*
+        version: link:../../packages/engines/smells
+      '@rivet/parsers':
+        specifier: workspace:*
+        version: link:../../packages/parsers
       next:
         specifier: ^15.1.6
         version: 15.5.11(react-dom@19.2.4(react@19.2.4))(react@19.2.4)

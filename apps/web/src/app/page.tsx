@@ -76,6 +76,18 @@ export default function Home() {
           justifyContent: 'center',
           flexWrap: 'wrap',
         }}>
+          <a href="/dashboard" style={{
+            background: 'linear-gradient(135deg, #a78bfa 0%, #22d3ee 100%)',
+            color: '#0a0a0f',
+            padding: '1rem 2rem',
+            borderRadius: '12px',
+            textDecoration: 'none',
+            fontWeight: 600,
+            fontSize: '1rem',
+            boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4), 0 0 40px rgba(139, 92, 246, 0.2)',
+          }}>
+            📊 Dashboard
+          </a>
           <a href="https://github.com/forbiddenlink/rivet" style={{
             background: 'linear-gradient(135deg, #a78bfa 0%, #22d3ee 100%)',
             color: '#0a0a0f',

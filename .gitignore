@@ -48,6 +48,7 @@ Thumbs.db
 !.vscode/launch.json
 !.vscode/extensions.json
 .idea/
+.history/
 *.sublime-*
 .project
 
