@@ -1,7 +1,8 @@
-import { describe, it, expect } from 'vitest'
-import { parseTypeScript } from '@rivet/parsers'
-import { detectCriticalPathGaps } from './critical-path-gaps'
 import type { AnalysisContext } from '@rivet/core'
+import { parseTypeScript } from '@rivet/parsers'
+import { describe, expect, it } from 'vitest'
+
+import { detectCriticalPathGaps } from './critical-path-gaps'
 
 function createContext(code: string, filePath = 'test.ts'): AnalysisContext {
   const parseResult = parseTypeScript({

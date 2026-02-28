@@ -9,13 +9,22 @@ export function detectMissingErrorBoundaries(context: AnalysisContext): Detectio
   const { parseResult } = context
   let detectionCounter = 0
 
-  function visit(node: ASTNode, filePath: string): void {
-    // Look for components that render async data without error boundaries
-    if (node.type === 'JSXElement' && node.children) {
-      const hasAsyncDataFetching = containsAsyncOperation(node)
-      const isWrappedInErrorBoundary = isInsideErrorBoundary(node)
+  function visit(node: ASTNode, filePath: string, parent?: ASTNode): void {
+    // Set parent reference for traversal
+    node.parent = parent
 
-      if (hasAsyncDataFetching && !isWrappedInErrorBoundary && node.loc) {
+    // Look for function components with async hooks
+    const isFunctionComponent =
+      (node.type === 'FunctionDeclaration' ||
+       node.type === 'FunctionExpression' ||
+       node.type === 'ArrowFunctionExpression') &&
+      returnsJSX(node)
+
+    if (isFunctionComponent) {
+      const hasAsyncHooks = containsAsyncOperation(node)
+
+      if (hasAsyncHooks && node.loc) {
+        const componentName = getComponentName(node)
         detections.push({
           id: `missing-error-boundary-${++detectionCounter}`,
           ruleId: 'missing-error-boundary',
@@ -26,7 +35,7 @@ export function detectMissingErrorBoundaries(context: AnalysisContext): Detectio
           },
           severity: 'medium',
           category: 'flows',
-          message: 'Component with async operations lacks Error Boundary',
+          message: `Component${componentName ? ` '${componentName}'` : ''} with async operations should be wrapped in Error Boundary`,
           metadata: {
             pattern: 'missing-error-boundary',
             explanation: 'Components that perform async operations should be wrapped in Error Boundaries to handle runtime errors gracefully',
@@ -38,9 +47,44 @@ export function detectMissingErrorBoundaries(context: AnalysisContext): Detectio
 
     if (node.children) {
       for (const child of node.children) {
-        visit(child, filePath)
+        visit(child, filePath, node)
       }
     }
+  }
+
+  function returnsJSX(node: ASTNode): boolean {
+    if (!node.children) return false
+    for (const child of node.children) {
+      if (child.type === 'JSXElement' || child.type === 'JSXFragment') {
+        return true
+      }
+      if (child.type === 'ReturnStatement' && child.children) {
+        for (const returnChild of child.children) {
+          if (returnChild.type === 'JSXElement' || returnChild.type === 'JSXFragment') {
+            return true
+          }
+        }
+      }
+      if (returnsJSX(child)) {
+        return true
+      }
+    }
+    return false
+  }
+
+  function getComponentName(node: ASTNode): string | null {
+    if (node.type === 'FunctionDeclaration' && node.raw.type === 'FunctionDeclaration') {
+      const id = (node.raw as { id?: { name?: string } }).id
+      return id?.name || null
+    }
+    // For arrow functions, check parent for variable declaration
+    if (node.parent?.type === 'VariableDeclarator' && node.parent.children) {
+      const id = node.parent.children.find((c) => c.type === 'Identifier')
+      if (id && id.raw.type === 'Identifier') {
+        return (id.raw as { name: string }).name
+      }
+    }
+    return null
   }
 
   function containsAsyncOperation(node: ASTNode): boolean {
@@ -64,7 +108,8 @@ export function detectMissingErrorBoundaries(context: AnalysisContext): Detectio
     return false
   }
 
-  function isInsideErrorBoundary(node: ASTNode): boolean {
+  // TODO: Use this to check if component usage is wrapped in error boundary
+  function _isInsideErrorBoundary(node: ASTNode): boolean {
     // Check if there's an ErrorBoundary component in parent tree
     const errorBoundaryNames = [
       'ErrorBoundary',
