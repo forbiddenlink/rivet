@@ -11,6 +11,8 @@ export interface ASTNode {
   loc: SourceLocation
   /** Child nodes */
   children?: ASTNode[]
+  /** Parent node (populated during tree traversal) */
+  parent?: ASTNode
   /** Raw ESTree node */
   raw: TSESTree.Node
 }

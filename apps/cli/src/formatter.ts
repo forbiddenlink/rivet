@@ -93,25 +93,21 @@ function formatDetection(detection: Detection, aiEnabled = false): string {
   }
 
   // AI Enhancement
-  if (aiEnabled && enhanced.aiEnhancement) {
-    const ai = enhanced.aiEnhancement
-    
-    if (ai.explanation) {
-      lines.push('')
-      lines.push(`  ${chalk.blue('💡 Explanation:')}`)
-      lines.push(`     ${chalk.dim(ai.explanation)}`)
-    }
-    
-    if (ai.suggestion) {
+  if (aiEnabled && enhanced.aiExplanation) {
+    lines.push('')
+    lines.push(`  ${chalk.blue('💡 Explanation:')}`)
+    lines.push(`     ${chalk.dim(enhanced.aiExplanation)}`)
+
+    if (enhanced.aiSuggestion) {
       lines.push('')
       lines.push(`  ${chalk.green('🔧 Suggestion:')}`)
-      lines.push(`     ${chalk.dim(ai.suggestion)}`)
+      lines.push(`     ${chalk.dim(enhanced.aiSuggestion)}`)
     }
-    
-    if (ai.analogy) {
+
+    if (enhanced.aiAnalogy) {
       lines.push('')
       lines.push(`  ${chalk.magenta('📖 Analogy:')}`)
-      lines.push(`     ${chalk.dim(ai.analogy)}`)
+      lines.push(`     ${chalk.dim(enhanced.aiAnalogy)}`)
     }
   }
 
@@ -171,41 +167,45 @@ export function formatTechDebt(metrics: TechDebtMetrics): string {
   output.push('')
 
   // Total debt
-  const days = Math.floor(metrics.totalHours / 8)
-  const remainingHours = (metrics.totalHours % 8).toFixed(1)
-  const totalDisplay = days > 0 
-    ? `${metrics.totalHours.toFixed(1)} hours (${days}d ${remainingHours}h)`
-    : `${metrics.totalHours.toFixed(1)} hours`
+  const days = Math.floor(metrics.totalDebt / 8)
+  const remainingHours = (metrics.totalDebt % 8).toFixed(1)
+  const totalDisplay = days > 0
+    ? `${metrics.totalDebt.toFixed(1)} hours (${days}d ${remainingHours}h)`
+    : `${metrics.totalDebt.toFixed(1)} hours`
 
   output.push(`${chalk.bold('Total Estimated Time:')} ${chalk.yellow(totalDisplay)}`)
   output.push('')
 
   // By Severity
-  if (Object.keys(metrics.bySeverity).length > 0) {
-    output.push(chalk.bold('By Severity:'))
-    const severityOrder: Severity[] = ['critical', 'high', 'medium', 'low', 'info']
-    
-    for (const severity of severityOrder) {
-      const hours = metrics.bySeverity[severity]
-      if (hours && hours > 0) {
-        const percentage = ((hours / metrics.totalHours) * 100).toFixed(0)
-        const color = getSeverityColor(severity)
-        output.push(`  ${color(`● ${severity.charAt(0).toUpperCase() + severity.slice(1)}:`)} ${hours.toFixed(1)}h (${percentage}%)`)
-      }
-    }
-    output.push('')
+  output.push(chalk.bold('By Severity:'))
+  if (metrics.criticalDebt > 0) {
+    const percentage = ((metrics.criticalDebt / metrics.totalDebt) * 100).toFixed(0)
+    output.push(`  ${chalk.red.bold('● Critical:')} ${metrics.criticalDebt.toFixed(1)}h (${percentage}%)`)
   }
+  if (metrics.highDebt > 0) {
+    const percentage = ((metrics.highDebt / metrics.totalDebt) * 100).toFixed(0)
+    output.push(`  ${chalk.redBright('● High:')} ${metrics.highDebt.toFixed(1)}h (${percentage}%)`)
+  }
+  if (metrics.mediumDebt > 0) {
+    const percentage = ((metrics.mediumDebt / metrics.totalDebt) * 100).toFixed(0)
+    output.push(`  ${chalk.yellow('● Medium:')} ${metrics.mediumDebt.toFixed(1)}h (${percentage}%)`)
+  }
+  if (metrics.lowDebt > 0) {
+    const percentage = ((metrics.lowDebt / metrics.totalDebt) * 100).toFixed(0)
+    output.push(`  ${chalk.blue('● Low:')} ${metrics.lowDebt.toFixed(1)}h (${percentage}%)`)
+  }
+  output.push('')
 
   // By Category
   if (Object.keys(metrics.byCategory).length > 0) {
     output.push(chalk.bold('By Category:'))
     const sortedCategories = Object.entries(metrics.byCategory)
-      .sort(([, a], [, b]) => (b || 0) - (a || 0))
+      .sort(([, a], [, b]) => (b ?? 0) - (a ?? 0))
       .slice(0, 5) // Top 5 categories
 
     for (const [category, hours] of sortedCategories) {
       if (hours && hours > 0) {
-        const percentage = ((hours / metrics.totalHours) * 100).toFixed(0)
+        const percentage = ((hours / metrics.totalDebt) * 100).toFixed(0)
         const icon = getCategoryIcon(category)
         output.push(`  ${icon} ${chalk.bold(category)}: ${hours.toFixed(1)}h (${percentage}%)`)
       }

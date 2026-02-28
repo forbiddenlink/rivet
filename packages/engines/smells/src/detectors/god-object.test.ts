@@ -132,6 +132,6 @@ describe('God Object Detector', () => {
 
     const detections = detectGodObjects(ast, 'test.ts', { maxMethods: 10 })
 
-    expect(detections[0].severity).toBe('high')
+    expect(detections[0]?.severity).toBe('high')
   })
 })

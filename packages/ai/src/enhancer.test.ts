@@ -105,43 +105,40 @@ describe('TechDebtCalculator', () => {
   ]
 
   it('should calculate tech debt metrics', () => {
-    const calculator = new TechDebtCalculator()
-    const metrics = calculator.calculate(mockDetections)
+    const metrics = TechDebtCalculator.calculate(mockDetections)
 
-    expect(metrics.totalMinutes).toBeGreaterThan(0)
-    expect(metrics.totalIssues).toBe(2)
-    expect(metrics.breakdown).toBeDefined()
+    expect(metrics.totalDebt).toBeGreaterThan(0)
+    expect(metrics.criticalDebt).toBeGreaterThan(0)
+    expect(metrics.mediumDebt).toBeGreaterThan(0)
   })
 
   it('should handle empty detections', () => {
-    const calculator = new TechDebtCalculator()
-    const metrics = calculator.calculate([])
+    const metrics = TechDebtCalculator.calculate([])
 
-    expect(metrics.totalMinutes).toBe(0)
-    expect(metrics.totalIssues).toBe(0)
+    expect(metrics.totalDebt).toBe(0)
+    expect(metrics.criticalDebt).toBe(0)
   })
 
   it('should categorize by severity', () => {
-    const calculator = new TechDebtCalculator()
-    const metrics = calculator.calculate(mockDetections)
+    const metrics = TechDebtCalculator.calculate(mockDetections)
 
-    expect(metrics.breakdown.bySeverity.critical).toBeGreaterThan(0)
-    expect(metrics.breakdown.bySeverity.medium).toBeGreaterThan(0)
+    expect(metrics.criticalDebt).toBeGreaterThan(0)
+    expect(metrics.mediumDebt).toBeGreaterThan(0)
   })
 
   it('should categorize by category', () => {
-    const calculator = new TechDebtCalculator()
-    const metrics = calculator.calculate(mockDetections)
+    const metrics = TechDebtCalculator.calculate(mockDetections)
 
-    expect(metrics.breakdown.byCategory.smells).toBeGreaterThan(0)
-    expect(metrics.breakdown.byCategory.security).toBeGreaterThan(0)
+    expect(metrics.byCategory['smells']).toBeGreaterThan(0)
+    expect(metrics.byCategory['security']).toBeGreaterThan(0)
   })
 
   it('should format time correctly', () => {
-    const calculator = new TechDebtCalculator()
-    const metrics = calculator.calculate(mockDetections)
+    const metrics = TechDebtCalculator.calculate(mockDetections)
+    const formatted = TechDebtCalculator.formatMetrics(metrics)
 
-    expect(metrics.formattedTime).toBeDefined()
-    expect(typeof metrics.formattedTime).toBe('string')
+    expect(formatted).toBeDefined()
+    expect(typeof formatted).toBe('string')
+    expect(formatted).toContain('Tech Debt Summary')
   })
 })

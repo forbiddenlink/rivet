@@ -1,9 +1,20 @@
-import type { ASTNode } from '@rivet/parsers'
 import type { Detection } from '@rivet/core'
-import ts from 'typescript'
+import type { ASTNode } from '@rivet/parsers'
 
 export interface DetectorResult {
   detections: Detection[]
+}
+
+interface RawNodeWithOperator {
+  operator?: string
+}
+
+interface RawNodeWithId {
+  id?: { name?: string }
+}
+
+interface RawNodeWithKey {
+  key?: { name?: string }
 }
 
 /**
@@ -26,19 +37,22 @@ export function calculateComplexity(node: ASTNode): number {
       case 'CatchClause':
         complexity += 1
         break
-      
-      case 'SwitchStatement':
+
+      case 'SwitchStatement': {
         // Each case adds a path
-        const cases = n.children?.filter(c => c.type === 'SwitchCase') || []
+        const cases = n.children?.filter(c => c.type === 'SwitchCase') ?? []
         complexity += cases.length
         break
-      
-      case 'LogicalExpression':
+      }
+
+      case 'LogicalExpression': {
         // && and || create branches
-        if (n.operator === '&&' || n.operator === '||') {
+        const rawNode = n.raw as RawNodeWithOperator
+        if (rawNode.operator === '&&' || rawNode.operator === '||') {
           complexity += 1
         }
         break
+      }
     }
 
     // Recursively visit children
@@ -91,10 +105,12 @@ export function getNestingDepth(node: ASTNode): number {
  */
 export function getFunctionName(node: ASTNode): string {
   if (node.type === 'FunctionDeclaration' || node.type === 'FunctionExpression') {
-    return (node as any).id?.name || '<anonymous>'
+    const rawNode = node.raw as RawNodeWithId
+    return rawNode.id?.name ?? '<anonymous>'
   }
   if (node.type === 'MethodDefinition') {
-    return (node as any).key?.name || '<method>'
+    const rawNode = node.raw as RawNodeWithKey
+    return rawNode.key?.name ?? '<method>'
   }
   if (node.type === 'ArrowFunctionExpression') {
     return '<arrow function>'
@@ -107,7 +123,8 @@ export function getFunctionName(node: ASTNode): string {
  */
 export function getClassName(node: ASTNode): string {
   if (node.type === 'ClassDeclaration') {
-    return (node as any).id?.name || '<anonymous class>'
+    const rawNode = node.raw as RawNodeWithId
+    return rawNode.id?.name ?? '<anonymous class>'
   }
   return '<unknown>'
 }

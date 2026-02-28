@@ -1,4 +1,4 @@
-import { RivetEngine, type RivetConfig, type Detection } from '@rivet/core'
+import { RivetEngine, type RivetConfig, type Detection, type Severity } from '@rivet/core'
 import { SmellsEngine } from '@rivet/engine-smells'
 import { SecurityEngine } from '@rivet/engine-security'
 import { BugEngine } from '@rivet/engine-bugs'
@@ -58,8 +58,9 @@ export const fixCommand = new Command('fix')
       const projectRoot = resolve(process.cwd(), targetPath)
 
       // Build configuration
+      const severityLevel = (options.severity as string) || 'info'
       const config: RivetConfig = {
-        severity: (options.severity as RivetConfig['severity']) || 'info',
+        severity: { minLevel: severityLevel as Severity },
         maxIssues: 10000, // No limit for auto-fix
       }
 
@@ -91,15 +92,17 @@ export const fixCommand = new Command('fix')
       }
 
       // Group by file
-      const fileGroups = fixableDetections.reduce(
+      const fileGroups = fixableDetections.reduce<Record<string, Detection[]>>(
         (acc, d) => {
-          if (!acc[d.filePath]) {
-            acc[d.filePath] = []
+          const existing = acc[d.filePath]
+          if (existing) {
+            existing.push(d)
+          } else {
+            acc[d.filePath] = [d]
           }
-          acc[d.filePath].push(d)
           return acc
         },
-        {} as Record<string, Detection[]>
+        {}
       )
 
       if (options.dryRun) {

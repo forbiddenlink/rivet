@@ -212,6 +212,6 @@ describe('Long Method Detector', () => {
 
     const detections = detectLongMethods(ast, 'test.ts', { maxLines: 50 })
 
-    expect(detections[0].severity).toBe('high')
+    expect(detections[0]?.severity).toBe('high')
   })
 })

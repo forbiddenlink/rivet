@@ -1,4 +1,4 @@
-import { RivetEngine, type RivetConfig } from '@rivet/core'
+import { RivetEngine, type RivetConfig, type Severity } from '@rivet/core'
 import { SmellsEngine } from '@rivet/engine-smells'
 import { SecurityEngine } from '@rivet/engine-security'
 import { BugEngine } from '@rivet/engine-bugs'
@@ -78,9 +78,7 @@ async function runAnalysis(
 
           const enhancer = new AIEnhancer(aiConfig)
           
-          const enhancedDetections = await enhancer.enhanceDetections(result.detections, {
-            maxConcurrent: 5,
-          })
+          const enhancedDetections = await enhancer.enhanceDetections(result.detections, 5)
 
           enhancedResult = {
             ...result,
@@ -149,8 +147,9 @@ export const scanCommand = new Command('scan')
       const projectRoot = resolve(process.cwd(), targetPath)
 
       // Build configuration
+      const severityLevel = (options.severity as string) || 'info'
       const config: RivetConfig = {
-        severity: (options.severity as RivetConfig['severity']) || 'info',
+        severity: { minLevel: severityLevel as Severity },
         maxIssues: Number.parseInt(options.maxIssues as string || '100', 10),
       }
 
