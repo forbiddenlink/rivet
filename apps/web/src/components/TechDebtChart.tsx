@@ -92,7 +92,7 @@ export default function TechDebtChart({ detections }: TechDebtChartProps) {
       </p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        {sortedCategories.map(([category, hours], idx) => (
+        {sortedCategories.map(([category, hours], _idx) => (
           <div key={category}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
               <span style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.8rem', textTransform: 'capitalize' }}>

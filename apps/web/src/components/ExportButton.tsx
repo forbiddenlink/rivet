@@ -171,7 +171,7 @@ export function ExportButton({ result }: ExportButtonProps) {
 
         <div class="issues-section">
             <h2>Detected Issues</h2>
-            ${result.detections.map((issue, i) => `
+            ${result.detections.map((issue, _i) => `
             <div class="issue ${issue.severity}">
                 <div class="issue-header">
                     <span class="severity-badge" style="background-color: ${getSeverityColor(issue.severity)}20; border: 1px solid ${getSeverityColor(issue.severity)}">

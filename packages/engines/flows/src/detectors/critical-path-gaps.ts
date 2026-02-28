@@ -11,8 +11,11 @@ export function detectCriticalPathGaps(context: AnalysisContext): Detection[] {
 
   function visit(node: ASTNode, filePath: string): void {
     // Detect async functions without try-catch
-    if ((node.type === 'FunctionDeclaration' || node.type === 'ArrowFunctionExpression') && 
-        node.raw.type === 'FunctionDeclaration' && (node.raw as any).async) {
+    const isAsyncFunction = (node.type === 'FunctionDeclaration' ||
+                             node.type === 'ArrowFunctionExpression' ||
+                             node.type === 'FunctionExpression') &&
+                            (node.raw as { async?: boolean }).async === true
+    if (isAsyncFunction) {
       const body = node.children?.find((child) => child.type === 'BlockStatement')
       if (body && !hasTryCatch(body) && node.loc) {
         detections.push({
@@ -74,14 +77,69 @@ export function detectCriticalPathGaps(context: AnalysisContext): Detection[] {
     return node.children.some((child) => child.type === 'TryStatement')
   }
 
-  function hasErrorHandling(_node: ASTNode): boolean {
-    // Check if this call expression is chained with .catch()
-    return false // Simplified for now
+  function hasErrorHandling(node: ASTNode): boolean {
+    // Check if this call expression is chained with .catch() or .then(..., errorHandler)
+    const parent = node.parent
+    if (!parent) return false
+
+    // Check for .catch() chain: fetch().catch(...)
+    if (parent.type === 'MemberExpression' && parent.raw.type === 'MemberExpression') {
+      const property = (parent.raw as { property?: { name?: string } }).property
+      if (property && property.name === 'catch') {
+        return true
+      }
+      if (property && property.name === 'then') {
+        // Check if .then() has error handler (second argument)
+        const grandparent = parent.parent
+        if (grandparent?.type === 'CallExpression' && grandparent.children) {
+          const args = grandparent.children.filter((c) =>
+            c.type !== 'MemberExpression' && c.type !== 'Identifier'
+          )
+          if (args.length >= 2) {
+            return true // .then(success, error) pattern
+          }
+        }
+      }
+    }
+
+    // Check if wrapped in await and parent is try block
+    if (parent.type === 'AwaitExpression') {
+      return isInTryCatch(parent)
+    }
+
+    return false
   }
 
-  function isInTryCatch(_node: ASTNode): boolean {
-    // Check if node is inside a try block
-    return false // Simplified for now
+  function isInTryCatch(node: ASTNode): boolean {
+    // Walk up the parent chain to check if we're inside a try block
+    let current: ASTNode | undefined = node.parent
+
+    while (current) {
+      if (current.type === 'TryStatement') {
+        // Check if we're in the try block, not the catch/finally
+        const tryBlock = current.children?.find((c) => c.type === 'BlockStatement')
+        if (tryBlock && isDescendantOf(node, tryBlock)) {
+          return true
+        }
+      }
+      // Stop at function boundaries
+      if (current.type === 'FunctionDeclaration' ||
+          current.type === 'ArrowFunctionExpression' ||
+          current.type === 'FunctionExpression') {
+        break
+      }
+      current = current.parent
+    }
+    return false
+  }
+
+  function isDescendantOf(node: ASTNode, ancestor: ASTNode): boolean {
+    let current: ASTNode | undefined = node.parent
+    while (current) {
+      if (current === ancestor) return true
+      current = current.parent
+    }
+    return false
   }
 
   if (parseResult.ast) {

@@ -1,13 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import IssueList from '../../components/IssueList'
-import IssueDetail from '../../components/IssueDetail'
-import TechDebtChart from '../../components/TechDebtChart'
-import FilterControls from '../../components/FilterControls'
-import { FileUpload } from '../../components/FileUpload'
+import { useEffect, useState } from 'react'
+
 import { ConfigurationModal } from '../../components/ConfigurationModal'
 import { ExportButton } from '../../components/ExportButton'
+import { FileUpload } from '../../components/FileUpload'
+import FilterControls from '../../components/FilterControls'
+import IssueDetail from '../../components/IssueDetail'
+import IssueList from '../../components/IssueList'
+import TechDebtChart from '../../components/TechDebtChart'
 
 interface Location {
   line: number
@@ -137,7 +138,7 @@ export default function Dashboard() {
     }
   }
 
-  const handleFileUpload = (content: string, fileName: string) => {
+  const handleFileUpload = (content: string, _fileName: string) => {
     setCodeInput(content)
     setError(null)
   }

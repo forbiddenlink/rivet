@@ -64,9 +64,50 @@ export function detectMissingErrorBoundaries(context: AnalysisContext): Detectio
     return false
   }
 
-  function isInsideErrorBoundary(_node: ASTNode): boolean {
-    // Simplified: check if there's an ErrorBoundary component in parent tree
+  function isInsideErrorBoundary(node: ASTNode): boolean {
+    // Check if there's an ErrorBoundary component in parent tree
+    const errorBoundaryNames = [
+      'ErrorBoundary',
+      'ReactErrorBoundary',
+      'Sentry.ErrorBoundary',
+      'SentryErrorBoundary',
+      'withErrorBoundary',
+    ]
+
+    let current: ASTNode | undefined = node.parent
+
+    while (current) {
+      if (current.type === 'JSXElement' && current.children) {
+        const openingElement = current.children.find((c) => c.type === 'JSXOpeningElement')
+        if (openingElement?.children) {
+          const nameNode = openingElement.children.find((c) =>
+            c.type === 'JSXIdentifier' || c.type === 'JSXMemberExpression'
+          )
+          if (nameNode) {
+            const name = getJSXName(nameNode)
+            if (errorBoundaryNames.some((eb) => name.includes(eb))) {
+              return true
+            }
+          }
+        }
+      }
+      current = current.parent
+    }
     return false
+  }
+
+  function getJSXName(node: ASTNode): string {
+    if (node.type === 'JSXIdentifier' && node.raw.type === 'JSXIdentifier') {
+      return (node.raw as { name: string }).name
+    }
+    if (node.type === 'JSXMemberExpression' && node.children) {
+      const parts: string[] = []
+      for (const child of node.children) {
+        parts.push(getJSXName(child))
+      }
+      return parts.join('.')
+    }
+    return ''
   }
 
   if (parseResult.ast) {
