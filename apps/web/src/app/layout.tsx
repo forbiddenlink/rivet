@@ -1,8 +1,39 @@
 import type { Metadata } from 'next'
 
+const siteUrl = 'https://rivet.dev'
+
 export const metadata: Metadata = {
   title: 'RIVET - AI-Powered Code Quality Platform',
-  description: 'Analyze your codebase for security issues, bugs, performance problems, and more with AI-powered explanations',
+  description: 'Analyze your codebase for security vulnerabilities, bugs, performance issues, code smells, and architectural problems with AI-powered explanations and actionable recommendations.',
+  metadataBase: new URL(siteUrl),
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: 'RIVET - AI-Powered Code Quality Platform',
+    description: 'Analyze your codebase for security vulnerabilities, bugs, performance issues, code smells, and architectural problems with AI-powered explanations and actionable recommendations.',
+    url: siteUrl,
+    siteName: 'RIVET',
+    type: 'website',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'RIVET - AI-Powered Code Quality Platform',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'RIVET - AI-Powered Code Quality Platform',
+    description: 'Analyze your codebase for security vulnerabilities, bugs, performance issues, code smells, and architectural problems with AI-powered explanations.',
+    images: ['/og-image.png'],
+  },
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.ico',
+  },
 }
 
 export default function RootLayout({

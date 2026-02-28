@@ -188,6 +188,7 @@ export default function Dashboard() {
           </div>
           <button
             onClick={() => setIsConfigModalOpen(true)}
+            aria-label="Open configuration settings"
             style={{
               padding: '0.75rem 1.5rem',
               borderRadius: '12px',
@@ -203,7 +204,7 @@ export default function Dashboard() {
               transition: 'all 0.2s ease',
             }}
           >
-            ⚙️ Configuration
+            <span aria-hidden="true">⚙️</span> Configuration
           </button>
         </div>
       </header>
@@ -234,6 +235,7 @@ export default function Dashboard() {
 
             <div style={{ marginBottom: '1.5rem' }}>
               <label
+                htmlFor="code-input"
                 style={{
                   display: 'block',
                   marginBottom: '0.5rem',
@@ -245,9 +247,13 @@ export default function Dashboard() {
                 Paste JavaScript/TypeScript Code:
               </label>
               <textarea
+                id="code-input"
+                name="code-input"
                 value={codeInput}
                 onChange={(e) => setCodeInput(e.target.value)}
                 placeholder="// Paste your JavaScript/TypeScript code here..."
+                aria-label="Code input for analysis"
+                aria-describedby="code-input-description"
                 style={{
                   width: '100%',
                   minHeight: '300px',
@@ -263,6 +269,9 @@ export default function Dashboard() {
                   boxSizing: 'border-box',
                 }}
               />
+              <span id="code-input-description" style={{ position: 'absolute', left: '-9999px' }}>
+                Enter your JavaScript or TypeScript code here for security, performance, and quality analysis
+              </span>
             </div>
 
             {error && (
@@ -281,8 +290,13 @@ export default function Dashboard() {
               </div>
             )}
 
-            <div style={{ marginBottom: '2rem', paddingBottom: '1.5rem', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+            <div
+              style={{ marginBottom: '2rem', paddingBottom: '1.5rem', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}
+              role="region"
+              aria-labelledby="file-upload-heading"
+            >
               <h3
+                id="file-upload-heading"
                 style={{
                   margin: '0 0 1rem 0',
                   fontSize: '1rem',
@@ -298,6 +312,8 @@ export default function Dashboard() {
             <button
               onClick={handleAnalyze}
               disabled={loading || !codeInput.trim()}
+              aria-label={loading ? 'Analysis in progress' : 'Start code analysis'}
+              aria-busy={loading}
               style={{
                 padding: '1rem 2rem',
                 fontSize: '1rem',
@@ -311,7 +327,7 @@ export default function Dashboard() {
                 transition: 'all 0.2s ease',
               }}
             >
-              {loading ? '🔄 Analyzing...' : '▶️ Analyze Code'}
+              {loading ? <><span aria-hidden="true">🔄</span> Analyzing...</> : <><span aria-hidden="true">▶️</span> Analyze Code</>}
             </button>
           </div>
         ) : (
@@ -351,6 +367,7 @@ export default function Dashboard() {
                     setCodeInput('')
                     setSelectedIssue(null)
                   }}
+                  aria-label="Start a new code analysis"
                   style={{
                     padding: '0.75rem 1.5rem',
                     fontSize: '0.9rem',
@@ -361,7 +378,7 @@ export default function Dashboard() {
                     cursor: 'pointer',
                   }}
                 >
-                  ← New Analysis
+                  <span aria-hidden="true">←</span> New Analysis
                 </button>
               </div>
             </div>

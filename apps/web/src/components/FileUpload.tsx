@@ -47,36 +47,52 @@ export function FileUpload({ onAnalyze, isAnalyzing }: FileUploadProps) {
 
   return (
     <div className="w-full">
+      <label htmlFor="file-upload" className="sr-only">
+        Upload JavaScript or TypeScript files for analysis
+      </label>
       <div
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            fileInputRef.current?.click()
+          }
+        }}
+        aria-label="Drop zone for file upload. Click or drag files here."
         className={`relative rounded-lg border-2 border-dashed p-8 text-center cursor-pointer transition-colors ${
           dragActive ? 'border-cyan-400 bg-cyan-400/10' : 'border-purple-500/30 bg-purple-500/5 hover:border-purple-500/50'
         } ${isAnalyzing ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         <input
           ref={fileInputRef}
+          id="file-upload"
+          name="file-upload"
           type="file"
           multiple
           accept=".ts,.tsx,.js,.jsx"
           onChange={handleChange}
           disabled={isAnalyzing}
+          aria-label="Select JavaScript or TypeScript files to analyze"
+          aria-describedby="file-upload-description"
           className="hidden"
         />
         <div className="space-y-2">
           <div className="text-sm font-medium text-purple-300">
-            📁 Drag & drop files or click to upload
+            <span aria-hidden="true">📁</span> Drag & drop files or click to upload
           </div>
-          <div className="text-xs text-purple-400">
+          <div id="file-upload-description" className="text-xs text-purple-400">
             Supported: .ts, .tsx, .js, .jsx
           </div>
         </div>
       </div>
-      <div className="mt-4 text-xs text-purple-400">
-        💡 Tip: Upload your TypeScript/JavaScript files for instant analysis
+      <div className="mt-4 text-xs text-purple-400" aria-hidden="true">
+        <span aria-hidden="true">💡</span> Tip: Upload your TypeScript/JavaScript files for instant analysis
       </div>
     </div>
   )
