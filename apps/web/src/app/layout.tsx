@@ -4,14 +4,14 @@ const siteUrl = 'https://rivet.dev'
 
 export const metadata: Metadata = {
   title: 'RIVET - AI-Powered Code Quality Platform',
-  description: 'Analyze your codebase for security vulnerabilities, bugs, performance issues, code smells, and architectural problems with AI-powered explanations and actionable recommendations.',
+  description: 'AI-powered code analysis for security vulnerabilities, bugs, performance issues, and architectural problems with actionable fixes.',
   metadataBase: new URL(siteUrl),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     title: 'RIVET - AI-Powered Code Quality Platform',
-    description: 'Analyze your codebase for security vulnerabilities, bugs, performance issues, code smells, and architectural problems with AI-powered explanations and actionable recommendations.',
+    description: 'AI-powered code analysis for security vulnerabilities, bugs, performance issues, and architectural problems with actionable fixes.',
     url: siteUrl,
     siteName: 'RIVET',
     type: 'website',
@@ -44,6 +44,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <meta charSet="utf-8" />
         <style>{`
           @keyframes aurora-1 {
             0%, 100% {
