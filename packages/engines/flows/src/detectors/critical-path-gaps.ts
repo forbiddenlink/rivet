@@ -74,12 +74,12 @@ export function detectCriticalPathGaps(context: AnalysisContext): Detection[] {
     return node.children.some((child) => child.type === 'TryStatement')
   }
 
-  function hasErrorHandling(node: ASTNode): boolean {
+  function hasErrorHandling(_node: ASTNode): boolean {
     // Check if this call expression is chained with .catch()
     return false // Simplified for now
   }
 
-  function isInTryCatch(node: ASTNode): boolean {
+  function isInTryCatch(_node: ASTNode): boolean {
     // Check if node is inside a try block
     return false // Simplified for now
   }

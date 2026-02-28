@@ -64,7 +64,7 @@ export function detectMissingErrorBoundaries(context: AnalysisContext): Detectio
     return false
   }
 
-  function isInsideErrorBoundary(node: ASTNode): boolean {
+  function isInsideErrorBoundary(_node: ASTNode): boolean {
     // Simplified: check if there's an ErrorBoundary component in parent tree
     return false
   }

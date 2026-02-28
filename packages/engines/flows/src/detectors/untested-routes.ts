@@ -6,7 +6,7 @@ import type { ASTNode } from '@rivet/parsers'
  */
 export function detectUntestedRoutes(context: AnalysisContext): Detection[] {
   const detections: Detection[] = []
-  const { parseResult, projectRoot } = context
+  const { parseResult } = context
   let detectionCounter = 0
 
   // Look for route definitions (React Router <Route>, Next.js file-based routing)

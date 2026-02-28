@@ -1,8 +1,8 @@
 import type { AnalysisEngine, Detection, AnalysisContext } from '@rivet/core'
 
-import { detectUntestedRoutes } from './detectors/untested-routes'
 import { detectCriticalPathGaps } from './detectors/critical-path-gaps'
 import { detectMissingErrorBoundaries } from './detectors/missing-error-boundaries'
+import { detectUntestedRoutes } from './detectors/untested-routes'
 import { detectUntestedStateTransitions } from './detectors/untested-state-transitions'
 
 /**
