@@ -9,7 +9,9 @@ export function detectCriticalPathGaps(context: AnalysisContext): Detection[] {
   const { parseResult } = context
   let detectionCounter = 0
 
-  function visit(node: ASTNode, filePath: string): void {
+  function visit(node: ASTNode, filePath: string, parent?: ASTNode): void {
+    // Set parent reference for traversal
+    node.parent = parent
     // Detect async functions without try-catch
     const isAsyncFunction = (node.type === 'FunctionDeclaration' ||
                              node.type === 'ArrowFunctionExpression' ||
@@ -67,7 +69,7 @@ export function detectCriticalPathGaps(context: AnalysisContext): Detection[] {
 
     if (node.children) {
       for (const child of node.children) {
-        visit(child, filePath)
+        visit(child, filePath, node)
       }
     }
   }
