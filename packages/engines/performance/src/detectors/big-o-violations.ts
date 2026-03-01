@@ -20,16 +20,18 @@ export function detectBigOViolations(ast: ASTNode, filePath: string): Detection[
       node.type === 'ForOfStatement' ||
       node.type === 'ForInStatement'
 
-    if (isLoop) {
-      // Check for O(n) operations in loop body
-      node.children?.forEach((child) => visit(child, true))
-    } else if (inLoop && node.type === 'CallExpression') {
-      // Check for array methods that are O(n) being called in a loop
+    const currentInLoop = inLoop || isLoop
+
+    // Check for array methods that are O(n) being called in a loop
+    if (currentInLoop && node.type === 'CallExpression') {
       if (node.children && node.children[0]?.type === 'MemberExpression') {
         const memberExpr = node.children[0]
-        if (memberExpr.children && memberExpr.children[1]?.type === 'Identifier') {
-          const methodName = memberExpr.children[1].raw.type === 'Identifier' 
-            ? memberExpr.children[1].raw.name 
+        // Get the last Identifier which is the method name (e.g., findIndex in items.findIndex)
+        const identifiers = memberExpr.children?.filter((c) => c.type === 'Identifier') || []
+        const methodNode = identifiers[identifiers.length - 1]
+        if (methodNode) {
+          const methodName = methodNode.raw.type === 'Identifier'
+            ? methodNode.raw.name
             : undefined
 
           if (
@@ -60,9 +62,11 @@ export function detectBigOViolations(ast: ASTNode, filePath: string): Detection[
           }
         }
       }
-    } else if (node.type === 'BinaryExpression' && node.raw.type === 'BinaryExpression') {
-      // Check for repeated string concatenation with +
-      if (node.raw.operator === '+' && inLoop) {
+    }
+
+    // Check for repeated string concatenation with +
+    if (currentInLoop && node.type === 'BinaryExpression' && node.raw.type === 'BinaryExpression') {
+      if (node.raw.operator === '+') {
         const hasStringOperand = checkForStringOperand(node)
         if (hasStringOperand) {
           detections.push({
@@ -82,9 +86,10 @@ export function detectBigOViolations(ast: ASTNode, filePath: string): Detection[
           })
         }
       }
-    } else {
-      node.children?.forEach((child) => visit(child, inLoop))
     }
+
+    // Always visit children
+    node.children?.forEach((child) => visit(child, currentInLoop))
   }
 
   visit(ast)

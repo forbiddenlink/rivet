@@ -210,8 +210,26 @@ export default function RootLayout({
         </div>
 
         {/* Content */}
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          {children}
+        <div style={{ position: 'relative', zIndex: 1, width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+          <main style={{ flex: 1 }}>
+            {children}
+          </main>
+          {/* Footer */}
+          <footer style={{
+            padding: '2rem',
+            textAlign: 'center',
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+            marginTop: 'auto',
+          }}>
+            <nav style={{ display: 'flex', justifyContent: 'center', gap: '2rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+              <a href="/about" style={{ color: 'rgba(255, 255, 255, 0.7)', textDecoration: 'none' }}>About</a>
+              <a href="/privacy" style={{ color: 'rgba(255, 255, 255, 0.7)', textDecoration: 'none' }}>Privacy Policy</a>
+              <a href="/contact" style={{ color: 'rgba(255, 255, 255, 0.7)', textDecoration: 'none' }}>Contact</a>
+            </nav>
+            <p style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '0.875rem', margin: 0 }}>
+              © {new Date().getFullYear()} RIVET. All rights reserved.
+            </p>
+          </footer>
         </div>
       </body>
     </html>

@@ -36,6 +36,9 @@ export function detectUntestedRoutes(context: AnalysisContext): Detection[] {
               severity: 'medium',
               category: 'flows',
               message: 'Route definition found without corresponding test coverage',
+              fix: {
+                description: 'Add a test file for this route:\n\nimport { render, screen } from "@testing-library/react";\nimport { MemoryRouter, Route, Routes } from "react-router-dom";\nimport YourComponent from "./YourComponent";\n\ntest("renders route correctly", () => {\n  render(\n    <MemoryRouter initialEntries={["/your-path"]}>\n      <Routes>\n        <Route path="/your-path" element={<YourComponent />} />\n      </Routes>\n    </MemoryRouter>\n  );\n  expect(screen.getByText("Expected content")).toBeInTheDocument();\n});',
+              },
               metadata: {
                 pattern: 'untested-route',
                 explanation: 'Routes should have integration tests to verify navigation and rendering',

@@ -15,19 +15,18 @@ export function detectBlockingOperations(ast: ASTNode, filePath: string): Detect
   function visit(node: ASTNode): void {
     if (node.type === 'CallExpression' && node.children) {
       const callee = node.children[0]
-      
+
       // Check for synchronous fs operations
       if (callee && callee.type === 'MemberExpression' && callee.children) {
-        const obj = callee.children[0]
-        const prop = callee.children[1]
-        
+        const identifiers = callee.children.filter((c) => c.type === 'Identifier')
+        const obj = identifiers[0]
+        const prop = identifiers[identifiers.length - 1]
+
         if (
           obj &&
-          obj.type === 'Identifier' &&
           obj.raw.type === 'Identifier' &&
           obj.raw.name === 'fs' &&
           prop &&
-          prop.type === 'Identifier' &&
           prop.raw.type === 'Identifier' &&
           prop.raw.name &&
           prop.raw.name.endsWith('Sync')
@@ -50,35 +49,31 @@ export function detectBlockingOperations(ast: ASTNode, filePath: string): Detect
           })
         }
       }
-      
-      // Check for XMLHttpRequest (should use fetch)
+    }
+
+    // Check for XMLHttpRequest (should use fetch) - NewExpression, not CallExpression
+    if (node.type === 'NewExpression' && node.children) {
+      const classNameNode = node.children.find((c) => c.type === 'Identifier')
       if (
-        callee &&
-        callee.type === 'NewExpression' &&
-        callee.children &&
-        callee.children[0]?.type === 'Identifier'
+        classNameNode &&
+        classNameNode.raw.type === 'Identifier' &&
+        classNameNode.raw.name === 'XMLHttpRequest'
       ) {
-        const className = callee.children[0]
-        if (
-          className.raw.type === 'Identifier' &&
-          className.raw.name === 'XMLHttpRequest'
-        ) {
-          detections.push({
-            id: `performance-${++detectionCounter}`,
-            ruleId: 'xmlhttprequest-usage',
-            filePath,
-            loc: {
-              start: { line: node.loc?.start.line || 0, column: node.loc?.start.column || 0 },
-              end: { line: node.loc?.end.line || 0, column: node.loc?.end.column || 0 },
-            },
-            severity: 'medium',
-            category: 'performance',
-            message: 'XMLHttpRequest is deprecated - use modern fetch API',
-            metadata: {
-              suggestion: 'Replace with async/await fetch() for better performance and readability',
-            },
-          })
-        }
+        detections.push({
+          id: `performance-${++detectionCounter}`,
+          ruleId: 'xmlhttprequest-usage',
+          filePath,
+          loc: {
+            start: { line: node.loc?.start.line || 0, column: node.loc?.start.column || 0 },
+            end: { line: node.loc?.end.line || 0, column: node.loc?.end.column || 0 },
+          },
+          severity: 'medium',
+          category: 'performance',
+          message: 'XMLHttpRequest is deprecated - use modern fetch API',
+          metadata: {
+            suggestion: 'Replace with async/await fetch() for better performance and readability',
+          },
+        })
       }
     }
 

@@ -36,6 +36,9 @@ export function detectMissingErrorBoundaries(context: AnalysisContext): Detectio
           severity: 'medium',
           category: 'flows',
           message: `Component${componentName ? ` '${componentName}'` : ''} with async operations should be wrapped in Error Boundary`,
+          fix: {
+            description: `Wrap the component in an Error Boundary:\n\nimport { ErrorBoundary } from 'react-error-boundary';\n\nfunction ErrorFallback({ error }) {\n  return <div>Something went wrong: {error.message}</div>;\n}\n\n// Usage:\n<ErrorBoundary FallbackComponent={ErrorFallback}>\n  <${componentName || 'YourComponent'} />\n</ErrorBoundary>`,
+          },
           metadata: {
             pattern: 'missing-error-boundary',
             explanation: 'Components that perform async operations should be wrapped in Error Boundaries to handle runtime errors gracefully',

@@ -31,6 +31,9 @@ export function detectCriticalPathGaps(context: AnalysisContext): Detection[] {
           severity: 'high',
           category: 'flows',
           message: 'Async function lacks error handling (try-catch or .catch())',
+          fix: {
+            description: 'Wrap the function body in a try-catch block:\n\nasync function example() {\n  try {\n    // existing code\n  } catch (error) {\n    console.error("Operation failed:", error);\n    throw error; // or handle appropriately\n  }\n}',
+          },
           metadata: {
             pattern: 'missing-error-handling',
             explanation: 'Async operations can fail and should have proper error handling to prevent unhandled rejections',
@@ -57,6 +60,9 @@ export function detectCriticalPathGaps(context: AnalysisContext): Detection[] {
             severity: 'high',
             category: 'flows',
             message: 'fetch() call without error handling',
+            fix: {
+              description: 'Add error handling to the fetch call:\n\n// Option 1: Using .catch()\nfetch(url)\n  .then(response => response.json())\n  .catch(error => console.error("Fetch failed:", error));\n\n// Option 2: Using try-catch with await\ntry {\n  const response = await fetch(url);\n} catch (error) {\n  console.error("Fetch failed:", error);\n}',
+            },
             metadata: {
               pattern: 'fetch-without-catch',
               explanation: 'Network requests can fail and should be wrapped in error handling',
