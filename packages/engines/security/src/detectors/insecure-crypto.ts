@@ -27,6 +27,10 @@ export function detectInsecureCrypto(ast: ASTNode, filePath: string): Detection[
           if (algorithmArg && algorithmArg.raw.type === 'Literal' && 'value' in algorithmArg.raw) {
             const algorithm = String(algorithmArg.raw.value).toLowerCase()
             if (weakAlgorithms.some((weak) => algorithm.includes(weak))) {
+              const secureAlternative = getSecureAlternative(algorithm, methodName)
+              const algStart = algorithmArg.loc?.start.offset
+              const algEnd = algorithmArg.loc?.end.offset
+
               detections.push({
                 id: `weak-crypto-${++detectionCounter}`,
                 ruleId: 'weak-crypto-algorithm',
@@ -38,6 +42,16 @@ export function detectInsecureCrypto(ast: ASTNode, filePath: string): Detection[
                 severity: 'high',
                 category: 'security',
                 message: `Insecure cryptographic algorithm detected: ${algorithm}`,
+                fix: algStart !== undefined && algEnd !== undefined ? {
+                  description: `Replace ${algorithm} with ${secureAlternative}`,
+                  replacements: [{
+                    start: algStart,
+                    end: algEnd,
+                    text: `'${secureAlternative}'`,
+                  }],
+                } : {
+                  description: `Replace ${algorithm} with ${secureAlternative}`,
+                },
                 metadata: {
                   pattern: 'weak-crypto',
                   algorithm,
@@ -107,6 +121,9 @@ export function detectInsecureCrypto(ast: ASTNode, filePath: string): Detection[
       if (calleeNode) {
         const methodCall = getFullMethodName(calleeNode)
         if (methodCall.toLowerCase() === 'math.random') {
+          const nodeStart = node.loc?.start.offset
+          const nodeEnd = node.loc?.end.offset
+
           detections.push({
             id: `weak-random-${++detectionCounter}`,
             ruleId: 'weak-random',
@@ -118,6 +135,16 @@ export function detectInsecureCrypto(ast: ASTNode, filePath: string): Detection[
             severity: 'medium',
             category: 'security',
             message: 'Weak random number generator: Math.random() is not cryptographically secure',
+            fix: nodeStart !== undefined && nodeEnd !== undefined ? {
+              description: 'Replace Math.random() with crypto.getRandomValues()',
+              replacements: [{
+                start: nodeStart,
+                end: nodeEnd,
+                text: 'crypto.getRandomValues(new Uint32Array(1))[0] / 0xFFFFFFFF',
+              }],
+            } : {
+              description: 'Replace Math.random() with crypto.getRandomValues()',
+            },
             metadata: {
               pattern: 'weak-random',
               explanation:
@@ -171,4 +198,19 @@ function getFullMethodName(node: ASTNode): string {
     return parts.join('.')
   }
   return ''
+}
+
+function getSecureAlternative(algorithm: string, methodName: string): string {
+  const lowerAlg = algorithm.toLowerCase()
+  if (methodName === 'createhash') {
+    if (lowerAlg.includes('md5') || lowerAlg.includes('sha1')) {
+      return 'sha256'
+    }
+  }
+  if (methodName === 'createcipher') {
+    if (lowerAlg.includes('des') || lowerAlg.includes('rc4')) {
+      return 'aes-256-gcm'
+    }
+  }
+  return 'sha256'
 }

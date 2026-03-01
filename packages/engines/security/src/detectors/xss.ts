@@ -28,6 +28,10 @@ export function detectXSS(ast: ASTNode, filePath: string): Detection[] {
 
         // Check for exact match of dangerous properties
         if (dangerousProperties.has(propName)) {
+          const propStart = propertyNode.loc?.start.offset
+          const propEnd = propertyNode.loc?.end.offset
+          const safeAlternative = propName === 'innerHTML' ? 'textContent' : null
+
           detections.push({
             id: `xss-${++detectionCounter}`,
             ruleId: 'xss-vulnerability',
@@ -39,6 +43,16 @@ export function detectXSS(ast: ASTNode, filePath: string): Detection[] {
             severity: 'high',
             category: 'security',
             message: `Potential XSS vulnerability: unsafe use of ${propName}`,
+            fix: safeAlternative && propStart !== undefined && propEnd !== undefined ? {
+              description: `Replace ${propName} with ${safeAlternative}`,
+              replacements: [{
+                start: propStart,
+                end: propEnd,
+                text: safeAlternative,
+              }],
+            } : {
+              description: 'Use textContent instead of innerHTML, or sanitize input with DOMPurify',
+            },
             metadata: {
               pattern: 'xss-dom-manipulation',
               property: propName,

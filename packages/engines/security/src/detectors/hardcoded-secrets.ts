@@ -113,6 +113,10 @@ export function detectHardcodedSecrets(context: AnalysisContext): Detection[] {
             }
           }
 
+          const envVarName = getEnvVarName(varName, detectedName)
+          const nodeStart = node.loc.start.offset
+          const nodeEnd = node.loc.end.offset
+
           detections.push({
             id: `hardcoded-secret-${++detectionCounter}`,
             ruleId: 'hardcoded-secret',
@@ -124,6 +128,16 @@ export function detectHardcodedSecrets(context: AnalysisContext): Detection[] {
             severity,
             category: 'security',
             message: `Potential ${detectedName} detected in hardcoded string`,
+            fix: nodeStart !== undefined && nodeEnd !== undefined ? {
+              description: `Replace with environment variable process.env.${envVarName}`,
+              replacements: [{
+                start: nodeStart,
+                end: nodeEnd,
+                text: `process.env.${envVarName}`,
+              }],
+            } : {
+              description: `Move to environment variable (e.g., process.env.${envVarName})`,
+            },
             metadata: {
               pattern: detectedName.toLowerCase().replace(/\s+/g, '-'),
               explanation: `Hardcoding secrets in source code is a security risk. Secrets should be stored in environment variables or secure key management systems.`,
@@ -187,4 +201,27 @@ export function detectHardcodedSecrets(context: AnalysisContext): Detection[] {
   }
 
   return detections
+}
+
+function getEnvVarName(varName: string | undefined, secretType: string): string {
+  if (varName) {
+    // Convert variable name to SCREAMING_SNAKE_CASE
+    return varName
+      .replace(/([a-z])([A-Z])/g, '$1_$2')
+      .replace(/[-\s]/g, '_')
+      .toUpperCase()
+  }
+  // Fallback based on secret type
+  const typeMap: Record<string, string> = {
+    'API Key': 'API_KEY',
+    'AWS Access Key': 'AWS_ACCESS_KEY_ID',
+    'Private Key': 'PRIVATE_KEY',
+    'JWT Token': 'JWT_SECRET',
+    'Database Password in URL': 'DATABASE_URL',
+    'GitHub Token': 'GITHUB_TOKEN',
+    'Hardcoded Secret': 'SECRET_KEY',
+    'OAuth Token': 'OAUTH_TOKEN',
+    'Authentication Token': 'AUTH_TOKEN',
+  }
+  return typeMap[secretType] || 'SECRET_KEY'
 }
