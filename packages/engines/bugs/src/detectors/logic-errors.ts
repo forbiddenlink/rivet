@@ -168,6 +168,25 @@ function collectIfConditions(node: ASTNode): ASTNode[] {
 }
 
 function serializeNode(node: ASTNode): string {
-  // Simple serialization for comparison
-  return `${node.type}-${JSON.stringify(node.loc)}`
+  // Serialize the node content for comparison (excluding location)
+  if (node.type === 'Identifier' && node.raw.type === 'Identifier') {
+    return `Identifier:${node.raw.name}`
+  }
+  if (node.type === 'Literal' && node.raw.type === 'Literal') {
+    return `Literal:${String(node.raw.value)}`
+  }
+  if (node.type === 'BinaryExpression' && node.children && node.children.length >= 2) {
+    const raw = node.raw as { operator?: string }
+    const op = raw.operator || '?'
+    const [left, right] = node.children
+    return `BinaryExpr:${serializeNode(left!)}${op}${serializeNode(right!)}`
+  }
+  if (node.type === 'MemberExpression' && node.children) {
+    return `MemberExpr:${node.children.map(serializeNode).join('.')}`
+  }
+  // Fallback: use type and children
+  if (node.children) {
+    return `${node.type}:[${node.children.map(serializeNode).join(',')}]`
+  }
+  return node.type
 }

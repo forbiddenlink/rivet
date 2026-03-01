@@ -9,44 +9,57 @@ export function detectNullChecks(ast: ASTNode, filePath: string): Detection[] {
   const detections: Detection[] = []
   let detectionCounter = 0
 
+  // Track which variables have been null-checked in the current context
+  const nullCheckedVars = new Set<string>()
+
   function visit(node: ASTNode): void {
-    // Check for unsafe property access (e.g., obj.prop without checking if obj exists)
-    if (node.type === 'MemberExpression' && node.children) {
-      const objectNode = node.children.find((child) => 
-        child.type === 'Identifier' || child.type === 'MemberExpression'
-      )
-      
-      // Check if accessing properties that might be null/undefined
-      // Common patterns: array.length, object.property without checking
-      if (objectNode && !hasNullCheck(node, objectNode)) {
-        // Look for risky patterns like accessing array methods without checking
-        const propertyNode = node.children.find((child) => child.type === 'Identifier')
-        if (propertyNode && propertyNode.raw.type === 'Identifier') {
-          const propName = propertyNode.raw.name
-          const riskyProps = ['length', 'map', 'filter', 'reduce', 'forEach', 'find']
-          
-          if (riskyProps.includes(propName)) {
-            detections.push({
-              id: `null-check-${++detectionCounter}`,
-              ruleId: 'missing-null-check',
-              filePath,
-              loc: {
-                start: { line: node.loc?.start.line || 0, column: node.loc?.start.column || 0 },
-                end: { line: node.loc?.end.line || 0, column: node.loc?.end.column || 0 },
-              },
-              severity: 'medium',
-              category: 'bugs',
-              message: `Potential null/undefined access: accessing '${propName}' without null check`,
-              metadata: {
-                pattern: 'missing-null-check',
-                property: propName,
-                explanation:
-                  'Accessing properties on potentially null/undefined values can cause runtime errors.',
-                recommendation: 'Use optional chaining (?.) or check for null/undefined before accessing',
-              },
-            })
-          }
-        }
+    // Track variables that are checked in if conditions (e.g., if (user && user.name))
+    if (node.type === 'IfStatement' && node.children) {
+      const testNode = node.children[0]
+      if (testNode) {
+        collectCheckedVars(testNode, nullCheckedVars)
+      }
+    }
+
+    // Check for unsafe property access
+    if (node.type === 'MemberExpression' && node.children && !hasNullCheck(node)) {
+      const identifiers = node.children.filter((child) => child.type === 'Identifier')
+      const propName = identifiers[identifiers.length - 1]?.raw.type === 'Identifier'
+        ? (identifiers[identifiers.length - 1]!.raw as { name: string }).name
+        : 'property'
+
+      // Check two cases:
+      // 1. Chained access: a.b.c (object is MemberExpression)
+      // 2. Risky methods: arr.length, arr.find (risky property names)
+      const objectNode = node.children.find((child) => child.type === 'MemberExpression')
+      const riskyProps = ['length', 'map', 'filter', 'reduce', 'forEach', 'find']
+      const isRiskyProp = riskyProps.includes(propName)
+      const isChainedAccess = objectNode !== undefined
+
+      // Get the base variable name to check if it's been null-checked
+      const baseVarName = getBaseVarName(node)
+      const isNullChecked = baseVarName ? nullCheckedVars.has(baseVarName) : false
+
+      if ((isChainedAccess || isRiskyProp) && !isNullChecked) {
+        detections.push({
+          id: `null-check-${++detectionCounter}`,
+          ruleId: 'missing-null-check',
+          filePath,
+          loc: {
+            start: { line: node.loc?.start.line || 0, column: node.loc?.start.column || 0 },
+            end: { line: node.loc?.end.line || 0, column: node.loc?.end.column || 0 },
+          },
+          severity: 'medium',
+          category: 'bugs',
+          message: `Potential null/undefined access: accessing '${propName}' without null check`,
+          metadata: {
+            pattern: 'missing-null-check',
+            property: propName,
+            explanation:
+              'Accessing properties on potentially null/undefined values can cause runtime errors.',
+            recommendation: 'Use optional chaining (?.) or check for null/undefined before accessing',
+          },
+        })
       }
     }
 
@@ -94,10 +107,47 @@ export function detectNullChecks(ast: ASTNode, filePath: string): Detection[] {
   return detections
 }
 
-function hasNullCheck(node: ASTNode, targetNode: ASTNode): boolean {
+function hasNullCheck(node: ASTNode): boolean {
   // Simple heuristic: check if there's optional chaining in the node
   if (node.raw.type === 'MemberExpression' && 'optional' in node.raw && node.raw.optional) {
     return true
   }
   return false
+}
+
+function collectCheckedVars(node: ASTNode, checkedVars: Set<string>): void {
+  // Collect variables from && checks like: if (user && user.name)
+  if (node.type === 'LogicalExpression' && node.children) {
+    for (const child of node.children) {
+      collectCheckedVars(child, checkedVars)
+    }
+  }
+  // Collect single identifier checks like: if (user)
+  if (node.type === 'Identifier' && node.raw.type === 'Identifier') {
+    checkedVars.add(node.raw.name)
+  }
+  // Collect from member expressions like: if (user.name)
+  if (node.type === 'MemberExpression' && node.children) {
+    const baseVar = getBaseVarName(node)
+    if (baseVar) {
+      checkedVars.add(baseVar)
+    }
+  }
+}
+
+function getBaseVarName(node: ASTNode): string | null {
+  // Get the root identifier from a member expression chain
+  // e.g., for a.b.c, returns 'a'
+  if (node.type === 'Identifier' && node.raw.type === 'Identifier') {
+    return node.raw.name
+  }
+  if (node.type === 'MemberExpression' && node.children) {
+    const objectNode = node.children.find(
+      (child) => child.type === 'Identifier' || child.type === 'MemberExpression'
+    )
+    if (objectNode) {
+      return getBaseVarName(objectNode)
+    }
+  }
+  return null
 }

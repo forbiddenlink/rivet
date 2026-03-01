@@ -9,48 +9,61 @@ export function detectUnreachableCode(ast: ASTNode, filePath: string): Detection
   const detections: Detection[] = []
   let detectionCounter = 0
 
+  function checkStatementList(statements: ASTNode[]): void {
+    let foundTerminal = false
+    let terminalNode: ASTNode | null = null
+
+    for (const child of statements) {
+      if (foundTerminal && child.type !== 'FunctionDeclaration') {
+        // Skip comments
+        if (child.type !== 'Line' && child.type !== 'Block') {
+          detections.push({
+            id: `unreachable-${++detectionCounter}`,
+            ruleId: 'unreachable-code',
+            filePath,
+            loc: {
+              start: { line: child.loc?.start.line || 0, column: child.loc?.start.column || 0 },
+              end: { line: child.loc?.end.line || 0, column: child.loc?.end.column || 0 },
+            },
+            severity: 'medium',
+            category: 'bugs',
+            message: 'Unreachable code: statement after return/throw',
+            metadata: {
+              pattern: 'unreachable-code',
+              terminalType: terminalNode?.type || 'unknown',
+              explanation:
+                'Code after return, throw, break, or continue statements will never execute.',
+              recommendation: 'Remove unreachable code or restructure control flow',
+            },
+          })
+        }
+      }
+
+      if (
+        child.type === 'ReturnStatement' ||
+        child.type === 'ThrowStatement' ||
+        child.type === 'BreakStatement' ||
+        child.type === 'ContinueStatement'
+      ) {
+        foundTerminal = true
+        terminalNode = child
+      }
+    }
+  }
+
   function visit(node: ASTNode): void {
     // Check for code after return/throw in block statements
     if (node.type === 'BlockStatement' && node.children) {
-      let foundTerminal = false
-      let terminalNode: ASTNode | null = null
+      checkStatementList(node.children)
+    }
 
-      for (const child of node.children) {
-        if (foundTerminal && child.type !== 'FunctionDeclaration') {
-          // Skip comments
-          if (child.type !== 'Line' && child.type !== 'Block') {
-            detections.push({
-              id: `unreachable-${++detectionCounter}`,
-              ruleId: 'unreachable-code',
-              filePath,
-              loc: {
-                start: { line: child.loc?.start.line || 0, column: child.loc?.start.column || 0 },
-                end: { line: child.loc?.end.line || 0, column: child.loc?.end.column || 0 },
-              },
-              severity: 'medium',
-              category: 'bugs',
-              message: 'Unreachable code: statement after return/throw',
-              metadata: {
-                pattern: 'unreachable-code',
-                terminalType: terminalNode?.type || 'unknown',
-                explanation:
-                  'Code after return, throw, break, or continue statements will never execute.',
-                recommendation: 'Remove unreachable code or restructure control flow',
-              },
-            })
-          }
-        }
-
-        if (
-          child.type === 'ReturnStatement' ||
-          child.type === 'ThrowStatement' ||
-          child.type === 'BreakStatement' ||
-          child.type === 'ContinueStatement'
-        ) {
-          foundTerminal = true
-          terminalNode = child
-        }
-      }
+    // Check for code after return/throw in switch cases
+    if (node.type === 'SwitchCase' && node.children) {
+      // SwitchCase children include the test and consequent statements
+      const consequent = node.children.filter(
+        (child) => child.type !== 'Literal' && child.type !== 'Identifier'
+      )
+      checkStatementList(consequent)
     }
 
     // Check for functions with multiple return statements at the same level

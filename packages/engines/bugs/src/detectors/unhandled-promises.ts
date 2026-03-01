@@ -106,7 +106,9 @@ function getMethodName(node: ASTNode): string {
     return node.raw.name
   }
   if (node.type === 'MemberExpression' && node.children) {
-    const propertyNode = node.children.find((child) => child.type === 'Identifier')
+    // Get the LAST identifier which is the method name (e.g., query in db.query)
+    const identifiers = node.children.filter((child) => child.type === 'Identifier')
+    const propertyNode = identifiers[identifiers.length - 1]
     if (propertyNode && propertyNode.raw.type === 'Identifier') {
       return propertyNode.raw.name
     }
