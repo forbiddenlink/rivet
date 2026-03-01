@@ -3,14 +3,16 @@ import { AIEnhancer } from './enhancer'
 import { TechDebtCalculator } from './tech-debt'
 import type { Detection } from '@rivet/core'
 
-// Mock OpenAI
-vi.mock('langchain/chat_models/openai', () => ({
+// Mock OpenAI - using @langchain/openai path
+vi.mock('@langchain/openai', () => ({
   ChatOpenAI: vi.fn().mockImplementation(() => ({
-    call: vi.fn().mockResolvedValue({
-      content: JSON.stringify({
-        explanation: 'This is a test explanation',
-        analogy: 'Like a test analogy',
-        suggestion: 'Fix it this way',
+    pipe: vi.fn().mockReturnValue({
+      pipe: vi.fn().mockReturnValue({
+        invoke: vi.fn().mockResolvedValue(JSON.stringify({
+          explanation: 'This is a test explanation',
+          analogy: 'Like a test analogy',
+          suggestion: 'Fix it this way',
+        })),
       }),
     }),
   })),

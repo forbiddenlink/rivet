@@ -102,6 +102,27 @@ export default function RootLayout({
               background-position: 0% 50%;
             }
           }
+
+          .skip-link {
+            position: absolute;
+            top: -100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #8b5cf6;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 600;
+            z-index: 9999;
+            transition: top 0.2s ease;
+          }
+
+          .skip-link:focus {
+            top: 1rem;
+            outline: 2px solid white;
+            outline-offset: 2px;
+          }
         `}</style>
       </head>
       <body style={{
@@ -115,6 +136,10 @@ export default function RootLayout({
         position: 'relative',
         overflowX: 'hidden',
       }}>
+        {/* Skip Navigation Link - Accessibility */}
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
         {/* Aurora Background Container */}
         <div style={{
           position: 'fixed',
@@ -211,7 +236,7 @@ export default function RootLayout({
 
         {/* Content */}
         <div style={{ position: 'relative', zIndex: 1, width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-          <main style={{ flex: 1 }}>
+          <main id="main-content" style={{ flex: 1 }}>
             {children}
           </main>
           {/* Footer */}
@@ -222,11 +247,11 @@ export default function RootLayout({
             marginTop: 'auto',
           }}>
             <nav style={{ display: 'flex', justifyContent: 'center', gap: '2rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-              <a href="/about" style={{ color: 'rgba(255, 255, 255, 0.7)', textDecoration: 'none' }}>About</a>
-              <a href="/privacy" style={{ color: 'rgba(255, 255, 255, 0.7)', textDecoration: 'none' }}>Privacy Policy</a>
-              <a href="/contact" style={{ color: 'rgba(255, 255, 255, 0.7)', textDecoration: 'none' }}>Contact</a>
+              <a href="/about" style={{ color: '#c4b5fd', textDecoration: 'none' }}>About</a>
+              <a href="/privacy" style={{ color: '#c4b5fd', textDecoration: 'none' }}>Privacy Policy</a>
+              <a href="/contact" style={{ color: '#c4b5fd', textDecoration: 'none' }}>Contact</a>
             </nav>
-            <p style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '0.875rem', margin: 0 }}>
+            <p style={{ color: '#a1a1aa', fontSize: '0.875rem', margin: 0 }}>
               © {new Date().getFullYear()} RIVET. All rights reserved.
             </p>
           </footer>
