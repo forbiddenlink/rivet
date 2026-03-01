@@ -22,15 +22,31 @@ export function detectCommandInjection(ast: ASTNode, filePath: string): Detectio
       if (calleeNode) {
         const methodName = getMethodName(calleeNode)
         if (dangerousMethods.includes(methodName)) {
-          // Check if there's string concatenation or template literals in arguments
-          const hasUnsafeInput = node.children.some(
-            (child) =>
-              child.type === 'BinaryExpression' ||
-              child.type === 'TemplateLiteral' ||
-              child.type === 'Identifier'
-          )
+          // Check if there's unsafe input in arguments (excluding the callee itself)
+          // Get arguments only (skip callee which is first child)
+          const args = node.children.filter((child) => child !== calleeNode)
 
-          if (hasUnsafeInput) {
+          // Check for dynamic/unsafe arguments
+          const hasUnsafeInput = args.some((arg) => {
+            // Identifiers are unsafe (could be user input)
+            if (arg.type === 'Identifier') return true
+            // Template literals with expressions are unsafe
+            if (arg.type === 'TemplateLiteral') return true
+            // Binary expressions (string concatenation) are unsafe
+            if (arg.type === 'BinaryExpression') return true
+            // Array expressions with dynamic elements are safe for spawn pattern
+            // But we skip this detection for now (spawn with array is safe)
+            return false
+          })
+
+          // Also check: if all args are just Literals or ArrayExpressions with literals, it's safe
+          const allArgsStatic = args.every((arg) => {
+            if (arg.type === 'Literal') return true
+            if (arg.type === 'ArrayExpression') return true // spawn('ls', ['-la']) is safe
+            return false
+          })
+
+          if (hasUnsafeInput && !allArgsStatic) {
             detections.push({
               id: `command-injection-${++detectionCounter}`,
               ruleId: 'command-injection',
@@ -74,7 +90,9 @@ function getMethodName(node: ASTNode): string {
     return node.raw.name
   }
   if (node.type === 'MemberExpression' && node.children) {
-    const propertyNode = node.children.find((child) => child.type === 'Identifier')
+    // Get the last identifier which is the property/method name (e.g., exec in cp.exec)
+    const identifiers = node.children.filter((child) => child.type === 'Identifier')
+    const propertyNode = identifiers[identifiers.length - 1]
     if (propertyNode && propertyNode.raw.type === 'Identifier') {
       return propertyNode.raw.name
     }

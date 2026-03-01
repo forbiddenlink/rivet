@@ -9,22 +9,25 @@ export function detectXSS(ast: ASTNode, filePath: string): Detection[] {
   const detections: Detection[] = []
   let detectionCounter = 0
 
-  // Dangerous properties and methods
-  const dangerousPatterns = [
+  // Dangerous properties and methods (exact matches only)
+  const dangerousProperties = new Set([
     'innerHTML',
     'outerHTML',
-    'dangerouslySetInnerHTML',
-    'document.write',
     'insertAdjacentHTML',
-  ]
+  ])
 
   function visit(node: ASTNode): void {
     // Check for member expressions (e.g., element.innerHTML)
     if (node.type === 'MemberExpression' && node.children) {
-      const propertyNode = node.children.find((child) => child.type === 'Identifier')
+      // Get the property name (last identifier in the chain)
+      const identifiers = node.children.filter((child) => child.type === 'Identifier')
+      const propertyNode = identifiers[identifiers.length - 1]
+
       if (propertyNode && propertyNode.raw.type === 'Identifier') {
         const propName = propertyNode.raw.name
-        if (dangerousPatterns.some((pattern) => pattern.includes(propName))) {
+
+        // Check for exact match of dangerous properties
+        if (dangerousProperties.has(propName)) {
           detections.push({
             id: `xss-${++detectionCounter}`,
             ruleId: 'xss-vulnerability',
@@ -46,6 +49,33 @@ export function detectXSS(ast: ASTNode, filePath: string): Detection[] {
             },
           })
         }
+      }
+    }
+
+    // Check for document.write pattern
+    if (node.type === 'CallExpression' && node.children) {
+      const calleeText = getCalleeText(node)
+      if (calleeText === 'document.write') {
+        detections.push({
+          id: `xss-${++detectionCounter}`,
+          ruleId: 'xss-vulnerability',
+          filePath,
+          loc: {
+            start: { line: node.loc?.start.line || 0, column: node.loc?.start.column || 0 },
+            end: { line: node.loc?.end.line || 0, column: node.loc?.end.column || 0 },
+          },
+          severity: 'high',
+          category: 'security',
+          message: 'Potential XSS vulnerability: unsafe use of document.write',
+          metadata: {
+            pattern: 'xss-dom-manipulation',
+            property: 'document.write',
+            explanation:
+              'document.write can lead to XSS attacks. Malicious scripts can be injected and executed.',
+            recommendation: 'Use DOM methods like appendChild or textContent instead',
+            owasp: 'A03:2021 – Injection',
+          },
+        })
       }
     }
 
@@ -85,6 +115,28 @@ export function detectXSS(ast: ASTNode, filePath: string): Detection[] {
         visit(child)
       }
     }
+  }
+
+  function getCalleeText(node: ASTNode): string {
+    // For CallExpression, find the callee and extract identifier names
+    const callee = node.children?.find(
+      (child) => child.type === 'MemberExpression' || child.type === 'Identifier'
+    )
+    if (!callee) return ''
+
+    if (callee.type === 'Identifier' && callee.raw.type === 'Identifier') {
+      return callee.raw.name
+    }
+
+    if (callee.type === 'MemberExpression' && callee.children) {
+      const identifiers = callee.children
+        .filter((child) => child.type === 'Identifier')
+        .map((child) => (child.raw.type === 'Identifier' ? child.raw.name : ''))
+        .filter(Boolean)
+      return identifiers.join('.')
+    }
+
+    return ''
   }
 
   visit(ast)

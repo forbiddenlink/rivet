@@ -10,7 +10,7 @@ export function detectSQLInjection(ast: ASTNode, filePath: string): Detection[] 
   let detectionCounter = 0
 
   function visit(node: ASTNode): void {
-    // Check for potential SQL query patterns
+    // Check for potential SQL query patterns in call expressions
     if (
       (node.type === 'CallExpression' || node.type === 'MemberExpression') &&
       node.children
@@ -20,32 +20,20 @@ export function detectSQLInjection(ast: ASTNode, filePath: string): Detection[] 
 
       // Look for SQL keywords with string concatenation or template literals
       if (
-        (lowerText.includes('select') ||
-          lowerText.includes('insert') ||
-          lowerText.includes('update') ||
-          lowerText.includes('delete') ||
-          lowerText.includes('where')) &&
+        hasSqlKeyword(lowerText) &&
         (hasConcatenation(node) || hasTemplateLiteral(node))
       ) {
-        detections.push({
-          id: `sql-injection-${++detectionCounter}`,
-          ruleId: 'sql-injection',
-          filePath,
-          loc: {
-            start: { line: node.loc?.start.line || 0, column: node.loc?.start.column || 0 },
-            end: { line: node.loc?.end.line || 0, column: node.loc?.end.column || 0 },
-          },
-          severity: 'high',
-          category: 'security',
-          message: 'Potential SQL injection vulnerability detected',
-          metadata: {
-            pattern: 'sql-injection',
-            explanation:
-              'String concatenation or template literals in SQL queries can lead to SQL injection. Use parameterized queries or prepared statements instead.',
-            recommendation: 'Use parameterized queries (e.g., db.query("SELECT * FROM users WHERE id = ?", [userId]))',
-            owasp: 'A03:2021 – Injection',
-          },
-        })
+        addDetection(node)
+      }
+    }
+
+    // Also check BinaryExpressions directly (for variable assignments like: const query = "SELECT..." + id)
+    if (node.type === 'BinaryExpression' && node.children) {
+      const nodeText = getNodeText(node)
+      const lowerText = nodeText.toLowerCase()
+
+      if (hasSqlKeyword(lowerText) && hasConcatenation(node)) {
+        addDetection(node)
       }
     }
 
@@ -57,6 +45,38 @@ export function detectSQLInjection(ast: ASTNode, filePath: string): Detection[] 
     }
   }
 
+  function hasSqlKeyword(text: string): boolean {
+    return (
+      text.includes('select') ||
+      text.includes('insert') ||
+      text.includes('update') ||
+      text.includes('delete') ||
+      text.includes('where')
+    )
+  }
+
+  function addDetection(node: ASTNode): void {
+    detections.push({
+      id: `sql-injection-${++detectionCounter}`,
+      ruleId: 'sql-injection',
+      filePath,
+      loc: {
+        start: { line: node.loc?.start.line || 0, column: node.loc?.start.column || 0 },
+        end: { line: node.loc?.end.line || 0, column: node.loc?.end.column || 0 },
+      },
+      severity: 'high',
+      category: 'security',
+      message: 'Potential SQL injection vulnerability detected',
+      metadata: {
+        pattern: 'sql-injection',
+        explanation:
+          'String concatenation or template literals in SQL queries can lead to SQL injection. Use parameterized queries or prepared statements instead.',
+        recommendation: 'Use parameterized queries (e.g., db.query("SELECT * FROM users WHERE id = ?", [userId]))',
+        owasp: 'A03:2021 – Injection',
+      },
+    })
+  }
+
   visit(ast)
   return detections
 }
@@ -66,7 +86,24 @@ function getNodeText(node: ASTNode): string {
   if (node.raw.type === 'Literal' && 'value' in node.raw && typeof node.raw.value === 'string') {
     return node.raw.value
   }
-  // For other nodes, return empty string - we check structure more than content
+  // For TemplateLiteral, get the quasi values
+  if (node.type === 'TemplateLiteral' && node.children) {
+    return node.children
+      .filter((child) => child.type === 'TemplateElement')
+      .map((child) => {
+        const raw = child.raw as unknown as Record<string, unknown>
+        if (raw.value && typeof raw.value === 'object') {
+          const value = raw.value as Record<string, unknown>
+          return String(value.raw || value.cooked || '')
+        }
+        return ''
+      })
+      .join('')
+  }
+  // Recursively collect text from children
+  if (node.children) {
+    return node.children.map((child) => getNodeText(child)).join(' ')
+  }
   return ''
 }
 
