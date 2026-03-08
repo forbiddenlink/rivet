@@ -28,15 +28,30 @@ export function detectMagicNumbers(
     return cfg.allowedNumbers.includes(value)
   }
 
-  function visit(node: ASTNode): void {
-    // Look for numeric literals
-    if (node.type === 'Literal' && typeof (node as any).value === 'number') {
-      const value = (node as any).value as number
-      
+  function visit(node: ASTNode, context: { inVariableDeclarator: boolean } = { inVariableDeclarator: false }): void {
+    // Track if we're inside a VariableDeclarator (named constant assignment)
+    let newContext = context
+    if (node.type === 'VariableDeclarator') {
+      newContext = { inVariableDeclarator: true }
+    }
+
+    // Look for numeric literals - value is in node.raw.value
+    const rawValue = (node.raw as any)?.value
+    if (node.type === 'Literal' && typeof rawValue === 'number') {
+      const value = rawValue as number
+
       // Skip allowed numbers
       if (isAllowedNumber(value)) {
         if (node.children) {
-          node.children.forEach(visit)
+          node.children.forEach(child => visit(child, newContext))
+        }
+        return
+      }
+
+      // Skip numbers in variable declarations (assigned to a named variable)
+      if (newContext.inVariableDeclarator) {
+        if (node.children) {
+          node.children.forEach(child => visit(child, newContext))
         }
         return
       }
@@ -46,7 +61,7 @@ export function detectMagicNumbers(
         ruleId: 'magic-number',
         category: 'smells',
         severity: 'low',
-        message: `Magic number '${value}' found. Replace with a named constant to improve code clarity.`,
+        message: `Found magic number '${value}'. Replace with a named constant to improve code clarity.`,
         filePath,
         loc: {
           start: { line: node.loc?.start.line || 0, column: node.loc?.start.column || 0 },
@@ -62,10 +77,10 @@ export function detectMagicNumbers(
 
     // Recursively check children
     if (node.children) {
-      node.children.forEach(visit)
+      node.children.forEach(child => visit(child, newContext))
     }
   }
 
-  visit(ast)
+  visit(ast, { inVariableDeclarator: false })
   return detections
 }

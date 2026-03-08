@@ -38,24 +38,40 @@ export function detectGodObjects(
     if (isClassNode(node)) {
       const className = getClassName(node)
       const lines = countLines(node)
-      
-      // Count methods in the class
-      const methods = node.children?.filter(isFunctionNode) || []
+
+      // Find ClassBody child - methods and properties are inside it
+      const classBody = node.children?.find(c => c.type === 'ClassBody')
+      const bodyChildren = classBody?.children || []
+
+      // Count methods (MethodDefinition nodes inside ClassBody)
+      const methods = bodyChildren.filter(
+        c => c.type === 'MethodDefinition' || isFunctionNode(c)
+      )
       const methodCount = methods.length
-      
-      // Count properties
-      const properties = node.children?.filter(c => 
-        c.type === 'PropertyDefinition' || c.type === 'FieldDefinition'
-      ) || []
+
+      // Count properties (PropertyDefinition or FieldDefinition)
+      const properties = bodyChildren.filter(
+        c => c.type === 'PropertyDefinition' || c.type === 'FieldDefinition'
+      )
       const propertyCount = properties.length
 
-      let issues: string[] = []
+      const issues: string[] = []
       let severity: Detection['severity'] = 'low'
 
       // Check method count
       if (methodCount > cfg.maxMethods) {
-        issues.push(`${methodCount} methods (threshold: ${cfg.maxMethods})`)
+        issues.push(`too many methods: ${methodCount} (threshold: ${cfg.maxMethods})`)
         severity = methodCount > cfg.maxMethods * 2 ? 'high' : 'medium'
+      }
+
+      // Check property count
+      if (propertyCount > cfg.maxProperties) {
+        issues.push(`too many properties: ${propertyCount} (threshold: ${cfg.maxProperties})`)
+        if (severity === 'low') {
+          severity = propertyCount > cfg.maxProperties * 2 ? 'high' : 'medium'
+        } else if (propertyCount > cfg.maxProperties * 2) {
+          severity = 'high'
+        }
       }
 
       // Check line count
@@ -87,7 +103,8 @@ export function detectGodObjects(
             lineCount: lines,
             methodThreshold: cfg.maxMethods,
             lineThreshold: cfg.maxLines,
-            explanation: 'God objects (Large Classes) try to do too much and violate the Single Responsibility Principle. They are hard to understand, test, and maintain. Split the class by extracting related methods into separate classes with clear, single responsibilities.',
+            explanation:
+              'God objects (Large Classes) try to do too much and violate the Single Responsibility Principle. They are hard to understand, test, and maintain. Split the class by extracting related methods into separate classes with clear, single responsibilities.',
           },
         })
       }
