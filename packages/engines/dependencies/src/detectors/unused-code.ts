@@ -16,7 +16,11 @@ export function detectUnusedCode(ast: ASTNode, filePath: string): Detection[] {
       node.children.forEach((child) => {
         if (child.type === 'ImportSpecifier' && child.children) {
           const imported = child.children.find((c) => c.type === 'Identifier')
-          if (imported && imported.raw.type === 'Identifier' && imported.raw.name) {
+          if (
+            imported &&
+            imported.raw.type === 'Identifier' &&
+            imported.raw.name
+          ) {
             declaredIdentifiers.add(imported.raw.name)
           }
         }
@@ -33,12 +37,32 @@ export function detectUnusedCode(ast: ASTNode, filePath: string): Detection[] {
     node.children?.forEach(collectDeclarations)
   }
 
-  function collectUsages(node: ASTNode): void {
-    if (node.type === 'Identifier' && node.raw.type === 'Identifier' && node.raw.name) {
+  function collectUsages(node: ASTNode, isDeclarationContext = false): void {
+    // Skip identifiers that are part of declarations (imports, variable declarations)
+    const skipContext =
+      node.type === 'ImportSpecifier' ||
+      node.type === 'ImportDefaultSpecifier' ||
+      node.type === 'ImportNamespaceSpecifier' ||
+      node.type === 'VariableDeclarator'
+
+    if (
+      node.type === 'Identifier' &&
+      node.raw.type === 'Identifier' &&
+      node.raw.name &&
+      !isDeclarationContext
+    ) {
       usedIdentifiers.add(node.raw.name)
     }
 
-    node.children?.forEach(collectUsages)
+    node.children?.forEach((child) => {
+      // For VariableDeclarator, the first child is the identifier (declaration), rest are usages
+      if (node.type === 'VariableDeclarator') {
+        const firstChild = node.children?.[0]
+        collectUsages(child, child === firstChild)
+      } else {
+        collectUsages(child, skipContext)
+      }
+    })
   }
 
   collectDeclarations(ast)

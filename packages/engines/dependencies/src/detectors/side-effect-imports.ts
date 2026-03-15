@@ -6,20 +6,26 @@ let detectionCounter = 0
 /**
  * Detect side-effect imports
  */
-export function detectSideEffectImports(ast: ASTNode, filePath: string): Detection[] {
+export function detectSideEffectImports(
+  ast: ASTNode,
+  filePath: string
+): Detection[] {
   const detections: Detection[] = []
 
   function visit(node: ASTNode): void {
     if (node.type === 'ImportDeclaration' && node.children) {
       const source = node.children.find((c) => c.type === 'Literal')
       const hasSpecifiers = node.children.some(
-        (c) => c.type === 'ImportSpecifier' || c.type === 'ImportDefaultSpecifier'
+        (c) =>
+          c.type === 'ImportSpecifier' ||
+          c.type === 'ImportDefaultSpecifier' ||
+          c.type === 'ImportNamespaceSpecifier'
       )
 
       // Side-effect import: no specifiers, just importing for side effects
       if (source && !hasSpecifiers && source.raw.type === 'Literal') {
         const modulePath = source.raw.value
-        
+
         // Ignore common side-effect imports like CSS/styles
         if (
           typeof modulePath === 'string' &&
@@ -32,8 +38,14 @@ export function detectSideEffectImports(ast: ASTNode, filePath: string): Detecti
             ruleId: 'side-effect-import',
             filePath,
             loc: {
-              start: { line: node.loc?.start.line || 0, column: node.loc?.start.column || 0 },
-              end: { line: node.loc?.end.line || 0, column: node.loc?.end.column || 0 },
+              start: {
+                line: node.loc?.start.line || 0,
+                column: node.loc?.start.column || 0,
+              },
+              end: {
+                line: node.loc?.end.line || 0,
+                column: node.loc?.end.column || 0,
+              },
             },
             severity: 'low',
             category: 'dependencies',
