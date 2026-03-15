@@ -1,2 +1,0 @@
-packages/ai:build:cd /Volumes/LizsDisk/rivet/packages/ai && npm run build
-packages/ai:tsc:cd /Volumes/LizsDisk/rivet/packages/ai && npx tsc --noEmit
