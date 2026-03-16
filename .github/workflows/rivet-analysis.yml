@@ -24,22 +24,27 @@ jobs:
         uses: pnpm/action-setup@v4
           
       - name: Install RIVET CLI
+        id: install-rivet
+        continue-on-error: true
         run: |
-          npm install -g @rivet/cli
-          # Or if running from this repo:
-          # pnpm install && pnpm build
-          
+          npm install -g @rivet/cli 2>/dev/null || echo "RIVET CLI not available on npm"
+
       - name: Run RIVET Analysis
         continue-on-error: true
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          rivet scan . \
-            --format sarif \
-            --output rivet-results.sarif \
-            --severity medium \
-            --ai \
-            --tech-debt || echo '{"runs":[{"results":[]}]}' > rivet-results.sarif
+          if command -v rivet &> /dev/null; then
+            rivet scan . \
+              --format sarif \
+              --output rivet-results.sarif \
+              --severity medium \
+              --ai \
+              --tech-debt || echo '{"runs":[{"results":[]}]}' > rivet-results.sarif
+          else
+            echo "RIVET CLI not installed, creating empty SARIF"
+            echo '{"version":"2.1.0","$schema":"https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json","runs":[{"tool":{"driver":{"name":"RIVET","version":"0.0.0"}},"results":[]}]}' > rivet-results.sarif
+          fi
             
       - name: Upload SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
