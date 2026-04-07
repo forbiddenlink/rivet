@@ -5,32 +5,36 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,
-    
+
     // Modules
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
-    
+
     // Emit
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
     "noEmit": false,
-    
+
+    // Composite builds for faster incremental builds
+    "composite": true,
+    "incremental": true,
+
     // Interop
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
-    
+
     // Language
     "target": "ES2022",
     "lib": ["ES2022"],
     "useDefineForClassFields": true,
-    
+
     // Skip Lib Check (for faster builds)
     "skipLibCheck": true,
-    
+
     // Paths for monorepo
     "baseUrl": ".",
     "paths": {
@@ -42,5 +46,19 @@
     }
   },
   "include": [],
-  "exclude": ["node_modules", "dist", "build", ".next"]
+  "exclude": ["node_modules", "dist", "build", ".next"],
+  "references": [
+    { "path": "./packages/parsers" },
+    { "path": "./packages/core" },
+    { "path": "./packages/engines/flows" },
+    { "path": "./packages/engines/security" },
+    { "path": "./packages/engines/practices" },
+    { "path": "./packages/engines/dependencies" },
+    { "path": "./packages/engines/architecture" },
+    { "path": "./packages/engines/bugs" },
+    { "path": "./packages/engines/smells" },
+    { "path": "./packages/engines/performance" },
+    { "path": "./packages/ai" },
+    { "path": "./apps/cli" }
+  ]
 }

@@ -1,10 +1,16 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": ["**/.env.*local"],
+  "globalDependencies": ["**/.env.*local", "tsconfig.json"],
+  "ui": "tui",
+  "remoteCache": {
+    "enabled": true
+  },
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.test.ts", "!**/*.spec.ts"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+      "outputLogs": "new-only"
     },
     "dev": {
       "cache": false,
@@ -12,17 +18,19 @@
     },
     "test": {
       "dependsOn": ["build"],
-      "outputs": ["coverage/**"]
+      "inputs": ["$TURBO_DEFAULT$", "**/*.test.ts", "**/*.spec.ts"],
+      "outputs": ["coverage/**"],
+      "outputLogs": "new-only"
     },
     "test:watch": {
       "cache": false,
       "persistent": true
     },
-    "lint": {
-      "dependsOn": ["^build"]
-    },
     "typecheck": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^typecheck"],
+      "inputs": ["$TURBO_DEFAULT$", "tsconfig.json"],
+      "outputs": ["*.tsbuildinfo"],
+      "outputLogs": "new-only"
     },
     "clean": {
       "cache": false
