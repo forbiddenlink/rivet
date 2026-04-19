@@ -13,8 +13,8 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts --clean --external @rivet/core --external @rivet/parsers --external typescript",
-    "dev": "tsup src/index.ts --format cjs,esm --dts --watch --external @rivet/core --external @rivet/parsers --external typescript",
+    "build": "tsup src/index.ts --format cjs,esm --dts --tsconfig ../../../tsconfig.tsup.json --clean --external @rivet/core --external @rivet/parsers --external typescript",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --tsconfig ../../../tsconfig.tsup.json --watch --external @rivet/core --external @rivet/parsers --external typescript",
     "test": "vitest run",
     "test:watch": "vitest"
   },

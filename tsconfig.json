@@ -17,9 +17,9 @@
     "sourceMap": true,
     "noEmit": false,
 
-    // Composite builds for faster incremental builds
-    "composite": true,
-    "incremental": true,
+    // Individual packages set composite: true for project references
+    // Root must NOT set composite/incremental — breaks tsup DTS builds
+    "incremental": false,
 
     // Interop
     "esModuleInterop": true,

@@ -13,8 +13,8 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts --clean --external @rivet/parsers",
-    "dev": "tsup src/index.ts --format cjs,esm --dts --watch --external @rivet/parsers",
+    "build": "tsup src/index.ts --format cjs,esm --dts --tsconfig ../../tsconfig.tsup.json --clean --external @rivet/parsers",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --tsconfig ../../tsconfig.tsup.json --watch --external @rivet/parsers",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
