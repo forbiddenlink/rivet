@@ -19,7 +19,7 @@
     "@rivet/engine-security": "workspace:*",
     "@rivet/engine-smells": "workspace:*",
     "@rivet/parsers": "workspace:*",
-    "next": "^15.1.6",
+    "next": "^15.5.15",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
