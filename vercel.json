@@ -3,6 +3,6 @@
   "buildCommand": "pnpm build --filter=@rivet/web",
   "devCommand": "pnpm dev --filter=@rivet/web",
   "installCommand": "pnpm install",
-  "framework": "nextjs",
+  "framework": null,
   "outputDirectory": "apps/web/.next"
 }
