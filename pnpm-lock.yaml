@@ -5243,7 +5243,7 @@ snapshots:
     dependencies:
       lightningcss: 1.32.0
       picomatch: 4.0.4
-      postcss: 8.5.14
+      postcss: 8.5.6
       rolldown: 1.0.0-rc.15
       tinyglobby: 0.2.15
     optionalDependencies:
