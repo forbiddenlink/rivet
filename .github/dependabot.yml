@@ -1,56 +1,48 @@
-# Dependabot config — npm ecosystem (Node/TypeScript/JavaScript)
-# Grouped patch/minor updates to reduce PR spam.
 version: 2
 updates:
   - package-ecosystem: "npm"
+    directories:
+      - "/"
+      - "/apps/cli"
+      - "/apps/web"
+      - "/examples/test-project"
+      - "/packages/ai"
+      - "/packages/core"
+      - "/packages/engines/architecture"
+      - "/packages/engines/bugs"
+      - "/packages/engines/dependencies"
+      - "/packages/engines/flows"
+      - "/packages/engines/performance"
+      - "/packages/engines/practices"
+      - "/packages/engines/security"
+      - "/packages/engines/smells"
+      - "/packages/parsers"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    cooldown:
+      semver-major-days: 30
+      semver-minor-days: 7
+      semver-patch-days: 3
+    groups:
+      patch-and-minor:
+        patterns: ["*"]
+        update-types: ["patch", "minor"]
+      major-updates:
+        patterns: ["*"]
+        update-types: ["major"]
+    labels: ["dependencies"]
+    commit-message:
+      prefix: "chore(deps):"
+  - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 5
     groups:
-      patch-and-minor:
-        update-types:
-          - "patch"
-          - "minor"
-        exclude-patterns:
-          - "next"
-          - "react"
-          - "react-dom"
-          - "typescript"
-          - "@types/react"
-          - "@types/react-dom"
-      major-frameworks:
-        patterns:
-          - "next"
-          - "react"
-          - "react-dom"
-          - "typescript"
-          - "@types/react"
-          - "@types/react-dom"
-        update-types:
-          - "major"
-      react-ecosystem:
-        patterns:
-          - "react"
-          - "react-dom"
-          - "@types/react"
-          - "@types/react-dom"
-        update-types:
-          - "patch"
-          - "minor"
-    labels:
-      - "dependencies"
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-    open-pull-requests-limit: 3
-    groups:
-      actions:
-        patterns:
-          - "*"
-    labels:
-      - "dependencies"
-      - "github-actions"
+      github-actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "chore(deps):"
