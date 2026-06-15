@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@langchain/core": "^0.3.29",
-    "@langchain/openai": "^0.3.16",
+    "@langchain/openai": "^1.4.7",
     "@rivet/core": "workspace:*",
     "langchain": "^1.4.4"
   },
