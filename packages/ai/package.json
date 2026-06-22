@@ -25,11 +25,11 @@
     "@langchain/core": "^0.3.29",
     "@langchain/openai": "^1.4.7",
     "@rivet/core": "workspace:*",
-    "langchain": "^1.4.4"
+    "langchain": "^1.4.6"
   },
   "devDependencies": {
     "tsup": "^8.5.1",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.9"
   }
 }
