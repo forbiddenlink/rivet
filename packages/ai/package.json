@@ -23,9 +23,9 @@
   },
   "dependencies": {
     "@langchain/core": "^0.3.29",
-    "@langchain/openai": "^1.4.7",
+    "@langchain/openai": "^1.5.1",
     "@rivet/core": "workspace:*",
-    "langchain": "^1.4.6"
+    "langchain": "^1.5.0"
   },
   "devDependencies": {
     "tsup": "^8.5.1",
