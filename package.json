@@ -45,12 +45,12 @@
     "release": "turbo run build && changeset publish"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.1",
+    "@biomejs/biome": "^2.5.2",
     "@changesets/cli": "^2.31.0",
     "@types/node": "^20.11.0",
     "fta-cli": "^3.0.0",
     "tsup": "^8.0.1",
-    "turbo": "^2.9.18",
+    "turbo": "^2.10.0",
     "typescript": "^6.0.3",
     "vitest": "^4.1.9"
   },
