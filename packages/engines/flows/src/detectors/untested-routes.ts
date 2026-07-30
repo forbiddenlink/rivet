@@ -94,20 +94,24 @@ export function detectUntestedRoutes(context: AnalysisContext): Detection[] {
     }
 
     // createBrowserRouter / createRoutesFromElements path: '...'
-    if (node.type === 'Property' && node.raw?.type === 'Property') {
-      const key = node.raw.key
+    if (node.type === 'Property' && node.raw && node.raw.type === 'Property') {
+      const prop = node.raw as {
+        key?: { type?: string; name?: string; value?: unknown }
+        value?: { type?: string; value?: unknown }
+      }
+      const key = prop.key
       const keyName =
-        key && key.type === 'Identifier'
+        key?.type === 'Identifier'
           ? key.name
-          : key && key.type === 'Literal'
-            ? String(key.value)
+          : key?.type === 'Literal' && typeof key.value === 'string'
+            ? key.value
             : null
+
       if (keyName === 'path' && node.loc) {
-        const value = node.raw.value
+        const value = prop.value
         const routePath =
-          value && value.type === 'Literal' && typeof value.value === 'string'
-            ? value.value
-            : null
+          value?.type === 'Literal' && typeof value.value === 'string' ? value.value : null
+
         if (routePath && routePath.startsWith('/')) {
           detections.push({
             id: `untested-route-${++detectionCounter}`,
@@ -156,24 +160,23 @@ function extractAppRoutePath(filePath: string): string | null {
 }
 
 function extractJsxStringValue(attr: ASTNode): string | null {
-  // JSXAttribute > JSXExpressionContainer | Literal
+  const tryValue = (node: ASTNode | undefined): string | null => {
+    if (!node?.raw) return null
+    const raw = node.raw as { type?: string; value?: unknown }
+    if (raw.type === 'Literal' && typeof raw.value === 'string') {
+      return raw.value
+    }
+    return null
+  }
+
   if (!attr.children) return null
   for (const child of attr.children) {
-    if (child.raw?.type === 'Literal' && typeof child.raw.value === 'string') {
-      return child.raw.value
-    }
-    if (child.type === 'Literal' && typeof child.raw?.value === 'string') {
-      return child.raw.value
-    }
-    // StringLiteral via nested
+    const direct = tryValue(child)
+    if (direct) return direct
     if (child.children) {
       for (const nested of child.children) {
-        if (nested.raw?.type === 'Literal' && typeof nested.raw.value === 'string') {
-          return nested.raw.value
-        }
-        if (nested.raw?.type === 'StringLiteral' && typeof nested.raw.value === 'string') {
-          return nested.raw.value
-        }
+        const nestedValue = tryValue(nested)
+        if (nestedValue) return nestedValue
       }
     }
   }

@@ -1,5 +1,7 @@
 import Link from 'next/link'
 
+import { CliQuickstart } from '../components/CliQuickstart'
+
 const ENGINES = [
   {
     title: 'Security',
@@ -250,35 +252,7 @@ $ `}
           </p>
         </header>
 
-        <div className="terminal">
-          <div className="terminal__chrome">
-            <span className="terminal__dot terminal__dot--accent" />
-            <span className="terminal__dot" />
-            <span className="terminal__dot" />
-            <span className="terminal__title">quickstart</span>
-          </div>
-          <pre className="terminal__body">
-            <span className="terminal__comment"># Install</span>
-            {`
-`}
-            <span className="terminal__prompt">$</span> <span className="terminal__cmd">pnpm add -g @rivet/cli</span>
-            {`
-
-`}
-            <span className="terminal__comment"># Scan</span>
-            {`
-`}
-            <span className="terminal__prompt">$</span> <span className="terminal__cmd">rivet scan .</span>
-            {`
-
-`}
-            <span className="terminal__comment"># With AI explanations + debt metrics</span>
-            {`
-`}
-            <span className="terminal__prompt">$</span>{' '}
-            <span className="terminal__cmd">rivet scan . --ai --tech-debt</span>
-          </pre>
-        </div>
+        <CliQuickstart />
       </section>
 
       <div className="cta-band" style={{ marginLeft: '1.5rem', marginRight: '1.5rem' }}>

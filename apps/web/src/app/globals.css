@@ -503,6 +503,10 @@ svg {
   background: var(--bg-secondary);
 }
 
+.terminal__chrome-actions {
+  margin-left: auto;
+}
+
 .terminal__dot {
   width: 8px;
   height: 8px;

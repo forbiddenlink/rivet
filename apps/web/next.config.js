@@ -11,6 +11,7 @@ const nextConfig = {
     '@rivet/engine-architecture',
     '@rivet/engine-practices',
     '@rivet/engine-dependencies',
+    '@rivet/engine-flows',
   ],
   // Note: Temporarily disabled static export to support API routes for dashboard
   // output: 'export',

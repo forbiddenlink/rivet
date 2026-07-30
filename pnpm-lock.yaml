@@ -123,6 +123,9 @@ importers:
       '@rivet/engine-dependencies':
         specifier: workspace:*
         version: link:../../packages/engines/dependencies
+      '@rivet/engine-flows':
+        specifier: workspace:*
+        version: link:../../packages/engines/flows
       '@rivet/engine-performance':
         specifier: workspace:*
         version: link:../../packages/engines/performance

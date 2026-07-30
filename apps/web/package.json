@@ -14,6 +14,7 @@
     "@rivet/engine-architecture": "workspace:*",
     "@rivet/engine-bugs": "workspace:*",
     "@rivet/engine-dependencies": "workspace:*",
+    "@rivet/engine-flows": "workspace:*",
     "@rivet/engine-performance": "workspace:*",
     "@rivet/engine-practices": "workspace:*",
     "@rivet/engine-security": "workspace:*",

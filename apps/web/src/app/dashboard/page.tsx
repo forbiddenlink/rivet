@@ -94,6 +94,38 @@ const ANALYZE_STAGES = [
   'Building report…',
 ]
 
+const DEMO_CODE = `// Demo snippet with intentional issues for RIVET
+const API_KEY = "sk-live-demo-do-not-use";
+
+export async function processOrder(user, items) {
+  // Nested conditionals + missing error handling
+  if (user) {
+    if (user.active) {
+      if (items && items.length > 0) {
+        let total = 0;
+        for (let i = 0; i < items.length; i++) {
+          for (let j = 0; j < items.length; j++) {
+            total += items[i].price * (items[j].qty || 1);
+          }
+        }
+
+        const res = await fetch("https://api.example.com/charge", {
+          method: "POST",
+          body: JSON.stringify({ total, key: API_KEY }),
+        });
+        return res.json();
+      }
+    }
+  }
+  return null;
+}
+
+export function AdminPanel({ data }) {
+  // Dangerous sink
+  return <div dangerouslySetInnerHTML={{ __html: data.html }} />;
+}
+`
+
 export default function Dashboard() {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
   const [loading, setLoading] = useState(false)
@@ -172,12 +204,12 @@ export default function Dashboard() {
       })
 
       if (!response.ok) {
-        throw new Error(`Analysis failed: ${response.statusText}`)
+        const payload = await response.json().catch(() => null)
+        throw new Error(payload?.error || `Analysis failed: ${response.statusText}`)
       }
 
       const result = await response.json()
       stopProgress()
-      // Brief beat at 100% so the bar feels finished
       await new Promise((r) => setTimeout(r, 180))
       setAnalysisResult(result)
       setSelectedIssue(null)
@@ -193,8 +225,28 @@ export default function Dashboard() {
     }
   }
 
+  const handleAnalyzeRef = useRef(handleAnalyze)
+  handleAnalyzeRef.current = handleAnalyze
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        if (loading || analysisResult || !codeInput.trim()) return
+        e.preventDefault()
+        void handleAnalyzeRef.current()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [loading, analysisResult, codeInput])
+
   const handleFileUpload = (content: string) => {
     setCodeInput(content)
+    setError(null)
+  }
+
+  const loadDemo = () => {
+    setCodeInput(DEMO_CODE)
     setError(null)
   }
 
@@ -238,6 +290,9 @@ export default function Dashboard() {
           <div className="panel">
             <div className="panel__header">
               <h2 className="panel__title">Analyze</h2>
+              <button type="button" className="btn btn--ghost btn--sm" onClick={loadDemo} disabled={loading}>
+                Load demo
+              </button>
             </div>
             <div className="panel__body">
               <label htmlFor="code-input" className="field-label">
@@ -301,16 +356,27 @@ export default function Dashboard() {
                 <FileUpload onAnalyze={handleFileUpload} isAnalyzing={loading} />
               </div>
 
-              <button
-                type="button"
-                className="btn btn--primary btn--lg"
-                onClick={handleAnalyze}
-                disabled={loading || !codeInput.trim()}
-                aria-label={loading ? 'Analysis in progress' : 'Start code analysis'}
-                aria-busy={loading}
-              >
-                {loading ? 'Analyzing…' : 'Analyze code'}
-              </button>
+              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.75rem' }}>
+                <button
+                  type="button"
+                  className="btn btn--primary btn--lg"
+                  onClick={handleAnalyze}
+                  disabled={loading || !codeInput.trim()}
+                  aria-label={loading ? 'Analysis in progress' : 'Start code analysis'}
+                  aria-busy={loading}
+                >
+                  {loading ? 'Analyzing…' : 'Analyze code'}
+                </button>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 'var(--text-xs)',
+                    color: 'var(--text-muted)',
+                  }}
+                >
+                  ⌘ Enter
+                </span>
+              </div>
             </div>
           </div>
         ) : (

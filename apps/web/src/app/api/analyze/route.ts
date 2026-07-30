@@ -29,7 +29,7 @@ interface Detection {
     start: Location
     end: Location
   }
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 interface AnalysisResponse {
@@ -45,25 +45,33 @@ interface AnalysisResponse {
 }
 
 const SEVERITY_RANK = { critical: 4, high: 3, medium: 2, low: 1, info: 0 }
+const MAX_CODE_BYTES = 200_000
 
-export async function POST(request: NextRequest): Promise<NextResponse<AnalysisResponse | { error: string }>> {
+export async function POST(
+  request: NextRequest
+): Promise<NextResponse<AnalysisResponse | { error: string }>> {
   let tmpDir: string | null = null
 
   try {
     const body: AnalysisRequest = await request.json()
 
-    if (!body.code) {
+    if (!body.code || !body.code.trim()) {
       return NextResponse.json({ error: 'No code provided' }, { status: 400 })
+    }
+
+    if (Buffer.byteLength(body.code, 'utf8') > MAX_CODE_BYTES) {
+      return NextResponse.json(
+        { error: `Code exceeds ${MAX_CODE_BYTES / 1000}KB limit for web analysis. Use the CLI for larger projects.` },
+        { status: 413 }
+      )
     }
 
     const startTime = Date.now()
 
-    // Create a temporary directory for analysis
     tmpDir = mkdtempSync(join(tmpdir(), 'rivet-'))
     const filePath = join(tmpDir, 'input.ts')
     writeFileSync(filePath, body.code, 'utf-8')
 
-    // Dynamically import to avoid build-time resolution issues
     const { RivetEngine } = await import('@rivet/core')
     const { SmellsEngine } = await import('@rivet/engine-smells')
     const { SecurityEngine } = await import('@rivet/engine-security')
@@ -72,8 +80,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<AnalysisR
     const { ArchitectureEngine } = await import('@rivet/engine-architecture')
     const { PracticesEngine } = await import('@rivet/engine-practices')
     const { DependenciesEngine } = await import('@rivet/engine-dependencies')
+    const { FlowsEngine } = await import('@rivet/engine-flows')
 
-    // Parse configuration
     const enabledEngines = {
       smells: body.config?.engines?.smells !== false,
       security: body.config?.engines?.security !== false,
@@ -87,15 +95,11 @@ export async function POST(request: NextRequest): Promise<NextResponse<AnalysisR
     const minSeverity = body.config?.minSeverity || 'info'
     const minSeverityRank = SEVERITY_RANK[minSeverity as keyof typeof SEVERITY_RANK]
 
-    // Create and configure RivetEngine
-    const config = {
+    const engine = new RivetEngine({
       severity: { minLevel: 'info' as const },
       maxIssues: 100,
-    }
+    })
 
-    const engine = new RivetEngine(config)
-
-    // Register analysis engines based on configuration
     if (enabledEngines.smells) engine.registerEngine(new SmellsEngine())
     if (enabledEngines.security) engine.registerEngine(new SecurityEngine())
     if (enabledEngines.bugs) engine.registerEngine(new BugEngine())
@@ -103,17 +107,15 @@ export async function POST(request: NextRequest): Promise<NextResponse<AnalysisR
     if (enabledEngines.architecture) engine.registerEngine(new ArchitectureEngine())
     if (enabledEngines.practices) engine.registerEngine(new PracticesEngine())
     if (enabledEngines.dependencies) engine.registerEngine(new DependenciesEngine())
+    if (enabledEngines.flows) engine.registerEngine(new FlowsEngine())
 
-    // Run analysis
     const result = await engine.analyze(tmpDir)
 
-    // Filter detections based on minimum severity and config
     const filteredDetections = result.detections.filter((detection) => {
       const detectionSeverityRank = SEVERITY_RANK[detection.severity]
       return detectionSeverityRank >= minSeverityRank
     })
 
-    // Calculate summary
     const bySeverity: Record<string, number> = {
       critical: 0,
       high: 0,
@@ -131,14 +133,13 @@ export async function POST(request: NextRequest): Promise<NextResponse<AnalysisR
       byEngine[rulePrefix] = (byEngine[rulePrefix] || 0) + 1
     }
 
-    // Remove zero-count severities
     Object.keys(bySeverity).forEach((key) => {
       if (bySeverity[key] === 0) delete bySeverity[key]
     })
 
     const duration = Date.now() - startTime
 
-    const response: AnalysisResponse = {
+    return NextResponse.json({
       detections: filteredDetections,
       filesAnalyzed: result.filesAnalyzed,
       duration,
@@ -148,9 +149,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<AnalysisR
         byCategory,
         byEngine,
       },
-    }
-
-    return NextResponse.json(response)
+    })
   } catch (error) {
     console.error('Analysis error:', error)
     return NextResponse.json(
@@ -158,7 +157,6 @@ export async function POST(request: NextRequest): Promise<NextResponse<AnalysisR
       { status: 500 }
     )
   } finally {
-    // Cleanup temporary directory
     if (tmpDir) {
       try {
         rmSync(tmpDir, { recursive: true, force: true })
