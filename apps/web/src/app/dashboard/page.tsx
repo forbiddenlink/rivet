@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { ConfigurationModal } from '../../components/ConfigurationModal'
 import { ExportButton } from '../../components/ExportButton'
@@ -26,7 +26,7 @@ interface Detection {
     start: Location
     end: Location
   }
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 interface AnalysisResult {
@@ -75,12 +75,30 @@ const DEFAULT_CONFIG: AnalysisConfig = {
     flows: true,
   },
   minSeverity: 'info',
-  categories: ['security', 'performance', 'bugs', 'smells', 'architecture', 'practices', 'dependencies', 'flows'],
+  categories: [
+    'security',
+    'performance',
+    'bugs',
+    'smells',
+    'architecture',
+    'practices',
+    'dependencies',
+    'flows',
+  ],
 }
+
+const ANALYZE_STAGES = [
+  'Parsing AST…',
+  'Running engines…',
+  'Scoring severity…',
+  'Building report…',
+]
 
 export default function Dashboard() {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
   const [loading, setLoading] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [stageIndex, setStageIndex] = useState(0)
   const [selectedIssue, setSelectedIssue] = useState<Detection | null>(null)
   const [filters, setFilters] = useState<FilterState>({
     severity: [],
@@ -92,35 +110,64 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null)
   const [config, setConfig] = useState<AnalysisConfig>(DEFAULT_CONFIG)
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false)
+  const progressTimer = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
-    // Load config from localStorage on mount
     const saved = localStorage.getItem('rivet-config')
     if (saved) {
       try {
         setConfig(JSON.parse(saved))
-      } catch (e) {
-        console.error('Failed to load config:', e)
+      } catch {
+        // Ignore corrupt config
       }
     }
   }, [])
 
+  useEffect(() => {
+    return () => {
+      if (progressTimer.current) clearInterval(progressTimer.current)
+    }
+  }, [])
+
+  const startProgress = useCallback(() => {
+    setProgress(8)
+    setStageIndex(0)
+    if (progressTimer.current) clearInterval(progressTimer.current)
+    progressTimer.current = setInterval(() => {
+      setProgress((p) => {
+        const next = Math.min(p + 7 + Math.random() * 10, 88)
+        setStageIndex(Math.min(ANALYZE_STAGES.length - 1, Math.floor(next / 25)))
+        return next
+      })
+    }, 280)
+  }, [])
+
+  const stopProgress = useCallback(() => {
+    if (progressTimer.current) {
+      clearInterval(progressTimer.current)
+      progressTimer.current = null
+    }
+    setProgress(100)
+    setStageIndex(ANALYZE_STAGES.length - 1)
+  }, [])
+
   const handleAnalyze = async () => {
     if (!codeInput.trim()) {
-      setError('Please paste some code to analyze')
+      setError('Paste some JavaScript or TypeScript to analyze.')
       return
     }
 
     setLoading(true)
     setError(null)
+    startProgress()
 
     try {
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           code: codeInput,
-          config: config,
+          config,
         }),
       })
 
@@ -129,362 +176,267 @@ export default function Dashboard() {
       }
 
       const result = await response.json()
+      stopProgress()
+      // Brief beat at 100% so the bar feels finished
+      await new Promise((r) => setTimeout(r, 180))
       setAnalysisResult(result)
       setSelectedIssue(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
+      if (progressTimer.current) {
+        clearInterval(progressTimer.current)
+        progressTimer.current = null
+      }
       setLoading(false)
+      setProgress(0)
     }
   }
 
-  const handleFileUpload = (content: string, _fileName: string) => {
+  const handleFileUpload = (content: string) => {
     setCodeInput(content)
     setError(null)
   }
 
-  const filteredDetections = analysisResult?.detections.filter((detection) => {
-    const matchesSeverity = filters.severity.length === 0 || filters.severity.includes(detection.severity)
-    const matchesCategory = filters.category.length === 0 || filters.category.includes(detection.category)
-    const engine = detection.ruleId?.split('-')[0] || ''
-    const matchesEngine = filters.engine.length === 0 || filters.engine.includes(engine)
-    const matchesSearch =
-      filters.searchText === '' ||
-      detection.message.toLowerCase().includes(filters.searchText.toLowerCase()) ||
-      detection.filePath.toLowerCase().includes(filters.searchText.toLowerCase())
+  const filteredDetections =
+    analysisResult?.detections.filter((detection) => {
+      const matchesSeverity =
+        filters.severity.length === 0 || filters.severity.includes(detection.severity)
+      const matchesCategory =
+        filters.category.length === 0 || filters.category.includes(detection.category)
+      const engine = detection.ruleId?.split('-')[0] || ''
+      const matchesEngine = filters.engine.length === 0 || filters.engine.includes(engine)
+      const matchesSearch =
+        filters.searchText === '' ||
+        detection.message.toLowerCase().includes(filters.searchText.toLowerCase()) ||
+        detection.filePath.toLowerCase().includes(filters.searchText.toLowerCase())
 
-    return matchesSeverity && matchesCategory && matchesEngine && matchesSearch
-  })
+      return matchesSeverity && matchesCategory && matchesEngine && matchesSearch
+    }) || []
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%)' }}>
-      {/* Header */}
-      <header
-        style={{
-          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-          padding: '2rem',
-          background: 'rgba(10, 10, 15, 0.8)',
-          backdropFilter: 'blur(10px)',
-        }}
-      >
-        <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div className="dash">
+      <header className="dash__header">
+        <div className="dash__header-inner">
           <div>
-            <h1
-              style={{
-                margin: 0,
-                fontSize: '2rem',
-                fontWeight: 700,
-                color: '#fff',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1rem',
-              }}
-            >
-              <span style={{ fontSize: '2.5rem' }}>🔩</span>
-              RIVET Dashboard
-            </h1>
-            <p style={{ margin: '0.5rem 0 0 0', color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.95rem' }}>
-              AI-Powered Code Quality Analysis
-            </p>
+            <h1 className="dash__title">Dashboard</h1>
+            <p className="dash__subtitle">Paste code or upload a file — get a riveted report.</p>
           </div>
           <button
+            type="button"
+            className="btn btn--ghost"
             onClick={() => setIsConfigModalOpen(true)}
             aria-label="Open configuration settings"
-            style={{
-              padding: '0.75rem 1.5rem',
-              borderRadius: '12px',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              background: 'rgba(255, 255, 255, 0.05)',
-              color: 'rgba(255, 255, 255, 0.9)',
-              cursor: 'pointer',
-              fontSize: '1rem',
-              fontWeight: 500,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              transition: 'all 0.2s ease',
-            }}
           >
-            <span aria-hidden="true">⚙️</span> Configuration
+            Configure
           </button>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main style={{ maxWidth: '1400px', margin: '0 auto', padding: '2rem' }}>
+      <main className="dash__body">
         {!analysisResult ? (
-          // Input Section
-          <div
-            style={{
-              background: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              borderRadius: '16px',
-              padding: '3rem',
-              backdropFilter: 'blur(10px)',
-            }}
-          >
-            <h2
-              style={{
-                margin: '0 0 1.5rem 0',
-                fontSize: '1.5rem',
-                fontWeight: 600,
-                color: '#fff',
-              }}
-            >
-              Analyze Your Code
-            </h2>
-
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label
-                htmlFor="code-input"
-                style={{
-                  display: 'block',
-                  marginBottom: '0.5rem',
-                  fontSize: '0.95rem',
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  fontWeight: 500,
-                }}
-              >
-                Paste JavaScript/TypeScript Code:
+          <div className="panel">
+            <div className="panel__header">
+              <h2 className="panel__title">Analyze</h2>
+            </div>
+            <div className="panel__body">
+              <label htmlFor="code-input" className="field-label">
+                JavaScript / TypeScript
               </label>
               <textarea
                 id="code-input"
                 name="code-input"
+                className="textarea"
                 value={codeInput}
                 onChange={(e) => setCodeInput(e.target.value)}
-                placeholder="// Paste your JavaScript/TypeScript code here..."
+                placeholder="// Paste code here…"
                 aria-label="Code input for analysis"
                 aria-describedby="code-input-description"
-                style={{
-                  width: '100%',
-                  minHeight: '300px',
-                  padding: '1rem',
-                  background: 'rgba(255, 255, 255, 0.02)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  borderRadius: '8px',
-                  color: '#fff',
-                  fontFamily: 'monospace',
-                  fontSize: '0.85rem',
-                  lineHeight: '1.5',
-                  resize: 'vertical',
-                  boxSizing: 'border-box',
-                }}
+                disabled={loading}
               />
-              <span id="code-input-description" style={{ position: 'absolute', left: '-9999px' }}>
-                Enter your JavaScript or TypeScript code here for security, performance, and quality analysis
+              <span id="code-input-description" className="sr-only">
+                Enter JavaScript or TypeScript for security, performance, and quality analysis
               </span>
-            </div>
 
-            {error && (
+              {error && (
+                <div className="alert alert--error" role="alert" style={{ marginTop: '1.5rem' }}>
+                  {error}
+                </div>
+              )}
+
+              {loading && (
+                <div className="analyze-progress" role="status" aria-live="polite">
+                  <div className="analyze-progress__label">
+                    <span>Analyzing</span>
+                    <span className="analyze-progress__stage">
+                      {ANALYZE_STAGES[stageIndex]} {Math.round(progress)}%
+                    </span>
+                  </div>
+                  <div className="analyze-progress__track">
+                    <div
+                      className="analyze-progress__bar"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+
               <div
                 style={{
+                  marginTop: '1.5rem',
                   marginBottom: '1.5rem',
-                  padding: '1rem',
-                  background: 'rgba(239, 68, 68, 0.1)',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
-                  borderRadius: '8px',
-                  color: '#fca5a5',
-                  fontSize: '0.9rem',
+                  paddingTop: '1.5rem',
+                  borderTop: '1px solid var(--border-subtle)',
                 }}
+                role="region"
+                aria-labelledby="file-upload-heading"
               >
-                ⚠️ {error}
+                <h3
+                  id="file-upload-heading"
+                  className="field-label"
+                  style={{ marginBottom: '0.75rem' }}
+                >
+                  Or upload a file
+                </h3>
+                <FileUpload onAnalyze={handleFileUpload} isAnalyzing={loading} />
               </div>
-            )}
 
-            <div
-              style={{ marginBottom: '2rem', paddingBottom: '1.5rem', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}
-              role="region"
-              aria-labelledby="file-upload-heading"
-            >
-              <h3
-                id="file-upload-heading"
-                style={{
-                  margin: '0 0 1rem 0',
-                  fontSize: '1rem',
-                  fontWeight: 600,
-                  color: 'rgba(255, 255, 255, 0.9)',
-                }}
+              <button
+                type="button"
+                className="btn btn--primary btn--lg"
+                onClick={handleAnalyze}
+                disabled={loading || !codeInput.trim()}
+                aria-label={loading ? 'Analysis in progress' : 'Start code analysis'}
+                aria-busy={loading}
               >
-                Or Upload Files:
-              </h3>
-              <FileUpload onAnalyze={handleFileUpload} isAnalyzing={loading} />
+                {loading ? 'Analyzing…' : 'Analyze code'}
+              </button>
             </div>
-
-            <button
-              onClick={handleAnalyze}
-              disabled={loading || !codeInput.trim()}
-              aria-label={loading ? 'Analysis in progress' : 'Start code analysis'}
-              aria-busy={loading}
-              style={{
-                padding: '1rem 2rem',
-                fontSize: '1rem',
-                fontWeight: 600,
-                background: loading || !codeInput.trim() ? 'rgba(139, 92, 246, 0.5)' : 'linear-gradient(135deg, #a78bfa 0%, #22d3ee 100%)',
-                color: loading || !codeInput.trim() ? 'rgba(0, 0, 0, 0.5)' : '#0a0a0f',
-                border: 'none',
-                borderRadius: '12px',
-                cursor: loading || !codeInput.trim() ? 'not-allowed' : 'pointer',
-                boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4)',
-                transition: 'all 0.2s ease',
-              }}
-            >
-              {loading ? <><span aria-hidden="true">🔄</span> Analyzing...</> : <><span aria-hidden="true">▶️</span> Analyze Code</>}
-            </button>
           </div>
         ) : (
-          // Results Section
           <div>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '2rem',
-              }}
-            >
+            <div className="dash__results-bar">
               <div>
-                <h2
-                  style={{
-                    margin: 0,
-                    fontSize: '1.5rem',
-                    fontWeight: 600,
-                    color: '#fff',
-                    marginBottom: '0.5rem',
-                  }}
-                >
-                  Analysis Results
+                <h2 className="dash__title" style={{ fontSize: '1.25rem' }}>
+                  Results
                 </h2>
-                <p style={{ margin: 0, color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.9rem' }}>
-                  {analysisResult.filesAnalyzed} file{analysisResult.filesAnalyzed !== 1 ? 's' : ''} analyzed •{' '}
-                  {analysisResult.duration}ms • {analysisResult.summary.total} issue
+                <p className="dash__subtitle">
+                  {analysisResult.filesAnalyzed} file
+                  {analysisResult.filesAnalyzed !== 1 ? 's' : ''} · {analysisResult.duration}ms ·{' '}
+                  {analysisResult.summary.total} issue
                   {analysisResult.summary.total !== 1 ? 's' : ''}
                 </p>
               </div>
-              <div style={{ display: 'flex', gap: '1rem' }}>
+              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
                 <ExportButton result={analysisResult} />
                 <button
+                  type="button"
+                  className="btn btn--ghost"
                   onClick={() => {
                     setAnalysisResult(null)
                     setCodeInput('')
                     setSelectedIssue(null)
                   }}
                   aria-label="Start a new code analysis"
-                  style={{
-                    padding: '0.75rem 1.5rem',
-                    fontSize: '0.9rem',
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    color: '#fff',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                  }}
                 >
-                  <span aria-hidden="true">←</span> New Analysis
+                  New analysis
                 </button>
               </div>
             </div>
 
-            {/* Summary Cards */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: '1rem',
-                marginBottom: '2rem',
-              }}
-            >
-              {Object.entries(analysisResult.summary.bySeverity).map(([severity, count]) => (
-                <div
-                  key={severity}
-                  style={{
-                    padding: '1.5rem',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '12px',
-                    textAlign: 'center',
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: '1.8rem',
-                      fontWeight: 700,
-                      background:
-                        severity === 'critical'
-                          ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
-                          : severity === 'high'
-                            ? 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)'
-                            : severity === 'medium'
-                              ? 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)'
-                              : 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text',
+            {analysisResult.summary.total === 0 ? (
+              <div className="panel">
+                <div className="empty-state--rich">
+                  <div className="empty-state__mark" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M20 6L9 17l-5-5"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </div>
+                  <h3>Looks solid</h3>
+                  <p>
+                    No issues in this snippet. Try a larger file, enable more engines in Configure,
+                    or scan a full project with the CLI.
+                  </p>
+                  <button
+                    type="button"
+                    className="btn btn--primary"
+                    onClick={() => {
+                      setAnalysisResult(null)
+                      setCodeInput('')
                     }}
                   >
-                    {count}
-                  </div>
-                  <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.85rem', marginTop: '0.5rem' }}>
-                    {severity.charAt(0).toUpperCase() + severity.slice(1)}
-                  </div>
+                    Analyze another file
+                  </button>
                 </div>
-              ))}
-            </div>
-
-            {/* Charts and List Container */}
-            <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '2rem', marginBottom: '2rem' }}>
-              {/* Tech Debt Chart */}
-              <TechDebtChart detections={filteredDetections || []} />
-
-              {/* Category Breakdown */}
-              <div
-                style={{
-                  padding: '1.5rem',
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: '12px',
-                }}
-              >
-                <h3 style={{ margin: '0 0 1rem 0', color: '#fff', fontSize: '1rem', fontWeight: 600 }}>
-                  By Category
-                </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  {Object.entries(analysisResult.summary.byCategory).map(([category, count]) => (
-                    <div
-                      key={category}
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        paddingBottom: '0.75rem',
-                        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                      }}
-                    >
-                      <span style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.9rem' }}>
-                        {category.charAt(0).toUpperCase() + category.slice(1)}
-                      </span>
-                      <span style={{ color: '#a78bfa', fontWeight: 600, fontSize: '0.9rem' }}>{count}</span>
+              </div>
+            ) : (
+              <>
+                <div className="severity-grid">
+                  {Object.entries(analysisResult.summary.bySeverity).map(([severity, count]) => (
+                    <div key={severity} className="severity-cell">
+                      <div className={`severity-cell__count severity-cell__count--${severity}`}>
+                        {count}
+                      </div>
+                      <div className="severity-cell__label">{severity}</div>
                     </div>
                   ))}
                 </div>
-              </div>
-            </div>
 
-            {/* Filters */}
-            <FilterControls filters={filters} setFilters={setFilters} />
+                <div className="dash-grid dash-grid--metrics">
+                  <TechDebtChart detections={filteredDetections} />
 
-            {/* Issues Display */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: '2rem' }}>
-              <IssueList
-                detections={filteredDetections || []}
-                selectedIssue={selectedIssue}
-                onSelectIssue={setSelectedIssue}
-              />
-              {selectedIssue && <IssueDetail issue={selectedIssue} />}
-            </div>
+                  <div className="panel">
+                    <div className="panel__header">
+                      <h3 className="panel__title">By category</h3>
+                    </div>
+                    <div className="panel__body">
+                      <div className="metric-list">
+                        {Object.entries(analysisResult.summary.byCategory).map(
+                          ([category, count]) => (
+                            <div key={category} className="metric-row">
+                              <span className="metric-row__label">{category}</span>
+                              <span className="metric-row__value">{count}</span>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <FilterControls filters={filters} setFilters={setFilters} />
+
+                <div className="dash-grid dash-grid--issues">
+                  <IssueList
+                    detections={filteredDetections}
+                    selectedIssue={selectedIssue}
+                    onSelectIssue={setSelectedIssue}
+                  />
+                  {selectedIssue ? (
+                    <IssueDetail issue={selectedIssue} />
+                  ) : (
+                    <div className="panel">
+                      <div className="empty-state--rich" style={{ padding: '3rem 1.5rem' }}>
+                        <h3 style={{ fontSize: '1rem' }}>Select an issue</h3>
+                        <p style={{ marginBottom: 0 }}>
+                          Use ↑ ↓ in the list, or click a row to see explanation and remediation.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         )}
       </main>
 
-      {/* Configuration Modal */}
       <ConfigurationModal
         isOpen={isConfigModalOpen}
         config={config}

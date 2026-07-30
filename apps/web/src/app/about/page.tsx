@@ -1,52 +1,62 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'About RIVET - AI-Powered Code Quality Platform',
-  description: 'Learn about RIVET, the AI-powered code quality platform that helps developers find and fix security vulnerabilities, bugs, and code smells.',
+  title: 'About — RIVET',
+  description:
+    'RIVET is a professional code quality platform that finds issues and teaches developers how to fix them.',
 }
 
 export default function AboutPage(): React.ReactElement {
   return (
-    <main style={{ maxWidth: '800px', margin: '0 auto', padding: '4rem 2rem', color: 'white' }}>
-      <h1 style={{ fontSize: '2.5rem', marginBottom: '2rem', background: 'linear-gradient(135deg, #a78bfa 0%, #60a5fa 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-        About RIVET
-      </h1>
+    <main className="prose-page">
+      <h1>About RIVET</h1>
 
-      <section style={{ marginBottom: '3rem' }}>
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#a78bfa' }}>Our Mission</h2>
-        <p style={{ lineHeight: 1.8, color: 'rgba(255,255,255,0.8)' }}>
-          RIVET is an AI-powered code quality platform designed to help development teams identify
-          and fix issues before they reach production. We combine static analysis with machine learning
-          to provide actionable insights that improve code quality, security, and maintainability.
-        </p>
-      </section>
-
-      <section style={{ marginBottom: '3rem' }}>
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#a78bfa' }}>What We Detect</h2>
-        <ul style={{ lineHeight: 2, color: 'rgba(255,255,255,0.8)', paddingLeft: '1.5rem' }}>
-          <li><strong>Security Vulnerabilities</strong> - SQL injection, XSS, hardcoded secrets, and more</li>
-          <li><strong>Bugs & Logic Errors</strong> - Null pointer issues, race conditions, memory leaks</li>
-          <li><strong>Code Smells</strong> - God objects, long methods, complex conditionals</li>
-          <li><strong>Performance Issues</strong> - N+1 queries, inefficient algorithms, memory bloat</li>
-          <li><strong>Architecture Problems</strong> - Circular dependencies, layer violations</li>
-          <li><strong>Best Practice Violations</strong> - Coding standards, naming conventions</li>
-        </ul>
-      </section>
-
-      <section style={{ marginBottom: '3rem' }}>
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#a78bfa' }}>Technology</h2>
-        <p style={{ lineHeight: 1.8, color: 'rgba(255,255,255,0.8)' }}>
-          Built with TypeScript and powered by advanced AST analysis, RIVET uses a modular engine
-          architecture that makes it easy to extend and customize. Our AI enhancement layer provides
-          contextual explanations and fix suggestions powered by large language models.
+      <section>
+        <h2>Mission</h2>
+        <p>
+          RIVET helps development teams find and fix issues before they reach production. We combine
+          static analysis with AI explanations so findings are not just flags — they are teachable
+          moments.
         </p>
       </section>
 
       <section>
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#a78bfa' }}>Open Source</h2>
-        <p style={{ lineHeight: 1.8, color: 'rgba(255,255,255,0.8)' }}>
-          RIVET is open source and available on GitHub. We believe in transparency and community-driven
-          development. Contributions are welcome!
+        <h2>What we detect</h2>
+        <ul>
+          <li>
+            <strong>Security</strong> — injection, XSS, secrets, weak crypto
+          </li>
+          <li>
+            <strong>Bugs</strong> — null refs, race conditions, async mistakes
+          </li>
+          <li>
+            <strong>Code smells</strong> — god objects, long methods, deep nesting
+          </li>
+          <li>
+            <strong>Performance</strong> — complexity hotspots, blocking work, re-render waste
+          </li>
+          <li>
+            <strong>Architecture</strong> — cycles, coupling, layer violations
+          </li>
+          <li>
+            <strong>Practices</strong> — naming, docs, framework conventions
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Technology</h2>
+        <p>
+          Built in TypeScript with a modular engine architecture. AST analysis runs in parallel;
+          an optional AI layer adds context, analogies, and tech-debt estimates.
+        </p>
+      </section>
+
+      <section>
+        <h2>Open source</h2>
+        <p>
+          RIVET is open source on GitHub. Contributions are welcome — star the repo, open an issue,
+          or ship a PR.
         </p>
       </section>
     </main>

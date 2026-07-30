@@ -13,7 +13,16 @@ interface FilterControlsProps {
 }
 
 const SEVERITIES = ['critical', 'high', 'medium', 'low', 'info']
-const CATEGORIES = ['smells', 'bugs', 'security', 'performance', 'architecture', 'practices', 'dependencies', 'flows']
+const CATEGORIES = [
+  'smells',
+  'bugs',
+  'security',
+  'performance',
+  'architecture',
+  'practices',
+  'dependencies',
+  'flows',
+]
 
 export default function FilterControls({ filters, setFilters }: FilterControlsProps) {
   const toggleSeverity = (severity: string) => {
@@ -35,96 +44,61 @@ export default function FilterControls({ filters, setFilters }: FilterControlsPr
   }
 
   return (
-    <div
-      style={{
-        background: 'rgba(255, 255, 255, 0.05)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
-        borderRadius: '12px',
-        padding: '1.5rem',
-        marginBottom: '2rem',
-      }}
-    >
-      {/* Search */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <label style={{ display: 'block', color: 'rgba(255, 255, 255, 0.9)', fontSize: '0.9rem', marginBottom: '0.5rem', fontWeight: 500 }}>
-          Search
-        </label>
-        <input
-          type="text"
-          placeholder="Search by message or file..."
-          value={filters.searchText}
-          onChange={(e) => setFilters({ ...filters, searchText: e.target.value })}
-          style={{
-            width: '100%',
-            padding: '0.75rem 1rem',
-            background: 'rgba(255, 255, 255, 0.05)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
-            borderRadius: '8px',
-            color: '#fff',
-            fontSize: '0.9rem',
-            boxSizing: 'border-box',
-          }}
-        />
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-        {/* Severity Filter */}
-        <div>
-          <h4 style={{ margin: '0 0 0.75rem 0', color: 'rgba(255, 255, 255, 0.9)', fontSize: '0.9rem', fontWeight: 600 }}>
-            Severity
-          </h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            {SEVERITIES.map((severity) => (
-              <label
-                key={severity}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  color: 'rgba(255, 255, 255, 0.7)',
-                  fontSize: '0.9rem',
-                  cursor: 'pointer',
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={filters.severity.includes(severity)}
-                  onChange={() => toggleSeverity(severity)}
-                  style={{ cursor: 'pointer' }}
-                />
-                <span style={{ textTransform: 'capitalize' }}>{severity}</span>
-              </label>
-            ))}
-          </div>
+    <div className="panel" style={{ marginBottom: '2rem' }}>
+      <div className="panel__body">
+        <div style={{ marginBottom: '1.25rem' }}>
+          <label htmlFor="issue-search" className="field-label">
+            Search
+          </label>
+          <input
+            id="issue-search"
+            type="text"
+            className="input"
+            placeholder="Filter by message or file…"
+            value={filters.searchText}
+            onChange={(e) => setFilters({ ...filters, searchText: e.target.value })}
+          />
         </div>
 
-        {/* Category Filter */}
-        <div>
-          <h4 style={{ margin: '0 0 0.75rem 0', color: 'rgba(255, 255, 255, 0.9)', fontSize: '0.9rem', fontWeight: 600 }}>
-            Category
-          </h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            {CATEGORIES.map((category) => (
-              <label
-                key={category}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  color: 'rgba(255, 255, 255, 0.7)',
-                  fontSize: '0.9rem',
-                  cursor: 'pointer',
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={filters.category.includes(category)}
-                  onChange={() => toggleCategory(category)}
-                  style={{ cursor: 'pointer' }}
-                />
-                <span style={{ textTransform: 'capitalize' }}>{category}</span>
-              </label>
-            ))}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: '1.5rem',
+          }}
+        >
+          <div>
+            <h4 className="field-label">Severity</h4>
+            <div className="filter-chip-row">
+              {SEVERITIES.map((severity) => (
+                <button
+                  type="button"
+                  key={severity}
+                  className={`filter-chip${filters.severity.includes(severity) ? ' filter-chip--active' : ''}`}
+                  onClick={() => toggleSeverity(severity)}
+                  aria-pressed={filters.severity.includes(severity)}
+                >
+                  {severity}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h4 className="field-label">Category</h4>
+            <div className="filter-chip-row">
+              {CATEGORIES.map((category) => (
+                <button
+                  type="button"
+                  key={category}
+                  className={`filter-chip${filters.category.includes(category) ? ' filter-chip--active' : ''}`}
+                  onClick={() => toggleCategory(category)}
+                  aria-pressed={filters.category.includes(category)}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>

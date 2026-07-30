@@ -232,9 +232,9 @@ export class HTMLFormatter implements OutputFormatter {
     }
     
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #333;
+      font-family: "IBM Plex Sans", system-ui, sans-serif;
+      background: #141210;
+      color: #f5f0e8;
       line-height: 1.6;
       padding: 2rem;
       min-height: 100vh;
@@ -243,17 +243,18 @@ export class HTMLFormatter implements OutputFormatter {
     .container {
       max-width: 1200px;
       margin: 0 auto;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      background: #1a1814;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 6px;
       overflow: hidden;
     }
     
     .header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 3rem 2rem;
-      text-align: center;
+      background: #1a1814;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      color: #f5f0e8;
+      padding: 2.5rem 2rem;
+      text-align: left;
     }
     
     .header h1 {
@@ -270,31 +271,32 @@ export class HTMLFormatter implements OutputFormatter {
     .summary {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1.5rem;
-      padding: 2rem;
-      background: #f8f9fa;
-      border-bottom: 1px solid #e0e0e0;
+      gap: 1px;
+      padding: 0;
+      background: rgba(255,255,255,0.08);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
     }
     
     .summary-card {
-      background: white;
+      background: #1a1814;
       padding: 1.5rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      text-align: center;
+      text-align: left;
     }
     
     .summary-card .value {
-      font-size: 2.5rem;
-      font-weight: 700;
+      font-size: 2rem;
+      font-weight: 600;
       margin-bottom: 0.5rem;
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      color: #f59e0b;
     }
     
     .summary-card .label {
-      color: #666;
-      font-size: 0.9rem;
+      color: #9a9080;
+      font-size: 0.7rem;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.06em;
+      font-family: "JetBrains Mono", ui-monospace, monospace;
     }
     
     .severity-critical { color: #dc3545; }
@@ -392,7 +394,7 @@ export class HTMLFormatter implements OutputFormatter {
       background: #f8f9fa;
       padding: 1rem;
       border-radius: 4px;
-      border-left: 4px solid #667eea;
+      border-left: 4px solid #f59e0b;
       margin-bottom: 1rem;
       font-family: 'Courier New', monospace;
       font-size: 0.9rem;
@@ -462,9 +464,9 @@ export class HTMLFormatter implements OutputFormatter {
     
     .filter-btn {
       padding: 0.5rem 1rem;
-      border: 2px solid #667eea;
+      border: 2px solid #f59e0b;
       background: white;
-      color: #667eea;
+      color: #f59e0b;
       border-radius: 4px;
       cursor: pointer;
       font-weight: 600;
@@ -472,12 +474,12 @@ export class HTMLFormatter implements OutputFormatter {
     }
     
     .filter-btn:hover {
-      background: #667eea;
+      background: #f59e0b;
       color: white;
     }
     
     .filter-btn.active {
-      background: #667eea;
+      background: #f59e0b;
       color: white;
     }
     

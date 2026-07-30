@@ -11,13 +11,14 @@
 
 RIVET is a comprehensive code quality and security platform that not only detects issues but explains WHY they matter and HOW to fix them. Unlike traditional linters, RIVET combines multiple analysis engines with AI-powered explanations to help developers write better, safer, more maintainable code.
 
-> 🎯 **Phase 1 MVP Progress: 75%** - 7/8 engines complete, AI layer operational, CLI integration next. [See Status →](./STATUS_CURRENT.md) | [Roadmap →](./docs/ROADMAP.md)
+> **Phase 1 MVP Progress: ~90%** — 8 engines, AI layer, and CLI `--ai` / `--tech-debt` shipping. [Roadmap →](./docs/ROADMAP.md)
 
-### 🚀 Current Status
-- ✅ **7 Analysis Engines** (smells, bugs, security, performance, architecture, practices, dependencies)
+### Current Status
+- ✅ **8 Analysis Engines** (smells, bugs, security, performance, architecture, practices, dependencies, flows)
 - ✅ **AI Enhancement Layer** (GPT-4 explanations + tech debt metrics)
-- 🔄 **Flow Testing Engine** (structure created, detection logic pending)
-- ⏳ **CLI Integration** (AI features ready, --ai flag pending)
+- ✅ **CLI Integration** (`rivet scan --ai --tech-debt`, JSON / SARIF / HTML)
+- 🔄 **Web Dashboard** (amber forge redesign live; auth & history next)
+- ⏳ **Flow engine depth** (Next.js App Router + router-config detection in progress)
 
 ## ✨ AI-Powered Code Quality
 
@@ -56,7 +57,7 @@ Total Technical Debt: 18.5 hours (2.3 days)
 - **⏱️  Tech Debt Metrics** - Time-based estimates (Critical=4h, High=2h, Medium=1h) aggregated by category
 - **🔧 Automatic Fixes** - Safe auto-fixes and intelligent refactoring suggestions
 - **📦 Smart Dependencies** - Detect outdated packages, vulnerabilities, unused deps
-- **🎨 Professional Design** - Terminal-inspired aesthetic (no purple gradients!)
+- **🎨 Professional Design** - Terminal-inspired forge aesthetic (charcoal + amber, no purple gradients!)
 - **📊 Comprehensive Reporting** - JSON, SARIF, HTML output formats
 
 ---
@@ -123,9 +124,10 @@ pnpm --filter @rivet/cli dev scan --tech-debt /path/to/project
    - License compliance checks
 
 8. **Flow Testing Engine** (`@rivet/engines/flows`) - Critical path detection
-   - Untested user journeys
-   - Code coverage gaps
-   - Test skeleton generation
+   - Untested React Router / Next.js App Router routes
+   - Critical path gaps (async/fetch without error handling)
+   - Missing error boundaries
+   - Untested state transitions (useState / useReducer / Redux)
 
 ### 🤖 AI Enhancement Layer
 
@@ -315,10 +317,10 @@ See [docs/TECH_STACK.md](./docs/TECH_STACK.md) for complete details.
 
 **Professional. Terminal-inspired. No AI clichés.**
 
-- **Colors**: Charcoal background, Amber accents (NO PURPLE!)
-- **Fonts**: Monospace (JetBrains Mono) for code, Sans-serif (Inter) for UI
-- **Style**: Minimalist, data-dense, developer-focused
-- **Inspiration**: Linear, Vercel, Stripe, GitHub CLI
+**Colors**: Charcoal background, Amber accents (NO PURPLE)  
+**Fonts**: JetBrains Mono for code, IBM Plex Sans for UI  
+**Style**: Minimalist, data-dense, developer-focused  
+**Inspiration**: Linear, Vercel, Stripe, GitHub CLI
 
 See [docs/DESIGN.md](./docs/DESIGN.md) for design guidelines.
 

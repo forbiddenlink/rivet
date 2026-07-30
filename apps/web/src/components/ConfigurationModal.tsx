@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 interface AnalysisConfig {
   engines: {
@@ -24,25 +24,47 @@ interface ConfigurationModalProps {
   onClose: () => void
 }
 
-export function ConfigurationModal({ isOpen, config, onConfigChange, onClose }: ConfigurationModalProps) {
+const ENGINE_LABELS: Array<{ key: keyof AnalysisConfig['engines']; label: string }> = [
+  { key: 'security', label: 'Security' },
+  { key: 'performance', label: 'Performance' },
+  { key: 'bugs', label: 'Bugs' },
+  { key: 'smells', label: 'Code smells' },
+  { key: 'architecture', label: 'Architecture' },
+  { key: 'practices', label: 'Practices' },
+  { key: 'dependencies', label: 'Dependencies' },
+  { key: 'flows', label: 'Flows' },
+]
+
+export function ConfigurationModal({
+  isOpen,
+  config,
+  onConfigChange,
+  onClose,
+}: ConfigurationModalProps) {
   const [localConfig, setLocalConfig] = useState<AnalysisConfig>(config)
 
-  const handleEngineToggle = (engine: keyof AnalysisConfig['engines']) => {
-    setLocalConfig({
-      ...localConfig,
-      engines: {
-        ...localConfig.engines,
-        [engine]: !localConfig.engines[engine],
-      },
-    })
-  }
+  useEffect(() => {
+    if (isOpen) setLocalConfig(config)
+  }, [isOpen, config])
 
-  const handleSeverityChange = (severity: AnalysisConfig['minSeverity']) => {
-    setLocalConfig({
-      ...localConfig,
-      minSeverity: severity,
-    })
-  }
+  useEffect(() => {
+    if (!isOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [isOpen, onClose])
+
+  if (!isOpen) return null
+
+  const severityLevels: AnalysisConfig['minSeverity'][] = [
+    'critical',
+    'high',
+    'medium',
+    'low',
+    'info',
+  ]
 
   const handleSave = () => {
     onConfigChange(localConfig)
@@ -51,7 +73,7 @@ export function ConfigurationModal({ isOpen, config, onConfigChange, onClose }: 
   }
 
   const handleReset = () => {
-    const defaultConfig: AnalysisConfig = {
+    setLocalConfig({
       engines: {
         security: true,
         performance: true,
@@ -63,214 +85,111 @@ export function ConfigurationModal({ isOpen, config, onConfigChange, onClose }: 
         flows: true,
       },
       minSeverity: 'info',
-      categories: ['security', 'performance', 'bugs', 'smells', 'architecture', 'practices', 'dependencies', 'flows'],
-    }
-    setLocalConfig(defaultConfig)
+      categories: [
+        'security',
+        'performance',
+        'bugs',
+        'smells',
+        'architecture',
+        'practices',
+        'dependencies',
+        'flows',
+      ],
+    })
   }
-
-  if (!isOpen) return null
-
-  const severityLevels: AnalysisConfig['minSeverity'][] = ['critical', 'high', 'medium', 'low', 'info']
-  const enginesList: Array<{ key: keyof AnalysisConfig['engines']; label: string; icon: string }> = [
-    { key: 'security', label: 'Security', icon: '🔒' },
-    { key: 'performance', label: 'Performance', icon: '⚡' },
-    { key: 'bugs', label: 'Bugs', icon: '🐛' },
-    { key: 'smells', label: 'Code Smells', icon: '👃' },
-    { key: 'architecture', label: 'Architecture', icon: '🏗️' },
-    { key: 'practices', label: 'Practices', icon: '✓' },
-    { key: 'dependencies', label: 'Dependencies', icon: '📦' },
-    { key: 'flows', label: 'Flows', icon: '🔀' },
-  ]
 
   return (
     <>
-      {/* Backdrop */}
+      <div className="modal-backdrop" onClick={onClose} aria-hidden="true" />
       <div
-        onClick={onClose}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.7)',
-          zIndex: 40,
-        }}
-      />
-
-      {/* Modal */}
-      <div
-        style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          background: 'rgba(26, 26, 46, 0.95)',
-          border: '1px solid rgba(255, 255, 255, 0.15)',
-          borderRadius: '16px',
-          padding: '2rem',
-          maxWidth: '600px',
-          width: '90%',
-          maxHeight: '80vh',
-          overflowY: 'auto',
-          zIndex: 50,
-          backdropFilter: 'blur(10px)',
-        }}
+        className="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="config-modal-title"
       >
-        <h2 style={{ margin: '0 0 1.5rem 0', color: '#fff', fontSize: '1.5rem', fontWeight: 700 }}>
-          ⚙️ Analysis Configuration
-        </h2>
+        <div className="modal__header">
+          <h2 id="config-modal-title" className="modal__title">
+            Configuration
+          </h2>
+          <button type="button" className="btn btn--ghost btn--sm" onClick={onClose}>
+            Close
+          </button>
+        </div>
 
-        {/* Minimum Severity Section */}
-        <div style={{ marginBottom: '2rem' }}>
-          <h3 style={{ margin: '0 0 1rem 0', color: 'rgba(255, 255, 255, 0.9)', fontSize: '1rem', fontWeight: 600 }}>
-            Minimum Severity Level
-          </h3>
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            {severityLevels.map((level) => (
-              <button
-                key={level}
-                onClick={() => handleSeverityChange(level)}
-                style={{
-                  padding: '0.5rem 1rem',
-                  borderRadius: '6px',
-                  border: localConfig.minSeverity === level ? '2px solid #22d3ee' : '1px solid rgba(255, 255, 255, 0.2)',
-                  background:
-                    localConfig.minSeverity === level
-                      ? 'rgba(34, 211, 238, 0.2)'
-                      : 'rgba(255, 255, 255, 0.05)',
-                  color: '#fff',
-                  fontSize: '0.85rem',
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                  textTransform: 'capitalize',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                {level}
-              </button>
+        <div className="modal__body">
+          <div style={{ marginBottom: '1.75rem' }}>
+            <h3 className="field-label">Minimum severity</h3>
+            <div className="filter-chip-row">
+              {severityLevels.map((level) => (
+                <button
+                  type="button"
+                  key={level}
+                  className={`filter-chip${localConfig.minSeverity === level ? ' filter-chip--active' : ''}`}
+                  onClick={() => setLocalConfig({ ...localConfig, minSeverity: level })}
+                  aria-pressed={localConfig.minSeverity === level}
+                >
+                  {level}
+                </button>
+              ))}
+            </div>
+            <p
+              style={{
+                margin: '0.75rem 0 0',
+                fontSize: 'var(--text-xs)',
+                color: 'var(--text-muted)',
+              }}
+            >
+              Only surface issues at this severity or higher.
+            </p>
+          </div>
+
+          <div style={{ marginBottom: '1.25rem' }}>
+            <h3 className="field-label">Engines</h3>
+            {ENGINE_LABELS.map(({ key, label }) => (
+              <div key={key} className="engine-toggle">
+                <span>{label}</span>
+                <button
+                  type="button"
+                  className={`filter-chip${localConfig.engines[key] ? ' filter-chip--active' : ''}`}
+                  onClick={() =>
+                    setLocalConfig({
+                      ...localConfig,
+                      engines: {
+                        ...localConfig.engines,
+                        [key]: !localConfig.engines[key],
+                      },
+                    })
+                  }
+                  aria-pressed={localConfig.engines[key]}
+                >
+                  {localConfig.engines[key] ? 'On' : 'Off'}
+                </button>
+              </div>
             ))}
           </div>
-          <p style={{ margin: '0.75rem 0 0 0', color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.85rem' }}>
-            Only show issues with this severity or higher
+
+          <p
+            style={{
+              margin: 0,
+              fontSize: 'var(--text-xs)',
+              fontFamily: 'var(--font-mono)',
+              color: 'var(--text-muted)',
+            }}
+          >
+            {Object.values(localConfig.engines).filter(Boolean).length}/8 engines · min{' '}
+            {localConfig.minSeverity}
           </p>
         </div>
 
-        {/* Analysis Engines Section */}
-        <div style={{ marginBottom: '2rem' }}>
-          <h3 style={{ margin: '0 0 1rem 0', color: 'rgba(255, 255, 255, 0.9)', fontSize: '1rem', fontWeight: 600 }}>
-            Analysis Engines
-          </h3>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-              gap: '1rem',
-            }}
-          >
-            {enginesList.map(({ key, label, icon }) => (
-              <button
-                key={key}
-                onClick={() => handleEngineToggle(key)}
-                style={{
-                  padding: '1rem',
-                  borderRadius: '12px',
-                  border: localConfig.engines[key] ? '2px solid #22d3ee' : '1px solid rgba(255, 255, 255, 0.2)',
-                  background: localConfig.engines[key] ? 'rgba(34, 211, 238, 0.1)' : 'rgba(255, 255, 255, 0.05)',
-                  color: '#fff',
-                  cursor: 'pointer',
-                  textAlign: 'center',
-                  transition: 'all 0.2s ease',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  fontSize: '0.9rem',
-                }}
-              >
-                <span style={{ fontSize: '1.5rem' }}>{icon}</span>
-                <span style={{ fontWeight: 500 }}>{label}</span>
-                <span
-                  style={{
-                    fontSize: '0.7rem',
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  {localConfig.engines[key] ? 'ON' : 'OFF'}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Summary */}
-        <div
-          style={{
-            padding: '1rem',
-            background: 'rgba(139, 92, 246, 0.1)',
-            border: '1px solid rgba(139, 92, 246, 0.2)',
-            borderRadius: '8px',
-            marginBottom: '1.5rem',
-            fontSize: '0.85rem',
-            color: 'rgba(255, 255, 255, 0.8)',
-          }}
-        >
-          <strong>Active Engines:</strong> {Object.values(localConfig.engines).filter(Boolean).length}/8
-          <br />
-          <strong>Minimum Severity:</strong> {localConfig.minSeverity}
-        </div>
-
-        {/* Buttons */}
-        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-          <button
-            onClick={handleReset}
-            style={{
-              padding: '0.75rem 1.5rem',
-              borderRadius: '8px',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              background: 'rgba(255, 255, 255, 0.05)',
-              color: 'rgba(255, 255, 255, 0.8)',
-              cursor: 'pointer',
-              fontSize: '0.9rem',
-              fontWeight: 500,
-              transition: 'all 0.2s ease',
-            }}
-          >
-            Reset to Defaults
+        <div className="modal__footer">
+          <button type="button" className="btn btn--ghost" onClick={handleReset}>
+            Reset
           </button>
-          <button
-            onClick={onClose}
-            style={{
-              padding: '0.75rem 1.5rem',
-              borderRadius: '8px',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              background: 'rgba(255, 255, 255, 0.05)',
-              color: 'rgba(255, 255, 255, 0.8)',
-              cursor: 'pointer',
-              fontSize: '0.9rem',
-              fontWeight: 500,
-              transition: 'all 0.2s ease',
-            }}
-          >
+          <button type="button" className="btn btn--ghost" onClick={onClose}>
             Cancel
           </button>
-          <button
-            onClick={handleSave}
-            style={{
-              padding: '0.75rem 1.5rem',
-              borderRadius: '8px',
-              border: 'none',
-              background: 'linear-gradient(135deg, #a78bfa 0%, #22d3ee 100%)',
-              color: '#0a0a0f',
-              cursor: 'pointer',
-              fontSize: '0.9rem',
-              fontWeight: 600,
-              transition: 'all 0.2s ease',
-              boxShadow: '0 4px 12px rgba(139, 92, 246, 0.4)',
-            }}
-          >
-            ✓ Save Configuration
+          <button type="button" className="btn btn--primary" onClick={handleSave}>
+            Save
           </button>
         </div>
       </div>

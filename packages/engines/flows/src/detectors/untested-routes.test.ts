@@ -76,18 +76,33 @@ describe('Untested Routes Detector', () => {
     expect(detections).toEqual([])
   })
 
-  it('should include helpful metadata', () => {
+  it('should detect Next.js App Router page files', () => {
     const code = `
-      function AppRoutes() {
-        return <Route path="/users/:id" element={<UserProfile />} />
+      export default function CheckoutPage() {
+        return <div>Checkout</div>
       }
     `
 
-    const detections = detectUntestedRoutes(createContext(code))
+    const detections = detectUntestedRoutes(
+      createContext(code, '/project/src/app/checkout/page.tsx')
+    )
 
-    if (detections.length > 0) {
-      expect(detections[0]?.metadata?.pattern).toBe('untested-route')
-      expect(detections[0]?.metadata?.recommendation).toContain('test')
-    }
+    expect(detections.length).toBeGreaterThan(0)
+    expect(detections[0]?.metadata?.framework).toBe('next-app-router')
+    expect(detections[0]?.message).toContain('/checkout')
+  })
+
+  it('should detect createBrowserRouter path configs', () => {
+    const code = `
+      const router = createBrowserRouter([
+        { path: '/dashboard', element: <Dashboard /> },
+        { path: '/settings', element: <Settings /> },
+      ])
+    `
+
+    const detections = detectUntestedRoutes(createContext(code, 'router.tsx'))
+
+    expect(detections.length).toBeGreaterThanOrEqual(1)
+    expect(detections.some((d) => d.message.includes('/dashboard'))).toBe(true)
   })
 })

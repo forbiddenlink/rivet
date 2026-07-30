@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useRef, useState } from 'react'
 
 interface FileUploadProps {
   onAnalyze: (content: string, fileName: string) => void
@@ -15,7 +15,12 @@ export function FileUpload({ onAnalyze, isAnalyzing }: FileUploadProps) {
     for (let i = 0; i < files.length; i++) {
       const file = files.item(i)
       if (!file) continue
-      if (file.name.endsWith('.ts') || file.name.endsWith('.tsx') || file.name.endsWith('.js') || file.name.endsWith('.jsx')) {
+      if (
+        file.name.endsWith('.ts') ||
+        file.name.endsWith('.tsx') ||
+        file.name.endsWith('.js') ||
+        file.name.endsWith('.jsx')
+      ) {
         const content = await file.text()
         onAnalyze(content, file.name)
       }
@@ -46,7 +51,7 @@ export function FileUpload({ onAnalyze, isAnalyzing }: FileUploadProps) {
   }
 
   return (
-    <div className="w-full">
+    <div>
       <label htmlFor="file-upload" className="sr-only">
         Upload JavaScript or TypeScript files for analysis
       </label>
@@ -55,7 +60,7 @@ export function FileUpload({ onAnalyze, isAnalyzing }: FileUploadProps) {
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
-        onClick={() => fileInputRef.current?.click()}
+        onClick={() => !isAnalyzing && fileInputRef.current?.click()}
         role="button"
         tabIndex={0}
         onKeyDown={(e) => {
@@ -65,9 +70,8 @@ export function FileUpload({ onAnalyze, isAnalyzing }: FileUploadProps) {
           }
         }}
         aria-label="Drop zone for file upload. Click or drag files here."
-        className={`relative rounded-lg border-2 border-dashed p-8 text-center cursor-pointer transition-colors ${
-          dragActive ? 'border-cyan-400 bg-cyan-400/10' : 'border-purple-500/30 bg-purple-500/5 hover:border-purple-500/50'
-        } ${isAnalyzing ? 'opacity-50 cursor-not-allowed' : ''}`}
+        className={`dropzone${dragActive ? ' dropzone--active' : ''}`}
+        style={isAnalyzing ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
       >
         <input
           ref={fileInputRef}
@@ -80,19 +84,12 @@ export function FileUpload({ onAnalyze, isAnalyzing }: FileUploadProps) {
           disabled={isAnalyzing}
           aria-label="Select JavaScript or TypeScript files to analyze"
           aria-describedby="file-upload-description"
-          className="hidden"
+          className="sr-only"
         />
-        <div className="space-y-2">
-          <div className="text-sm font-medium text-purple-300">
-            <span aria-hidden="true">📁</span> Drag & drop files or click to upload
-          </div>
-          <div id="file-upload-description" className="text-xs text-purple-400">
-            Supported: .ts, .tsx, .js, .jsx
-          </div>
-        </div>
-      </div>
-      <div className="mt-4 text-xs text-purple-400" aria-hidden="true">
-        <span aria-hidden="true">💡</span> Tip: Upload your TypeScript/JavaScript files for instant analysis
+        <p className="dropzone__title">Drop files or click to browse</p>
+        <p id="file-upload-description" className="dropzone__hint">
+          .ts · .tsx · .js · .jsx
+        </p>
       </div>
     </div>
   )

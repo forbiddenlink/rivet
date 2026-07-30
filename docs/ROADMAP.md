@@ -114,37 +114,37 @@ Build the most comprehensive, developer-friendly code quality platform that not 
 
 ---
 
-#### Week 8: Flow Testing Engine 🔄 IN PROGRESS
+#### Week 8: Flow Testing Engine ✅ COMPLETED
 - [x] Basic flow detection framework
 - [x] Engine structure created
-- [ ] Route detection (React Router, Next.js) - TODO
-- [ ] User flow mapping - TODO
-- [ ] Test coverage analysis - TODO
-- [ ] Critical path identification - TODO
-- [ ] Playwright test generation - TODO
-- [ ] State machine validation - TODO
+- [x] Route detection (React Router, Next.js App Router, router config)
+- [x] Critical path gaps (async/fetch without error handling)
+- [x] Missing error boundaries
+- [x] Untested state transitions (useState / useReducer / Redux)
+- [ ] Playwright test generation - deferred
+- [ ] Full user-flow mapping - deferred
 
 **Deliverables:**
-- ⏳ Detects untested critical flows
-- ⏳ Generates test skeletons
+- ✅ Detects untested routes and critical path gaps
+- ⏳ Generates test skeletons (future)
 
 ---
 
-#### Week 9-10: CLI Polish & Documentation ⏳ NEXT
+#### Week 9-10: CLI Polish & Documentation ✅ MOSTLY COMPLETE
 **Week 9: CLI Integration & Output**
-- [ ] Integrate @rivet/ai into CLI
+- [x] Integrate @rivet/ai into CLI
   - --ai flag for explanations
   - --tech-debt flag for metrics
   - OPENAI_API_KEY environment variable
-- [ ] Configuration system (rivet.config.js)
-- [ ] Output formatters:
+- [ ] Configuration system (rivet.config.js) - partial (.rivetrc.json exists)
+- [x] Output formatters:
   - JSON (--format json)
   - SARIF (--format sarif)
   - HTML (--format html)
-- [ ] Formatter enhancements:
-  - Display AI explanations with emoji
+- [x] Formatter enhancements:
+  - Display AI explanations
   - Tech debt summary section
-  - Color-coded severity levels
+  - Color-coded severity (forge amber CLI theme)
 
 **Week 10: Documentation & Polish**
 - [ ] Complete API documentation
