@@ -19,14 +19,14 @@
     "@rivet/engine-security": "workspace:*",
     "@rivet/engine-smells": "workspace:*",
     "@rivet/parsers": "workspace:*",
-    "next": "^16.2.11",
+    "next": "^16.2.12",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.0.2",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
     "typescript": "^6.0.3"
   }
 }
