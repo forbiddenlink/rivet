@@ -23,13 +23,13 @@
   },
   "dependencies": {
     "@langchain/core": "^0.3.29",
-    "@langchain/openai": "^1.5.7",
+    "@langchain/openai": "^1.5.10",
     "@rivet/core": "workspace:*",
-    "langchain": "^1.5.8"
+    "langchain": "^1.5.10"
   },
   "devDependencies": {
     "tsup": "^8.5.1",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.11"
   }
 }
