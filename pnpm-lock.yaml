@@ -144,7 +144,7 @@ importers:
         version: link:../../packages/parsers
       next:
         specifier: ^16.3.3
-        version: 16.3.3(@types/node@20.19.43)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 16.3.3(@types/node@22.19.7)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react:
         specifier: ^19.2.8
         version: 19.2.8
@@ -154,7 +154,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: ^22.10.5
-        version: 20.19.43
+        version: 22.19.7
       '@types/react':
         specifier: ^19.2.18
         version: 19.2.18
@@ -236,7 +236,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: ^22.0.0
-        version: 20.19.43
+        version: 22.19.7
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(postcss@8.5.26)(typescript@6.0.3)(yaml@2.8.2)
@@ -271,7 +271,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: ^22.10.5
-        version: 20.19.43
+        version: 22.19.7
       tsup:
         specifier: ^8.3.5
         version: 8.5.1(postcss@8.5.26)(typescript@6.0.3)(yaml@2.8.2)
@@ -280,7 +280,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: ^4.1.11
-        version: 4.1.11(@types/node@20.19.43)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.27.2)(yaml@2.8.2))
+        version: 4.1.11(@types/node@22.19.7)(vite@8.2.2(@types/node@22.19.7)(esbuild@0.27.2)(yaml@2.8.2))
 
   packages/engines/performance:
     dependencies:
@@ -325,7 +325,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: ^22.0.0
-        version: 20.19.43
+        version: 22.19.7
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(postcss@8.5.26)(typescript@6.0.3)(yaml@2.8.2)
@@ -334,7 +334,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: ^4.1.11
-        version: 4.1.11(@types/node@20.19.43)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.27.2)(yaml@2.8.2))
+        version: 4.1.11(@types/node@22.19.7)(vite@8.2.2(@types/node@22.19.7)(esbuild@0.27.2)(yaml@2.8.2))
 
   packages/engines/smells:
     dependencies:
@@ -350,7 +350,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: ^22.10.5
-        version: 20.19.43
+        version: 22.19.7
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(postcss@8.5.26)(typescript@6.0.3)(yaml@2.8.2)
@@ -3448,7 +3448,6 @@ snapshots:
   '@types/node@22.19.7':
     dependencies:
       undici-types: 6.21.0
-    optional: true
 
   '@types/react-dom@19.2.7(@types/react@19.2.18)':
     dependencies:
@@ -4188,7 +4187,7 @@ snapshots:
 
   natural-compare@1.4.0: {}
 
-  next@16.3.3(@types/node@20.19.43)(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
+  next@16.3.3(@types/node@22.19.7)(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
     dependencies:
       '@next/env': 16.3.3
       '@swc/helpers': 0.5.23
@@ -4207,7 +4206,7 @@ snapshots:
       '@next/swc-linux-x64-musl': 16.3.3
       '@next/swc-win32-arm64-msvc': 16.3.3
       '@next/swc-win32-x64-msvc': 16.3.3
-      sharp: 0.35.4(@types/node@20.19.43)
+      sharp: 0.35.4(@types/node@22.19.7)
     transitivePeerDependencies:
       - '@babel/core'
       - '@types/node'
@@ -4466,7 +4465,7 @@ snapshots:
 
   semver@7.8.5: {}
 
-  sharp@0.35.4(@types/node@20.19.43):
+  sharp@0.35.4(@types/node@22.19.7):
     dependencies:
       '@img/colour': 1.1.0
       detect-libc: 2.1.2
@@ -4497,7 +4496,7 @@ snapshots:
       '@img/sharp-win32-arm64': 0.35.4
       '@img/sharp-win32-ia32': 0.35.4
       '@img/sharp-win32-x64': 0.35.4
-      '@types/node': 20.19.43
+      '@types/node': 22.19.7
     optional: true
 
   shebang-command@2.0.0:
