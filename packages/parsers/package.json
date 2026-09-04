@@ -21,7 +21,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@typescript-eslint/parser": "^7.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
     "@typescript-eslint/utils": "^7.0.0",
     "typescript": "^6.0.3"
   },
