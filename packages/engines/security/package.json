@@ -25,10 +25,10 @@
     "@rivet/parsers": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
-    "tsup": "^8.5.1",
-    "typescript": "^6.0.3",
-    "vitest": "^4.1.11"
+    "@types/node": "22.19.7",
+    "tsup": "8.5.1",
+    "typescript": "6.0.3",
+    "vitest": "4.1.11"
   },
   "keywords": ["security", "vulnerability", "owasp", "analysis"],
   "author": "",
