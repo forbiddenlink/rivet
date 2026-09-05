@@ -25,9 +25,9 @@
     "@rivet/parsers": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
-    "tsup": "^8.5.1",
-    "typescript": "^6.0.3"
+    "@types/node": "22.19.7",
+    "tsup": "8.5.1",
+    "typescript": "6.0.3"
   },
   "keywords": ["bugs", "errors", "null-checks", "promises", "analysis"],
   "author": "",
