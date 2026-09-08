@@ -41,7 +41,7 @@ describe('RivetEngine', () => {
 
     it('should accept custom configuration', () => {
       const customEngine = new RivetEngine({
-        severity: 'high',
+        severity: { minLevel: 'high' },
         maxIssues: 50,
       })
       expect(customEngine).toBeDefined()
@@ -65,11 +65,9 @@ describe('RivetEngine', () => {
       const engine1 = new MockEngine()
       engine1.name = 'engine-1'
       
-      const engine2: AnalysisEngine = {
-        ...new MockEngine(),
-        name: 'engine-2',
-        category: 'security',
-      }
+      const engine2: AnalysisEngine = new MockEngine()
+      engine2.name = 'engine-2'
+      engine2.category = 'security'
 
       expect(() => {
         engine.registerEngine(engine1)
@@ -94,7 +92,7 @@ describe('RivetEngine', () => {
   describe('severity filtering', () => {
     it('should respect severity configuration', () => {
       const highSeverityEngine = new RivetEngine({
-        severity: 'high',
+        severity: { minLevel: 'high' },
       })
       expect(highSeverityEngine).toBeDefined()
     })
@@ -109,7 +107,7 @@ describe('RivetEngine', () => {
       ]
 
       levels.forEach((severity) => {
-        const testEngine = new RivetEngine({ severity })
+        const testEngine = new RivetEngine({ severity: { minLevel: severity } })
         expect(testEngine).toBeDefined()
       })
     })

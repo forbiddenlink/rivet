@@ -11,25 +11,20 @@ export class SmellsEngine implements AnalysisEngine {
   description = 'Detects code smells and anti-patterns'
 
   async analyze(context: AnalysisContext): Promise<Detection[]> {
-    try {
-      const { parseResult } = context
-      const { ast, filePath } = parseResult
+    const { parseResult } = context
+    const { ast, filePath } = parseResult
 
-      // Run all detectors in parallel
-      const [longMethods, godObjects, magicNumbers, deepNesting, duplicateCode] =
-        await Promise.all([
-          Promise.resolve(detectLongMethods(ast, filePath)),
-          Promise.resolve(detectGodObjects(ast, filePath)),
-          Promise.resolve(detectMagicNumbers(ast, filePath)),
-          Promise.resolve(detectDeepNesting(ast, filePath)),
-          Promise.resolve(detectDuplicateCode(ast, filePath)),
-        ])
+    // Run all detectors in parallel
+    const [longMethods, godObjects, magicNumbers, deepNesting, duplicateCode] =
+      await Promise.all([
+        Promise.resolve(detectLongMethods(ast, filePath)),
+        Promise.resolve(detectGodObjects(ast, filePath)),
+        Promise.resolve(detectMagicNumbers(ast, filePath)),
+        Promise.resolve(detectDeepNesting(ast, filePath)),
+        Promise.resolve(detectDuplicateCode(ast, filePath)),
+      ])
 
-      return [...longMethods, ...godObjects, ...magicNumbers, ...deepNesting, ...duplicateCode]
-    } catch (error) {
-      // Return empty array on error - the engine orchestrator will handle logging
-      return []
-    }
+    return [...longMethods, ...godObjects, ...magicNumbers, ...deepNesting, ...duplicateCode]
   }
 }
 

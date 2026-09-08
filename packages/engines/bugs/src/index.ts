@@ -11,30 +11,26 @@ export class BugEngine implements AnalysisEngine {
   category = 'bugs' as const
 
   async analyze(context: AnalysisContext): Promise<Detection[]> {
-    try {
-      const { parseResult } = context
-      const { ast, filePath } = parseResult
+    const { parseResult } = context
+    const { ast, filePath } = parseResult
 
-      // Run all bug detectors in parallel
-      const [nullChecks, unhandledPromises, logicErrors, typeCoercion, unreachableCode] =
-        await Promise.all([
-          Promise.resolve(detectNullChecks(ast, filePath)),
-          Promise.resolve(detectUnhandledPromises(ast, filePath)),
-          Promise.resolve(detectLogicErrors(ast, filePath)),
-          Promise.resolve(detectTypeCoercion(ast, filePath)),
-          Promise.resolve(detectUnreachableCode(ast, filePath)),
-        ])
+    // Run all bug detectors in parallel
+    const [nullChecks, unhandledPromises, logicErrors, typeCoercion, unreachableCode] =
+      await Promise.all([
+        Promise.resolve(detectNullChecks(ast, filePath)),
+        Promise.resolve(detectUnhandledPromises(ast, filePath)),
+        Promise.resolve(detectLogicErrors(ast, filePath)),
+        Promise.resolve(detectTypeCoercion(ast, filePath)),
+        Promise.resolve(detectUnreachableCode(ast, filePath)),
+      ])
 
-      return [
-        ...nullChecks,
-        ...unhandledPromises,
-        ...logicErrors,
-        ...typeCoercion,
-        ...unreachableCode,
-      ]
-    } catch (error) {
-      return []
-    }
+    return [
+      ...nullChecks,
+      ...unhandledPromises,
+      ...logicErrors,
+      ...typeCoercion,
+      ...unreachableCode,
+    ]
   }
 }
 
