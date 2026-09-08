@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.0.0/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.12/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -7,20 +7,19 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "ignore": [
-      "node_modules",
-      ".next",
-      "dist",
-      "build",
-      ".vercel",
-      "coverage",
-      "*.min.js",
-      "public"
+    "includes": [
+      "**",
+      "!**/node_modules",
+      "!**/.next",
+      "!**/dist",
+      "!**/build",
+      "!**/.vercel",
+      "!**/coverage",
+      "!**/*.min.js",
+      "!**/public"
     ]
   },
-  "organizeImports": {
-    "enabled": true
-  },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
@@ -30,7 +29,7 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "complexity": {
         "noUselessFragments": "warn",
         "noUselessTypeConstraint": "error",
