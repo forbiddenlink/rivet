@@ -5,7 +5,8 @@ import type { Detection } from '@rivet/core'
 
 // Mock OpenAI - using @langchain/openai path
 vi.mock('@langchain/openai', () => ({
-  ChatOpenAI: vi.fn().mockImplementation(() => ({
+  ChatOpenAI: vi.fn().mockImplementation(function () {
+    return {
     pipe: vi.fn().mockReturnValue({
       pipe: vi.fn().mockReturnValue({
         invoke: vi.fn().mockResolvedValue(JSON.stringify({
@@ -15,7 +16,8 @@ vi.mock('@langchain/openai', () => ({
         })),
       }),
     }),
-  })),
+    }
+  }),
 }))
 
 describe('AIEnhancer', () => {
