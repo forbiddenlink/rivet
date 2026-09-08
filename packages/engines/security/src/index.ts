@@ -12,32 +12,28 @@ export class SecurityEngine implements AnalysisEngine {
   category = 'security' as const
 
   async analyze(context: AnalysisContext): Promise<Detection[]> {
-    try {
-      const { parseResult } = context
-      const { ast, filePath } = parseResult
+    const { parseResult } = context
+    const { ast, filePath } = parseResult
 
-      // Run all security detectors in parallel
-      const [sqlInjection, xss, commandInjection, pathTraversal, insecureCrypto, hardcodedSecrets] =
-        await Promise.all([
-          Promise.resolve(detectSQLInjection(ast, filePath)),
-          Promise.resolve(detectXSS(ast, filePath)),
-          Promise.resolve(detectCommandInjection(ast, filePath)),
-          Promise.resolve(detectPathTraversal(ast, filePath)),
-          Promise.resolve(detectInsecureCrypto(ast, filePath)),
-          Promise.resolve(detectHardcodedSecrets(context)),
-        ])
+    // Run all security detectors in parallel
+    const [sqlInjection, xss, commandInjection, pathTraversal, insecureCrypto, hardcodedSecrets] =
+      await Promise.all([
+        Promise.resolve(detectSQLInjection(ast, filePath)),
+        Promise.resolve(detectXSS(ast, filePath)),
+        Promise.resolve(detectCommandInjection(ast, filePath)),
+        Promise.resolve(detectPathTraversal(ast, filePath)),
+        Promise.resolve(detectInsecureCrypto(ast, filePath)),
+        Promise.resolve(detectHardcodedSecrets(context)),
+      ])
 
-      return [
-        ...sqlInjection,
-        ...xss,
-        ...commandInjection,
-        ...pathTraversal,
-        ...insecureCrypto,
-        ...hardcodedSecrets,
-      ]
-    } catch (error) {
-      return []
-    }
+    return [
+      ...sqlInjection,
+      ...xss,
+      ...commandInjection,
+      ...pathTraversal,
+      ...insecureCrypto,
+      ...hardcodedSecrets,
+    ]
   }
 }
 
