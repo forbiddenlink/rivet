@@ -22,7 +22,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@langchain/core": "^0.3.29",
+    "@langchain/core": "^1.0.0",
     "@langchain/openai": "^1.5.10",
     "@rivet/core": "workspace:*",
     "langchain": "^1.5.10"
