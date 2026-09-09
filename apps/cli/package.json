@@ -32,9 +32,9 @@
     "ora": "^9.4.1"
   },
   "devDependencies": {
-    "@types/node": "^20.11.0",
-    "tsup": "^8.0.1",
-    "vitest": "^4.1.11"
+    "@types/node": "20.19.43",
+    "tsup": "8.5.1",
+    "vitest": "4.1.11"
   },
   "keywords": [
     "cli",
