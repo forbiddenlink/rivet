@@ -3,4 +3,4 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://rivet.dev/sitemap.xml
+Sitemap: https://rivet-one.vercel.app/sitemap.xml

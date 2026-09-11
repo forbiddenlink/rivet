@@ -3,6 +3,7 @@ import { IBM_Plex_Sans, JetBrains_Mono } from 'next/font/google'
 
 import { SiteFooter } from '../components/SiteFooter'
 import { SiteNav } from '../components/SiteNav'
+import { getSiteUrl } from '../lib/site-url'
 
 import './globals.css'
 
@@ -20,7 +21,7 @@ const jetbrains = JetBrains_Mono({
   display: 'swap',
 })
 
-const siteUrl = 'https://rivet.dev'
+const siteUrl = getSiteUrl()
 
 export const metadata: Metadata = {
   title: 'RIVET — Code quality that holds',
