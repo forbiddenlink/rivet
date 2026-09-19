@@ -10,7 +10,7 @@ Repo: github.com/elizabethstein/rivet. Vercel project: `rivet` (team
 
 ## Stack
 
-- Turborepo monorepo with pnpm-managed workspaces (`pnpm@10.32.1`, Node >=20)
+- Turborepo monorepo with pnpm-managed workspaces (`pnpm@10.34.5`, Node >=20)
 - TypeScript 6, Biome 2 (lint + format, not ESLint/Prettier)
 - `apps/web`: Next.js 16, React 19
 - `apps/cli`: Commander-based CLI, built with tsup (CJS + dts)
@@ -50,7 +50,6 @@ pnpm release          # turbo run build && changeset publish
 - `docs/`: ARCHITECTURE, API_SPEC, CLI_SPEC, DESIGN, FEATURES, ROADMAP,
   TECH_STACK, AI_ENHANCEMENT, CONFIGURATION, DEPLOYMENT
 - `.impeccable.md`: design/brand context (Impeccable design tool)
-- `thoughts/`: planning notes
 
 Workspace packages import each other as `@rivet/<name>`
 (`workspace:*`/`workspace:^`); the CLI build externals all of them so they

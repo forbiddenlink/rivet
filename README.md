@@ -10,7 +10,7 @@
 
 RIVET is a comprehensive code quality and security platform that not only detects issues but explains WHY they matter and HOW to fix them. Unlike traditional linters, RIVET combines multiple analysis engines with AI-powered explanations to help developers write better, safer, more maintainable code.
 
-> **Phase 1 MVP Progress: ~90%** — 8 engines, AI layer, and CLI `--ai` / `--tech-debt` shipping. [Roadmap →](./docs/ROADMAP.md)
+> **Phase 1 MVP Progress: ~90%** - 8 engines, AI layer, and CLI `--ai` / `--tech-debt` shipping. [Roadmap →](./docs/ROADMAP.md)
 
 ### Current Status
 - ✅ **8 Analysis Engines** (smells, bugs, security, performance, architecture, practices, dependencies, flows)
@@ -87,42 +87,41 @@ pnpm --filter @rivet/cli dev scan --tech-debt /path/to/project
 
 ### ✅ Completed Engines (Phase 1)
 
-1. **Code Smell Detector** (`@rivet/engines/smells`) - 15+ patterns
+1. **Code Smell Detector** (`@rivet/engine-smells`) - 15+ patterns
    - Long methods, god objects, duplicate code
    - Feature envy, data clumps, primitive obsession
    - Switch statements, speculative generality
    
-2. **Bug & Error Detector** (`@rivet/engines/bugs`) - 12+ rules
+2. **Bug & Error Detector** (`@rivet/engine-bugs`) - 12+ rules
    - Null/undefined references, type mismatches
    - Async/await mistakes, promise rejections
    - Logic errors, boundary conditions
 
-3. **Security Scanner** (`@rivet/engines/security`) - OWASP coverage
-   - SQL injection, XSS, path traversal
+3. **Security Scanner** (`@rivet/engine-security`) - OWASP coverage
+   - SQL injection, XSS, path traversal, command injection
    - Exposed secrets, weak crypto
-   - SSRF, XXE, insecure dependencies
 
-4. **Performance Analyzer** (`@rivet/engines/performance`) - 10+ checks
+4. **Performance Analyzer** (`@rivet/engine-performance`) - 10+ checks
    - Algorithmic complexity (O(n²) → O(n))
    - Bundle size issues, unnecessary re-renders
    - Memory leaks, blocking operations
 
-5. **Architecture Analyzer** (`@rivet/engines/architecture`) - SOLID compliance
+5. **Architecture Analyzer** (`@rivet/engine-architecture`) - SOLID compliance
    - Circular dependencies, tight coupling
    - Single Responsibility violations
    - Interface segregation issues
 
-6. **Best Practices Advisor** (`@rivet/engines/practices`) - Modern patterns
+6. **Best Practices Advisor** (`@rivet/engine-practices`) - Modern patterns
    - Framework-specific improvements
    - Code organization, naming conventions
    - Documentation quality
 
-7. **Dependency Manager** (`@rivet/engines/dependencies`) - Knip integration
-   - Outdated packages, vulnerabilities
-   - Unused dependencies, dead exports
-   - License compliance checks
+7. **Dependency Manager** (`@rivet/engine-dependencies`) - import hygiene
+   - Barrel-file and circular/relative-import risk
+   - Duplicate imports, side-effect imports
+   - Unused identifiers
 
-8. **Flow Testing Engine** (`@rivet/engines/flows`) - Critical path detection
+8. **Flow Testing Engine** (`@rivet/engine-flows`) - Critical path detection
    - Untested React Router / Next.js App Router routes
    - Critical path gaps (async/fetch without error handling)
    - Missing error boundaries
@@ -140,7 +139,7 @@ pnpm --filter @rivet/cli dev scan --tech-debt /path/to/project
 
 ### 🔧 Infrastructure
 
-- **Parser System** (`@rivet/parsers`) - TypeScript Compiler API + tree-sitter
+- **Parser System** (`@rivet/parsers`) - `@typescript-eslint/parser` + TypeScript Compiler API
 - **Core Engine** (`@rivet/core`) - Parallel orchestration, plugin system
 - **CLI** (`@rivet/cli`) - Commander-based interface (in progress)
 - **Build System** - Turborepo + pnpm workspaces, strict TypeScript
@@ -280,15 +279,13 @@ See [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) for detailed information.
 rivet/
 ├── apps/
 │   ├── cli/              # CLI application
-│   ├── web/              # Next.js web dashboard
-│   └── vscode/           # VS Code extension
+│   └── web/              # Next.js web dashboard
 ├── packages/
 │   ├── core/             # Core detection engine
 │   ├── parsers/          # Language parsers
-│   ├── llm/              # LLM integration
-│   ├── security/         # Security scanner
-│   ├── flow-testing/     # Flow analysis engine
-│   └── refactor/         # Refactoring engine
+│   ├── ai/               # AI enhancement layer
+│   └── engines/          # architecture, bugs, dependencies, flows,
+│                         # performance, practices, security, smells
 ├── docs/                 # Documentation
 └── examples/             # Example projects
 ```
@@ -300,13 +297,10 @@ rivet/
 - **Language**: TypeScript (100%)
 - **Runtime**: Node.js 20+
 - **Monorepo**: Turborepo + pnpm
-- **Parsing**: @typescript-eslint, tree-sitter
-- **Security**: Semgrep, eslint-plugin-security
-- **Dead Code**: Knip
-- **Refactoring**: jscodeshift
-- **AI**: LangChain + OpenAI/Claude
-- **Testing**: Vitest, Playwright
-- **CLI**: Commander, Ink
+- **Parsing**: `@typescript-eslint/parser`, TypeScript Compiler API
+- **AI**: LangChain + OpenAI
+- **Testing**: Vitest
+- **CLI**: Commander, chalk, ora
 
 See [docs/TECH_STACK.md](./docs/TECH_STACK.md) for complete details.
 
@@ -371,7 +365,7 @@ RIVET is open source and welcomes contributions!
 
 ```bash
 # Clone and install
-git clone https://github.com/rivet/rivet
+git clone https://github.com/elizabethstein/rivet
 cd rivet
 pnpm install
 
@@ -399,8 +393,6 @@ pnpm test
 ### Community
 - **[Contributing](./CONTRIBUTING.md)** - How to contribute
 - **[Code of Conduct](./CODE_OF_CONDUCT.md)** - Community guidelines
-- **[Support](./SUPPORT.md)** - Getting help
-- **[Security](./SECURITY.md)** - Security policy
 - **[Changelog](./CHANGELOG.md)** - Version history
 - **[Contributors](./CONTRIBUTORS.md)** - Hall of fame
 
@@ -413,7 +405,6 @@ We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md)
 - 🐛 [Report a bug](https://github.com/elizabethstein/rivet/issues/new?template=bug_report.yml)
 - 💡 [Request a feature](https://github.com/elizabethstein/rivet/issues/new?template=feature_request.yml)
 - ❓ [Ask a question](https://github.com/elizabethstein/rivet/discussions)
-- 🔒 [Report security issue](./SECURITY.md)
 
 ---
 

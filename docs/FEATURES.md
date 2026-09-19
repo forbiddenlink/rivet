@@ -1,696 +1,147 @@
 # RIVET Features
 
-Complete documentation of all RIVET features, organized by analysis engine and capability.
+Documentation of RIVET's features, organized by analysis engine and capability, verified against
+the actual detectors in this repository (2026-09-19). An earlier version of this document listed
+many detectors, security categories, auto-fix/codemod capabilities, and a scored dashboard that do
+not exist in the code; this rewrite replaces that content with what's actually implemented.
+
+Each analysis engine is a workspace package (`@rivet/engine-<name>`) with its own
+`src/detectors/*.ts` files. `apps/cli` wires 7 of the 8 engines (all except flows);
+`apps/web/src/app/api/analyze/route.ts` wires all 8, gated per-engine by config flags.
 
 ---
 
 ## 🔍 Analysis Engines
 
-### 1. Code Smell Detector
+### 1. Code Smell Detector (`@rivet/engine-smells`)
 
-Identifies anti-patterns and maintainability issues in your code.
+- **Long methods** - functions over 50 lines, or cyclomatic complexity over 10
+- **God objects** - classes with more than 10 methods, or over 500 lines
+- **Duplicate code** - similar blocks of at least 5 lines / 50 tokens
+- **Magic numbers** - unexplained numeric literals outside a small allowlist (0, 1, -1, 2, 10, 100, 1000)
+- **Deep nesting** - control flow nested more than 3 levels deep
 
-#### **Long Methods** 
-- **Threshold**: >50 lines
-- **Impact**: Hard to understand, test, and maintain
-- **Fix**: Extract smaller methods
-- **Example**:
-  ```typescript
-  // ❌ Bad: 80-line method
-  function processOrder(order) {
-    // 80 lines of mixed concerns...
-  }
-  
-  // ✅ Good: Extracted methods
-  function processOrder(order) {
-    validateOrder(order)
-    calculateTotal(order)
-    applyDiscounts(order)
-    processPayment(order)
-    sendConfirmation(order)
-  }
-  ```
+### 2. Bug & Error Detector (`@rivet/engine-bugs`)
 
-#### **God Objects**
-- **Detection**: Classes with >10 public methods or >500 lines
-- **Impact**: Violates Single Responsibility Principle
-- **Fix**: Split into multiple focused classes
+- **Null/undefined access** - property access without a null check
+- **Loose equality** - `==`/`!=` where strict equality is safer, including `NaN` comparisons
+- **Logic errors** - assignment inside a condition (`if (x = 5)`), self-comparison, duplicate
+  if/else conditions, always-true/false constant conditions, implicit string+number coercion,
+  truthy checks against array/object literals
+- **Unhandled promises** - a promise result that's neither awaited nor caught, or an `async`
+  function with `await` but no try/catch
+- **Unreachable code** - statements after `return`/`throw`, multiple returns at the same level,
+  empty `catch` blocks
 
-#### **Duplicate Code**
-- **Detection**: Similar code blocks (>6 lines)
-- **Impact**: Maintenance nightmare, bug multiplication
-- **Fix**: Extract to shared function/module
+### 3. Security Scanner (`@rivet/engine-security`)
 
-#### **Magic Numbers**
-- **Detection**: Unexplained numeric literals
-- **Fix**: Named constants
-  ```typescript
-  // ❌ Bad
-  if (user.age >= 18) { }
-  
-  // ✅ Good
-  const LEGAL_AGE = 18
-  if (user.age >= LEGAL_AGE) { }
-  ```
+- **SQL injection** and **command injection**
+- **XSS**
+- **Path traversal**
+- **Hardcoded secrets** (API keys, passwords, tokens in source)
+- **Insecure crypto** (weak hashing/cipher usage)
 
-#### **Long Parameter Lists**
-- **Detection**: Functions with >5 parameters
-- **Fix**: Use object parameters or builder pattern
+This is not a full OWASP Top 10 scanner: there's no access-control, authentication/session,
+logging, SSRF, or dependency-vulnerability detection here (dependency risk is a separate engine,
+below, and it doesn't do vulnerability scanning either).
 
-#### **Deep Nesting**
-- **Detection**: >3 levels of if/loop nesting
-- **Fix**: Early returns, guard clauses
+### 4. Performance Analyzer (`@rivet/engine-performance`)
 
-#### **Dead Code**
-- **Detection**: Unreachable code, unused variables
-- **Fix**: Remove (auto-fixable)
+- **Big-O violations** - e.g. `Array.includes()`/`indexOf()` inside a loop (O(n²) where a
+  `Set`/`Map` would give O(1) lookups), and loops nested deep enough that complexity is O(n^depth)
+- **Inefficient loops** - string concatenation in a loop, `Array.push()` in a loop, DOM queries
+  inside a loop
+- **Blocking operations** - synchronous file I/O, deprecated `XMLHttpRequest`, loops large enough
+  to block the event loop
+- **Unnecessary re-renders** (React) - missing dependency arrays, inline functions/objects in
+  JSX, state updates during render
 
-#### **Inconsistent Naming**
-- **Detection**: Mixed camelCase/snake_case, unclear names
-- **Fix**: Standardize to project conventions
+There's no N+1 query detection, bundle-size analysis, or regex-backtracking detection.
 
-#### **Callback Hell**
-- **Detection**: >3 levels of nested callbacks
-- **Fix**: Convert to Promises or async/await (auto-fixable)
+### 5. Architecture Analyzer (`@rivet/engine-architecture`)
 
-#### **Missing Error Handling**
-- **Detection**: Try/catch gaps, unhandled promises
-- **Fix**: Add proper error handling
+- **Circular dependencies** and **layer violations** (imports crossing a declared layer boundary)
+- **Module coupling** - high relative-import depth, or a file with an unusually high import count
+- **SOLID violations** - Law of Demeter chain-depth, feature envy (excessive use of another
+  object), Single Responsibility (too many methods on a class), Dependency Inversion (direct
+  `new` of a concrete class), Liskov Substitution (`instanceof` checks), Interface Segregation
+  (interfaces with too many members)
+- **Tight coupling**
 
-#### **Tight Coupling**
-- **Detection**: High dependency count between modules
-- **Fix**: Introduce abstractions, dependency injection
+### 6. Best Practices Advisor (`@rivet/engine-practices`)
 
-#### **Feature Envy**
-- **Detection**: Method uses another class more than its own
-- **Fix**: Move method to appropriate class
+- **Console statements** left in code
+- **Missing documentation** on classes/functions
+- **Error handling** - throwing a string literal instead of an `Error`, generic error messages
+- **Naming conventions** - class names not in PascalCase, variables not in camelCase/UPPER_CASE
+- Focused test/debug leftovers: `.only()`/`.skip()` on tests, stray `debugger` statements
 
-#### **Primitive Obsession**
-- **Detection**: Overuse of primitives instead of objects
-- **Fix**: Create value objects
+There's no framework-modernization advice (class-to-hooks, callback-to-async/await), deprecated-API
+detection, or accessibility checking here.
 
-#### **Switch Statements**
-- **Detection**: Large switch blocks (>5 cases)
-- **Fix**: Consider polymorphism or strategy pattern
+### 7. Dependency Manager (`@rivet/engine-dependencies`)
 
-#### **Comments Compensating for Bad Code**
-- **Detection**: Excessive comments explaining unclear code
-- **Fix**: Refactor code to be self-explanatory
+Import hygiene, not package-level dependency management:
+
+- **Barrel files** - `export *` anti-pattern
+- **Circular/relative-import risk** - a high count of relative imports
+- **Duplicate imports** - the same module imported more than once
+- **Side-effect imports**
+- **Unused identifiers**
+
+There's no outdated-package detection, CVE/vulnerability scanning, license-compliance checking, or
+bundle-impact analysis, and no Knip or npm-audit integration.
+
+### 8. Flow Testing Engine (`@rivet/engine-flows`)
+
+- **Untested routes** - React Router / Next.js App Router routes with no matching test
+- **Critical path gaps** - `async`/`fetch` calls without error handling
+- **Missing error boundaries** - components with async operations not wrapped in an error boundary
+- **Untested state transitions** - `useState`/`useReducer`/Redux transitions with no test coverage
+
+This engine reports gaps; it does not generate tests. There's no Playwright dependency anywhere in
+the repo, and no auto-generated test code.
 
 ---
 
-### 2. Bug & Error Detector
-
-Catches common programming mistakes before they reach production.
-
-#### **Null/Undefined References**
-```typescript
-// ❌ Detected
-const name = user.profile.name  // user or profile might be null
-
-// ✅ Suggested fix
-const name = user?.profile?.name ?? 'Unknown'
-```
-
-#### **Type Mismatches**
-- TypeScript type errors
-- Implicit any usage
-- Wrong function arguments
-
-#### **Logic Errors**
-```typescript
-// ❌ Assignment in condition
-if (x = 5) { }
-
-// ✅ Comparison
-if (x === 5) { }
-```
-
-#### **Infinite Loops**
-- Loops without exit conditions
-- Missing break statements
-
-#### **Memory Leaks**
-- Unclosed connections
-- Event listener leaks
-- Circular references
-
-#### **Race Conditions**
-```typescript
-// ❌ Race condition
-async function updateUser() {
-  const user = await getUser()
-  user.visits++
-  saveUser(user)  // Missing await!
-}
-
-// ✅ Fixed
-async function updateUser() {
-  const user = await getUser()
-  user.visits++
-  await saveUser(user)
-}
-```
-
-#### **Off-by-One Errors**
-- Array indexing issues
-- Loop boundary errors
-
-#### **Unhandled Promises**
-```typescript
-// ❌ Unhandled
-fetchData()  // Promise not awaited or .catch()
-
-// ✅ Handled
-await fetchData()
-// or
-fetchData().catch(handleError)
-```
-
-#### **Division by Zero**
-- Potential crashes detected
-
-#### **Resource Leaks**
-- Files not closed
-- Database connections not released
-
----
-
-### 3. Security Scanner
-
-Comprehensive security analysis based on OWASP Top 10.
-
-#### **A01: Broken Access Control**
-- Missing authorization checks
-- Insecure direct object references
-- Inadequate permissions validation
-
-#### **A02: Cryptographic Failures**
-```typescript
-// ❌ Detected
-const API_KEY = 'sk-1234567890'  // Hardcoded secret
-const password = user.password    // Plain text
-
-// ✅ Fix
-const API_KEY = process.env.API_KEY
-const hashedPassword = await bcrypt.hash(user.password, 10)
-```
-
-#### **A03: Injection Vulnerabilities**
-```typescript
-// ❌ SQL Injection
-db.query(`SELECT * FROM users WHERE id = ${userId}`)
-
-// ✅ Parameterized
-db.query('SELECT * FROM users WHERE id = ?', [userId])
-
-// ❌ XSS
-innerHTML = userInput
-
-// ✅ Sanitized
-textContent = sanitize(userInput)
-```
-
-#### **A04: Insecure Design**
-- Missing rate limiting
-- No input validation
-- Weak session management
-
-#### **A05: Security Misconfiguration**
-```typescript
-// ❌ Detected
-app.set('env', 'development')  // In production
-app.use(cors({ origin: '*' }))  // Too permissive
-
-// ✅ Fix
-app.set('env', 'production')
-app.use(cors({ origin: process.env.ALLOWED_ORIGINS }))
-```
-
-#### **A06: Vulnerable Dependencies**
-- CVE detection in npm packages
-- Outdated libraries with known exploits
-- License violations
-
-#### **A07: Authentication Failures**
-- Weak password requirements
-- Missing MFA
-- Session fixation vulnerabilities
-
-#### **A08: Data Integrity Failures**
-- Insecure deserialization
-- Unsigned data
-
-#### **A09: Logging Failures**
-```typescript
-// ❌ Logging sensitive data
-logger.info(`User ${user.email} password: ${password}`)
-
-// ✅ Safe logging
-logger.info(`User ${user.id} authenticated`)
-```
-
-#### **A10: SSRF**
-- Server-Side Request Forgery detection
-- Unvalidated URL redirects
-
----
-
-### 4. Performance Analyzer
-
-Identifies performance bottlenecks and optimization opportunities.
-
-#### **Algorithmic Complexity**
-```typescript
-// ❌ O(n²) - Detected
-for (let i = 0; i < arr.length; i++) {
-  for (let j = 0; j < arr.length; j++) {
-    if (arr[i] === arr[j]) { }
-  }
-}
-
-// ✅ O(n) - Suggested
-const seen = new Set()
-for (const item of arr) {
-  if (seen.has(item)) { }
-  seen.add(item)
-}
-```
-
-#### **React Unnecessary Re-renders**
-```typescript
-// ❌ Missing memoization
-const Component = ({ data }) => {
-  const expensiveCalc = calculateSomething(data)  // Runs every render
-  return <div>{expensiveCalc}</div>
-}
-
-// ✅ Memoized
-const Component = ({ data }) => {
-  const expensiveCalc = useMemo(() => calculateSomething(data), [data])
-  return <div>{expensiveCalc}</div>
-}
-```
-
-#### **N+1 Query Problems**
-```typescript
-// ❌ N+1 queries
-for (const user of users) {
-  const posts = await db.posts.find({ userId: user.id })
-}
-
-// ✅ Single query
-const posts = await db.posts.find({
-  userId: { $in: users.map(u => u.id) }
-})
-```
-
-#### **Large Bundle Sizes**
-```typescript
-// ❌ Importing entire library
-import _ from 'lodash'  // +69kb
-
-// ✅ Import specific function
-import debounce from 'lodash/debounce'  // +3kb
-```
-
-#### **Blocking Operations**
-```typescript
-// ❌ Synchronous file I/O
-const data = fs.readFileSync('large-file.json')
-
-// ✅ Asynchronous
-const data = await fs.promises.readFile('large-file.json')
-```
-
-#### **Memory Inefficiency**
-- Large object copies
-- String concatenation in loops
-- Memory leaks
-
-#### **Inefficient DOM Manipulation**
-- Multiple reflows
-- Layout thrashing
-
-#### **Missing Database Indexes**
-- Slow queries detected
-
-#### **Regex Catastrophic Backtracking**
-```typescript
-// ❌ Dangerous regex
-/^(a+)+$/  // Can cause exponential time
-
-// ✅ Optimized
-/^a+$/
-```
-
----
-
-### 5. Architecture Analyzer
-
-Evaluates code structure and design patterns.
-
-#### **Circular Dependencies**
-```
-File A imports B
-File B imports C
-File C imports A  // ⚠️ Circular!
-```
-
-#### **Tight Coupling**
-- High dependency count
-- Direct instantiation instead of DI
-
-#### **SOLID Violations**
-- **S**: Single Responsibility
-- **O**: Open/Closed
-- **L**: Liskov Substitution
-- **I**: Interface Segregation
-- **D**: Dependency Inversion
-
-#### **Poor Separation of Concerns**
-```typescript
-// ❌ Business logic in UI
-function LoginForm() {
-  const handleSubmit = async (data) => {
-    const hash = await bcrypt.hash(data.password, 10)
-    await db.users.create({ ...data, password: hash })
-    // Business logic mixed with UI!
-  }
-}
-
-// ✅ Separated
-function LoginForm() {
-  const { register } = useAuth()
-  const handleSubmit = (data) => register(data)  // Logic in service
-}
-```
-
-#### **Anemic Domain Models**
-- Objects with no behavior (just data)
-
-#### **Spaghetti Code**
-- No clear structure
-- Random organization
-
----
-
-### 6. Best Practices Advisor
-
-Suggests modern patterns and framework-specific improvements.
-
-#### **Outdated Patterns**
-```typescript
-// ❌ Old callback pattern
-fs.readFile('file.txt', (err, data) => {
-  if (err) return console.error(err)
-  console.log(data)
-})
-
-// ✅ Modern async/await
-try {
-  const data = await fs.promises.readFile('file.txt')
-  console.log(data)
-} catch (err) {
-  console.error(err)
-}
-```
-
-#### **React: Class to Hooks**
-```typescript
-// ❌ Old class component
-class Counter extends React.Component {
-  state = { count: 0 }
-  render() {
-    return <div>{this.state.count}</div>
-  }
-}
-
-// ✅ Modern hooks
-function Counter() {
-  const [count, setCount] = useState(0)
-  return <div>{count}</div>
-}
-```
-
-#### **Language Features**
-```typescript
-// ❌ Old var
-var x = 10
-
-// ✅ Modern const/let
-const x = 10
-
-// ❌ For loop
-for (let i = 0; i < arr.length; i++) {
-  console.log(arr[i])
-}
-
-// ✅ Modern iteration
-arr.forEach(item => console.log(item))
-// or
-for (const item of arr) {
-  console.log(item)
-}
-```
-
-#### **API Updates**
-- Deprecated API detection
-- Suggested modern alternatives
-
-#### **Accessibility**
-```jsx
-// ❌ Missing accessibility
-<button onClick={handleClick}>
-  <img src="icon.png" />
-</button>
-
-// ✅ Accessible
-<button onClick={handleClick} aria-label="Submit form">
-  <img src="icon.png" alt="Submit" />
-</button>
-```
-
----
-
-### 7. Dependency Manager
-
-Smart dependency management with breaking change analysis.
-
-#### **Outdated Packages**
-```
-react: 17.0.2 → 18.3.1 (major update)
-├─ Breaking: New root API
-├─ Migration: ~2 hours
-└─ AI Guide: "Update createRoot()..."
-
-lodash: 4.17.20 → 4.17.21 (patch)
-├─ Safe to update
-└─ Security fixes included
-```
-
-#### **Vulnerabilities**
-```
-⚠️ Critical: express@4.17.1
-├─ CVE-2022-24999: CSRF vulnerability
-├─ Fix: Update to 4.18.2+
-└─ Impact: HIGH - Authentication bypass possible
-```
-
-#### **Unused Dependencies**
-```
-Unused in package.json:
-  • moment (338kb) - Not imported anywhere
-  • axios - Using fetch instead
-  → Run: rivet deps clean
-```
-
-#### **License Compliance**
-```
-⚠️ License Issue:
-  package "gpl-library" (GPL-3.0)
-  Your project: MIT
-  → Incompatible! Consider alternative.
-```
-
-#### **Bundle Impact**
-```
-Update lodash 4.17.20 → 4.17.21
-├─ Bundle size: No change
-├─ Breaking changes: None
-└─ ✅ Safe to update
-```
-
----
-
-### 8. Flow Testing Engine
-
-Detects untested critical user paths.
-
-#### **Critical Path Detection**
-```
-✓ User Registration Flow (95% covered)
-  signup → verify email → profile setup → dashboard
-
-⚠️ Payment Flow (0% covered) - CRITICAL!
-  cart → checkout → payment → confirmation
-  → Generate test: rivet flows generate payment
-
-○ Admin Dashboard (45% covered)
-  login → admin panel → user management
-  Missing: delete user, bulk actions
-```
-
-#### **User Journey Mapping**
-```typescript
-// Auto-detected from routes
-const flows = [
-  {
-    name: 'Purchase Flow',
-    steps: [
-      { route: '/products', action: 'browse' },
-      { route: '/product/:id', action: 'view' },
-      { route: '/cart', action: 'add-to-cart' },
-      { route: '/checkout', action: 'checkout' },
-      { route: '/payment', action: 'pay' },
-      { route: '/confirmation', action: 'confirm' },
-    ],
-    testCoverage: 30%, // Only 2/6 steps tested!
-  }
-]
-```
-
-#### **Generated Tests**
-```typescript
-// RIVET auto-generated from flow analysis
-import { test, expect } from '@playwright/test'
-
-test('complete payment flow', async ({ page }) => {
-  // Navigate to products
-  await page.goto('/products')
-  
-  // Add item to cart
-  await page.click('[data-testid="product-1"]')
-  await page.click('[data-testid="add-to-cart"]')
-  
-  // Checkout
-  await page.goto('/checkout')
-  await page.fill('#email', 'test@example.com')
-  
-  // Payment
-  await page.fill('#card-number', '4242424242424242')
-  await page.click('[data-testid="submit-payment"]')
-  
-  // Verify success
-  await expect(page).toHaveURL(/\/confirmation/)
-  await expect(page.locator('.success')).toBeVisible()
-})
-```
-
-#### **State Transition Validation**
-```typescript
-// Detected state machine
-const authStates = {
-  LOGGED_OUT: ['login'],
-  LOGGED_IN: ['logout', 'view-profile'],
-  MFA_REQUIRED: ['verify-mfa', 'logout'],
-}
-
-// Missing tests:
-// ⚠️ LOGGED_IN → logout transition not tested
-// ⚠️ MFA_REQUIRED → verify-mfa not tested
-```
-
----
-
-## 🔧 Auto-Fix Capabilities
-
-### Safe Auto-Fixes (No User Confirmation)
-- Remove unused imports
-- Fix consistent spacing
-- Add missing semicolons
-- Convert var → const/let
-- Remove console.logs
-- Fix simple typos
-
-### Interactive Fixes (Requires Confirmation)
-- Refactor long methods
-- Extract duplicate code
-- Update dependencies
-- Apply codemods
-- Fix security issues
-
-### Migration Codemods
-- React class → hooks
-- CommonJS → ESM
-- Callbacks → async/await
-- Jest → Vitest
-- CRA → Vite
+## 🔧 Fixing
+
+`apps/cli/src/commands/fix.ts` applies fixes that a detector provides directly (a `fix.replacements`
+field on the `Detection`), sorted so replacements don't shift line offsets. Today that's a small
+subset of detectors: `insecure-crypto`, `hardcoded-secrets`, and `xss` in the security engine.
+There's no interactive fix-confirmation flow and no migration codemods (React class-to-hooks,
+CommonJS-to-ESM, Jest-to-Vitest, CRA-to-Vite); none of that exists in the code.
 
 ---
 
 ## 📊 Reporting Features
 
-### Tech Debt Score
-```
-Overall: 72/100 ⚠️
+### Tech debt estimate (`@rivet/ai`'s `TechDebtCalculator`)
 
-Breakdown:
-  Security:        78/100
-  Code Quality:    68/100
-  Performance:     81/100
-  Dependencies:    45/100  ← Needs attention!
-  Testing:         65/100
-  Documentation:   58/100
+Not a 0-100 score: it sums a fixed per-severity time estimate (critical = 4h, high = 2h,
+medium = 1h, low = 0.5h, info = 0.25h) across all detections, and breaks the total down by
+severity and by category (engine).
 
-Trend: ▁▂▃▄▅▆ Improving
-```
+### Web dashboard
 
-### HTML Dashboard
-- Interactive issue exploration
-- Filter by severity/category
-- Historical trends
-- Team comparison
+`apps/web/src/app/dashboard/page.tsx` is a single dashboard page; there's no historical-trend
+storage or team-comparison feature.
 
-### CI/CD Integration
-```bash
-$ rivet ci --fail-on critical
-✓ No critical issues found
-○ 3 medium issues (warnings)
-→ Exit code: 0
-```
+### CI/CD
+
+There's no `rivet ci` subcommand. `apps/cli` exits non-zero when detections meet a caller-provided
+severity threshold; wiring that into a CI pipeline is left to the caller's own shell script.
 
 ---
 
 ## 🎯 Configuration
 
-```json
-{
-  "engines": {
-    "security": { "enabled": true, "severity": "high" },
-    "performance": { "enabled": true },
-    "flows": { "enabled": true, "criticalOnly": true }
-  },
-  
-  "autoFix": {
-    "safe": true,
-    "interactive": false
-  },
-  
-  "llm": {
-    "provider": "openai",
-    "model": "gpt-4",
-    "maxTokens": 1000
-  },
-  
-  "exclude": [
-    "node_modules/**",
-    "dist/**",
-    "*.test.ts"
-  ]
-}
-```
+`packages/core/src/config.ts` loads `rivet.config.js`/`.mjs`/`.cjs` or `.rivetrc.js` and merges it
+with `DEFAULT_CONFIG`. The `RivetConfig` type (`packages/core/src/types.ts`) supports `engines`,
+`include`/`exclude`/`ignore` globs, a `severity.minLevel`, an `output.format`
+(`console`/`json`/`sarif`), and `maxIssues`. There's no Zod validation and no separate config
+package; see `docs/CONFIGURATION.md` for more detail.
 
 ---
 
-**Every feature designed to make you a better developer.** 🚀
+**Every feature described above is verified against `packages/engines/*/src/detectors/`.**
