@@ -1,7 +1,7 @@
 # RIVET Copilot Instructions
 
 ## Project Overview
-RIVET is an AI-powered code quality platform combining 8 analysis engines (security, bugs, performance, architecture, smells, dependencies, dead code, flow testing) with AI explanations. **Currently in MVP Phase 1** - CLI foundation with core engines. The monorepo uses pnpm workspaces + Turborepo, 100% TypeScript.
+RIVET is an AI-powered code quality platform combining 8 analysis engines (security, bugs, performance, architecture, smells, dependencies, practices, flows) with AI explanations. **Currently in MVP Phase 1** - CLI foundation with core engines. The monorepo uses pnpm workspaces + Turborepo, 100% TypeScript.
 
 ## Architecture Patterns
 

@@ -45,52 +45,55 @@ RIVET's design reflects our core values:
 
 ## 🎨 Color Palette
 
-### Primary Colors
+Actual tokens are defined in `apps/web/src/app/globals.css` and use the OKLCH color space, not hex.
+
+### Surfaces & accent
 ```css
-/* Background - Deep Charcoal */
---bg-primary: #0a0a0a;       /* Almost black */
---bg-secondary: #1a1a1a;     /* Dark gray */
---bg-tertiary: #2a2a2a;      /* Lighter gray */
+--bg-canvas: oklch(0.12 0.008 60);
+--bg-primary: oklch(0.145 0.01 60);
+--bg-secondary: oklch(0.18 0.012 60);
+--bg-tertiary: oklch(0.22 0.014 60);
+--bg-elevated: oklch(0.2 0.012 60);
 
-/* Accent - Amber (Forge/Heat theme) */
---accent-primary: #f59e0b;   /* Warm orange */
---accent-hover: #fbbf24;     /* Lighter amber */
---accent-pressed: #d97706;   /* Darker amber */
-
-/* Text */
---text-primary: #f9fafb;     /* Off-white */
---text-secondary: #9ca3af;   /* Gray */
---text-muted: #6b7280;       /* Muted gray */
+--accent: oklch(0.78 0.15 70);         /* forge amber */
+--accent-hover: oklch(0.84 0.14 75);
+--accent-pressed: oklch(0.68 0.14 65);
+--accent-muted: oklch(0.78 0.15 70 / 0.12);
+--accent-subtle: oklch(0.78 0.15 70 / 0.06);
 ```
 
-### Semantic Colors
+### Text
 ```css
-/* Success */
---success: #10b981;          /* Emerald green */
---success-bg: #065f46;       /* Dark green */
-
-/* Warning */
---warning: #fbbf24;          /* Amber */
---warning-bg: #78350f;       /* Dark amber */
-
-/* Error */
---error: #ef4444;            /* Red */
---error-bg: #7f1d1d;         /* Dark red */
-
-/* Info */
---info: #3b82f6;             /* Blue */
---info-bg: #1e3a8a;          /* Dark blue */
+--text-primary: oklch(0.96 0.01 80);
+--text-secondary: oklch(0.72 0.015 70);
+--text-muted: oklch(0.55 0.012 65);
+--text-inverse: oklch(0.14 0.01 60);
 ```
 
-### Borders & Shadows
+### Semantic (severity) colors
 ```css
---border-subtle: #2a2a2a;
---border-default: #3a3a3a;
---border-emphasis: #4a4a4a;
+--critical: oklch(0.63 0.22 25);
+--high: oklch(0.7 0.17 45);
+--medium: oklch(0.8 0.14 85);
+--low: oklch(0.7 0.1 230);
+--info: oklch(0.6 0.02 60);
+--success: oklch(0.72 0.15 155);
+```
+Each has a matching `-bg` variant at 12% alpha.
 
-/* Subtle shadows only - no glows! */
---shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
---shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+### Category accents
+One accent per engine, restrained, no purple:
+```css
+--cat-security, --cat-bugs, --cat-performance, --cat-smells,
+--cat-architecture, --cat-practices, --cat-dependencies, --cat-flows
+```
+
+### Borders
+```css
+--border-subtle: oklch(1 0 0 / 0.06);
+--border-default: oklch(1 0 0 / 0.1);
+--border-emphasis: oklch(1 0 0 / 0.16);
+--border-accent: oklch(0.78 0.15 70 / 0.4);
 ```
 
 ---
@@ -99,30 +102,23 @@ RIVET's design reflects our core values:
 
 ### Fonts
 
-**Code (Monospace):**
-```css
---font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', 
-             'Consolas', monospace;
-```
+**Code (Monospace):** `JetBrains Mono` (Google Font, via `next/font/google` in `layout.tsx`).
 - Use for: Code snippets, file paths, commands, data
 
-**UI (Sans-serif):**
-```css
---font-sans: 'Inter', 'SF Pro', -apple-system, 
-             BlinkMacSystemFont, 'Segoe UI', sans-serif;
-```
+**UI (Sans-serif):** `IBM Plex Sans` (Google Font, not Inter).
 - Use for: Headings, body text, buttons, labels
 
 ### Type Scale
+Actual values from `globals.css` (not a round 16px base):
 ```css
---text-xs: 0.75rem;      /* 12px */
---text-sm: 0.875rem;     /* 14px */
---text-base: 1rem;       /* 16px */
---text-lg: 1.125rem;     /* 18px */
---text-xl: 1.25rem;      /* 20px */
---text-2xl: 1.5rem;      /* 24px */
---text-3xl: 1.875rem;    /* 30px */
---text-4xl: 2.25rem;     /* 36px */
+--text-xs: 0.75rem;
+--text-sm: 0.8125rem;
+--text-base: 0.9375rem;
+--text-lg: 1.0625rem;
+--text-xl: 1.25rem;
+--text-2xl: 1.5rem;
+--text-3xl: clamp(1.75rem, 3vw, 2.25rem);
+--text-4xl: clamp(2.25rem, 5vw, 3.5rem);
 ```
 
 ### Font Weights
@@ -211,9 +207,9 @@ const medium = chalk.yellow('○')
 const low = chalk.gray('○')
 const success = chalk.green('✓')
 
-// Category colors
+// Category colors (chalk has no built-in "amber"; use chalk.hex() for the forge accent)
 const security = chalk.red
-const performance = chalk.amber
+const performance = chalk.hex('#f59e0b')
 const smell = chalk.yellow
 const info = chalk.gray
 ```
@@ -353,10 +349,8 @@ const info = chalk.gray
 
 ## 🎯 Icon System
 
-### Icons We Use
-- **Feather Icons** - Clean, consistent, professional
-- **Lucide** - Modern variant of Feather
-- **Heroicons** - Alternative option
+No icon library is a dependency of `apps/web` today; the web app currently uses emoji and inline
+SVG rather than an icon package.
 
 ### Icon Guidelines
 - Line icons only (no filled)
@@ -581,10 +575,9 @@ Before shipping any UI:
 
 ## 🎓 Design Resources
 
-- **Figma File**: [Coming Soon]
-- **Component Library**: shadcn/ui customized
-- **Icons**: Lucide Icons
-- **Charts**: Recharts
+`apps/web` has no UI component library, icon package, or charting library as a dependency today;
+components are hand-built with plain React/CSS.
+
 - **Examples**: Linear, Vercel, Stripe
 
 ---
