@@ -1,167 +1,63 @@
 # 🚀 Quick Start Guide
 
-Get RIVET running in 5 minutes.
+RIVET is a Phase 1 MVP monorepo, not yet published as a standalone package. Run it from
+within the repo via the pnpm workspace filter.
 
 ---
 
-## 📦 Installation
+## 📦 Setup
 
-### Option 1: npm/pnpm (Recommended)
-```bash
-npm install -g rivet
-# or
-pnpm add -g rivet
-```
-
-### Option 2: npx (No installation)
-```bash
-npx rivet scan
-```
-
-### Option 3: From Source
 ```bash
 git clone https://github.com/elizabethstein/rivet.git
 cd rivet
 pnpm install
 pnpm build
-pnpm link --global
 ```
-
----
 
 ## ⚙️ Configuration
 
-### 1. Initialize Project
-```bash
-cd your-project
-rivet init
-```
-
-This creates `.rivetrc.json`:
-```json
-{
-  "engines": {
-    "security": { "enabled": true },
-    "bugs": { "enabled": true },
-    "smells": { "enabled": true }
-  },
-  "llm": {
-    "provider": "openai",
-    "model": "gpt-4"
-  }
-}
-```
-
-### 2. Set API Key
+### Set an API key (only needed for `--ai`)
 ```bash
 # Add to .env or .env.local
 echo "OPENAI_API_KEY=sk-..." >> .env.local
 ```
-
-**Alternatives:**
-- **Anthropic**: `ANTHROPIC_API_KEY=sk-ant-...`
-- **Ollama** (local): No API key needed
+`--ai` calls OpenAI (`packages/ai/src/enhancer.ts`); no other provider is wired.
 
 ---
 
 ## 🔍 First Scan
 
 ```bash
-rivet scan
+pnpm --filter @rivet/cli dev scan /path/to/project
 ```
 
-**Output:**
+Real `scan` flags (`apps/cli/src/commands/scan.ts`):
 ```
-╭─ Tech Debt Score ────────────────────╮
-│            72/100  ⚠                  │
-╰───────────────────────────────────────╯
-
-╭─ Critical Issues ─────────────────────╮
-│ ⚠ SQL Injection in auth.ts:42        │
-│ ⚠ Exposed API key in config.ts:12    │
-╰───────────────────────────────────────╯
-
-Scanned 245 files in 3.2s
-Found 23 issues (2 critical, 5 high, 16 medium)
-
-✓ Fixed 12 issues automatically
+--format <format>       cli, json, sarif, html (default: cli)
+--output <path>         output file path for json/sarif/html
+--severity <level>      minimum severity: critical, high, medium, low, info
+--max-issues <number>   default: 100
+--ai                    AI explanations/suggestions (requires OPENAI_API_KEY)
+--ai-model <model>      gpt-4, gpt-3.5-turbo (default: gpt-4)
+--tech-debt             technical debt metrics with time estimates
+--watch                 re-run analysis when files change
 ```
 
----
+Example with AI explanations and tech-debt metrics:
+```bash
+pnpm --filter @rivet/cli dev scan --ai --tech-debt /path/to/project
+```
 
 ## 🔧 Fix Issues
 
-### Safe Auto-Fix
 ```bash
-rivet fix --safe
-```
-Automatically fixes issues with no risk.
-
-### Interactive Fix
-```bash
-rivet fix
-```
-Review each fix before applying.
-
----
-
-## 📊 Common Commands
-
-### Security Audit
-```bash
-rivet scan --only security --fail-on critical
+pnpm --filter @rivet/cli dev fix /path/to/project
 ```
 
-### Dependency Check
-```bash
-rivet deps check
-rivet deps update --safe
+Real `fix` flags (`apps/cli/src/commands/fix.ts`):
 ```
-
-### Flow Testing
-```bash
-rivet flows scan
-rivet flows generate payment --framework playwright
-```
-
-### Modernize Code
-```bash
-rivet modernize --all
-```
-
-### Watch Mode
-```bash
-rivet scan --watch
-```
-
----
-
-## 🎯 CI/CD Integration
-
-### GitHub Actions
-```yaml
-# .github/workflows/code-quality.yml
-name: Code Quality
-
-on: [push, pull_request]
-
-jobs:
-  rivet:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      
-      - name: Install RIVET
-        run: npm install -g rivet
-      
-      - name: Run Scan
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: rivet ci --fail-on critical
+--severity <level>   minimum severity to fix
+--dry-run            show what would be fixed without making changes
 ```
 
 ---

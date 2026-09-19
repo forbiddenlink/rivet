@@ -57,14 +57,13 @@ enhanced.forEach(detection => {
 })
 ```
 
-### Option 2: CLI Integration (Coming Soon)
+### Option 2: CLI Integration
 
-The next step is to add `--ai` flag to the CLI:
+`--ai` and `--tech-debt` are wired into `rivet scan` (`apps/cli/src/commands/scan.ts`):
 
 ```bash
-# Future usage:
-rivet scan ./src --ai
-rivet scan ./src --ai --tech-debt
+pnpm --filter @rivet/cli dev scan ./src --ai
+pnpm --filter @rivet/cli dev scan ./src --ai --tech-debt
 ```
 
 ## AI Features

@@ -1,6 +1,5 @@
 # RIVET 🔩
 
-[![npm version](https://img.shields.io/npm/v/rivet?color=f59e0b&logo=npm)](https://www.npmjs.com/package/rivet)
 [![License: MIT](https://img.shields.io/badge/License-MIT-f59e0b.svg)](./LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-f59e0b?logo=typescript)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-f59e0b?logo=node.js)](https://nodejs.org/)

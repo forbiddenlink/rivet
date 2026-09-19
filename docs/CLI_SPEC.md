@@ -1,12 +1,17 @@
 # RIVET CLI Specification
 
-Complete command-line interface documentation.
+Target CLI design. **Only `scan` and `fix` are implemented today** (Phase 1 MVP,
+`apps/cli/src/commands/{scan,fix}.ts`); every other command below (`deps`, `flows`, `refactor`,
+`modernize`, `migrate`, `score`, `bundle`, `coverage`, `report`, `explain`, `learn`, `ci`,
+`init`) is planned, not built. RIVET is not published to npm; run it from the monorepo via
+`pnpm --filter @rivet/cli dev <command>` (see `QUICK_START.md`). Flag lists under `scan`/`fix`
+below include planned flags beyond what `apps/cli/src/commands/scan.ts`/`fix.ts` accept today;
+see `QUICK_START.md` for the flags that are real now.
 
 ---
 
 ## 📋 Table of Contents
 
-- [Installation](#installation)
 - [Global Options](#global-options)
 - [Commands](#commands)
 - [Configuration](#configuration)
@@ -15,24 +20,7 @@ Complete command-line interface documentation.
 
 ---
 
-## 📦 Installation
-
-```bash
-# Global installation
-npm install -g rivet
-
-# Project installation
-npm install --save-dev rivet
-
-# Using npx (no installation)
-npx rivet scan
-```
-
----
-
-## ⚙️ Global Options
-
-Available for all commands:
+## ⚙️ Global Options (planned)
 
 ```bash
 rivet [command] [options]
@@ -45,6 +33,9 @@ Options:
   --version              Show version number
   -h, --help             Show help
 ```
+
+Today, only Commander's default `--version`/`--help` exist on the root `rivet` command; the
+other global flags are not wired.
 
 ---
 

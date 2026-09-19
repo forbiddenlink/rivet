@@ -1,6 +1,13 @@
 # RIVET Configuration
 
-RIVET can be configured via a `.rivetrc.json` file in your project root.
+Target configuration design. **What's implemented today** (`packages/core/src/config.ts`):
+config is loaded from `rivet.config.js`, `rivet.config.mjs`, `rivet.config.cjs`, or
+`.rivetrc.js` (JS, not JSON), merged with defaults. The real `RivetConfig` shape
+(`packages/core/src/types.ts`) is `{ engines, include, exclude, ignore, severity: { minLevel },
+output: { format, path }, maxIssues, engineConfig }` - flat, not the nested `engines.enabled/
+disabled`, `ai`, `autofix`, or `integrations` shape shown below. `RIVET_CONFIG`/
+`RIVET_CACHE_DIR` env vars and multi-project config inheritance are not implemented. The
+example and options below describe the target design.
 
 ## Example Configuration
 
