@@ -12,15 +12,15 @@
     "ai",
     "developer-tools"
   ],
-  "homepage": "https://github.com/elizabethstein/rivet#readme",
+  "homepage": "https://github.com/forbiddenlink/rivet#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/elizabethstein/rivet.git"
+    "url": "https://github.com/forbiddenlink/rivet.git"
   },
   "license": "MIT",
   "author": {
     "name": "Elizabeth Stein",
-    "email": "elizabeth@example.com"
+    "url": "https://github.com/forbiddenlink"
   },
   "workspaces": [
     "apps/*",
@@ -31,7 +31,7 @@
     "build": "turbo run build",
     "test": "turbo run test",
     "test:watch": "turbo run test:watch",
-    "lint": "biome check .",
+    "lint": "biome check . && node scripts/check-no-stray-build-output.mjs",
     "lint:fix": "biome check . --write",
     "format": "biome format . --write",
     "format:check": "biome format . --check",
@@ -42,7 +42,9 @@
     "clean": "turbo run clean && rm -rf node_modules",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "turbo run build && changeset publish"
+    "release": "turbo run build && changeset publish",
+    "check:stray": "node scripts/check-no-stray-build-output.mjs",
+    "clean:stray": "find apps packages -path '*/src/*' \\( -name '*.js' -o -name '*.js.map' -o -name '*.d.ts' -o -name '*.d.ts.map' \\) -not -path '*/node_modules/*' -not -name 'next-env.d.ts' -delete"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.12",

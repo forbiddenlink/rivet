@@ -1,15 +1,28 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": ["**/.env.*local", "tsconfig.json"],
+  "globalDependencies": [
+    "**/.env.*local",
+    "tsconfig.json"
+  ],
   "ui": "tui",
   "remoteCache": {
     "enabled": true
   },
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", "!**/*.test.ts", "!**/*.spec.ts"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!**/*.test.ts",
+        "!**/*.spec.ts"
+      ],
+      "outputs": [
+        "dist/**",
+        ".next/**",
+        "!.next/cache/**"
+      ],
       "outputLogs": "new-only"
     },
     "dev": {
@@ -17,9 +30,15 @@
       "persistent": true
     },
     "test": {
-      "dependsOn": ["build"],
-      "inputs": ["$TURBO_DEFAULT$", "**/*.test.ts", "**/*.spec.ts"],
-      "outputs": ["coverage/**"],
+      "dependsOn": [
+        "build"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "**/*.test.ts",
+        "**/*.spec.ts"
+      ],
+      "outputs": [],
       "outputLogs": "new-only"
     },
     "test:watch": {
@@ -27,13 +46,24 @@
       "persistent": true
     },
     "typecheck": {
-      "dependsOn": ["^typecheck"],
-      "inputs": ["$TURBO_DEFAULT$", "tsconfig.json"],
-      "outputs": ["*.tsbuildinfo"],
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "tsconfig.json"
+      ],
+      "outputs": [
+        "*.tsbuildinfo"
+      ],
       "outputLogs": "new-only"
     },
     "clean": {
       "cache": false
+    },
+    "lint": {
+      "dependsOn": [],
+      "outputs": []
     }
   }
 }

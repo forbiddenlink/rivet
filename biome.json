@@ -16,10 +16,22 @@
       "!**/.vercel",
       "!**/coverage",
       "!**/*.min.js",
-      "!**/public"
+      "!**/public",
+      "!**/.turbo",
+      "!**/.history",
+      "!pnpm-lock.yaml",
+      "!**/*.d.ts",
+      "!packages/*/src/**/*.js",
+      "!examples"
     ]
   },
-  "assist": { "actions": { "source": { "organizeImports": "on" } } },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
@@ -68,5 +80,36 @@
       "semicolons": "asNeeded",
       "trailingCommas": "es5"
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": [
+        "apps/cli/**"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "**/*.test.ts",
+        "**/*.test.tsx"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "noNonNullAssertion": "off"
+          },
+          "suspicious": {
+            "noExplicitAny": "off",
+            "noConsole": "off"
+          }
+        }
+      }
+    }
+  ]
 }

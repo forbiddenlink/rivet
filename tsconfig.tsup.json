@@ -5,5 +5,7 @@
     "incremental": false,
     "declaration": true,
     "declarationMap": true
-  }
+  },
+  "include": ["packages/*/src/**/*.ts", "packages/engines/*/src/**/*.ts", "apps/cli/src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "build", ".next", "**/*.test.ts"]
 }
