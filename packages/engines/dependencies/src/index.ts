@@ -1,10 +1,9 @@
 import type { AnalysisContext, AnalysisEngine, Detection } from '@rivet/core'
-
-import { detectUnusedCode } from './detectors/unused-code'
+import { detectBarrelFiles } from './detectors/barrel-files'
 import { detectCircularImports } from './detectors/circular-imports'
 import { detectDuplicateImports } from './detectors/duplicate-imports'
-import { detectBarrelFiles } from './detectors/barrel-files'
 import { detectSideEffectImports } from './detectors/side-effect-imports'
+import { detectUnusedCode } from './detectors/unused-code'
 
 export class DependenciesEngine implements AnalysisEngine {
   name = 'DependenciesEngine'
@@ -26,8 +25,8 @@ export class DependenciesEngine implements AnalysisEngine {
   }
 }
 
-export * from './detectors/unused-code'
+export * from './detectors/barrel-files'
 export * from './detectors/circular-imports'
 export * from './detectors/duplicate-imports'
-export * from './detectors/barrel-files'
 export * from './detectors/side-effect-imports'
+export * from './detectors/unused-code'

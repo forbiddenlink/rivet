@@ -9,10 +9,7 @@ let detectionCounter = 0
  * - Missing error context
  * - Not using Error objects
  */
-export function detectErrorHandling(
-  ast: ASTNode,
-  filePath: string
-): Detection[] {
+export function detectErrorHandling(ast: ASTNode, filePath: string): Detection[] {
   const detections: Detection[] = []
 
   function visit(node: ASTNode): void {
@@ -49,10 +46,7 @@ export function detectErrorHandling(
     if (node.type === 'NewExpression' && node.children) {
       // Find the Error identifier - could be at any position in children
       const errorIdentifier = node.children.find(
-        (c) =>
-          c.type === 'Identifier' &&
-          c.raw.type === 'Identifier' &&
-          c.raw.name === 'Error'
+        (c) => c.type === 'Identifier' && c.raw.type === 'Identifier' && c.raw.name === 'Error'
       )
 
       if (errorIdentifier) {
@@ -65,8 +59,7 @@ export function detectErrorHandling(
           const message = messageLiteral.raw.value
           if (
             typeof message === 'string' &&
-            (message.toLowerCase() === 'error' ||
-              message.toLowerCase() === 'an error occurred')
+            (message.toLowerCase() === 'error' || message.toLowerCase() === 'an error occurred')
           ) {
             detections.push({
               id: `practices-${++detectionCounter}`,

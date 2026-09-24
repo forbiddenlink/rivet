@@ -1,5 +1,5 @@
-import type { ASTNode } from '@rivet/parsers'
 import type { Detection } from '@rivet/core'
+import type { ASTNode } from '@rivet/parsers'
 
 let detectionCounter = 0
 
@@ -12,11 +12,11 @@ export function detectConsoleStatements(ast: ASTNode, filePath: string): Detecti
   function visit(node: ASTNode): void {
     if (node.type === 'CallExpression' && node.children) {
       const callee = node.children[0]
-      
+
       if (callee && callee.type === 'MemberExpression' && callee.children) {
         const obj = callee.children[0]
         const prop = callee.children[1]
-        
+
         if (
           obj &&
           obj.type === 'Identifier' &&
@@ -27,7 +27,7 @@ export function detectConsoleStatements(ast: ASTNode, filePath: string): Detecti
           prop.raw.type === 'Identifier'
         ) {
           const method = prop.raw.name
-          
+
           detections.push({
             id: `practices-${++detectionCounter}`,
             ruleId: 'console-statement',

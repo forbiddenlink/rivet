@@ -1,4 +1,24 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { DEFAULT_EXPLAIN_MODEL } from '@rivet/core'
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { clientKey, rateLimit, rateLimitHeaders } from '@/lib/rate-limit'
+
+export const runtime = 'nodejs'
+export const maxDuration = 30
+
+// This route spends money: it is unauthenticated and calls OpenAI on the project's
+// key. The cap is tighter than /api/analyze for that reason.
+const RATE_LIMIT = { limit: 6, windowMs: 60_000 }
+
+// The detection fields are pasted straight into the model prompt, so they are
+// truncated first. An unbounded message is both a cost multiplier and the obvious
+// place to smuggle instructions into the prompt.
+const MAX_PROMPT_FIELD = 500
+const MAX_CODE_CHARS = 4_000
+
+function clamp(value: unknown, max: number): string {
+  return typeof value === 'string' ? value.slice(0, max) : ''
+}
 
 interface ExplanationRequest {
   detection: {
@@ -16,7 +36,7 @@ interface ExplanationResponse {
   references?: string[]
 }
 
-const REPO = 'https://github.com/elizabethstein/rivet'
+const REPO = 'https://github.com/forbiddenlink/rivet'
 
 function localExplanation(detection: ExplanationRequest['detection']): ExplanationResponse {
   const categoryGuides: Record<string, { why: string; fix: string; refs: string[] }> = {
@@ -78,13 +98,28 @@ function localExplanation(detection: ExplanationRequest['detection']): Explanati
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<ExplanationResponse | { error: string }>> {
+  const limit = rateLimit(clientKey(request), RATE_LIMIT)
+  if (!limit.ok) {
+    return NextResponse.json(
+      { error: `Too many explanation requests. Try again in ${limit.retryAfter}s.` },
+      { status: 429, headers: rateLimitHeaders(limit) }
+    )
+  }
+
   try {
     const body: ExplanationRequest = await request.json()
-    const { detection, code } = body
 
-    if (!detection) {
+    if (!body?.detection) {
       return NextResponse.json({ error: 'Detection is required' }, { status: 400 })
     }
+
+    const detection: ExplanationRequest['detection'] = {
+      message: clamp(body.detection.message, MAX_PROMPT_FIELD),
+      severity: clamp(body.detection.severity, 32),
+      category: clamp(body.detection.category, 32),
+      ruleId: clamp(body.detection.ruleId, 64),
+    }
+    const code = clamp(body.code, MAX_CODE_CHARS)
 
     const apiKey = process.env.OPENAI_API_KEY
     if (!apiKey) {
@@ -98,7 +133,7 @@ export async function POST(
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: process.env.OPENAI_MODEL || DEFAULT_EXPLAIN_MODEL,
         messages: [
           {
             role: 'system',
@@ -140,16 +175,17 @@ REMEDIATION:
     const remediationMatch = explanationText.match(/REMEDIATION:\s*([\s\S]*?)$/i)
 
     return NextResponse.json({
-      explanation: explanationMatch?.[1]?.trim() || explanationText.trim() || localExplanation(detection).explanation,
-      remediation:
-        remediationMatch?.[1]?.trim() || localExplanation(detection).remediation,
+      explanation:
+        explanationMatch?.[1]?.trim() ||
+        explanationText.trim() ||
+        localExplanation(detection).explanation,
+      remediation: remediationMatch?.[1]?.trim() || localExplanation(detection).remediation,
       references: localExplanation(detection).references,
     })
   } catch (error) {
+    // Logged server-side; the client gets a fixed message rather than upstream
+    // error text, which can quote the request sent to OpenAI.
     console.error('Explanation error:', error)
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to generate explanation' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to generate explanation' }, { status: 500 })
   }
 }

@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
 import { parseTypeScript } from '@rivet/parsers'
+import { describe, expect, it } from 'vitest'
 import { detectNestedLoops } from './nested-loops'
 
 describe('Nested Loops Detector', () => {
@@ -55,8 +55,8 @@ describe('Nested Loops Detector', () => {
 
       // Should detect both the 2nd and 3rd level nesting
       expect(detections.length).toBe(2)
-      expect(detections.some(d => d.message.includes('O(n^2)'))).toBe(true)
-      expect(detections.some(d => d.message.includes('O(n^3)'))).toBe(true)
+      expect(detections.some((d) => d.message.includes('O(n^2)'))).toBe(true)
+      expect(detections.some((d) => d.message.includes('O(n^3)'))).toBe(true)
     })
 
     it('should not flag single loops', () => {
@@ -265,7 +265,7 @@ describe('Nested Loops Detector', () => {
       })
 
       const detections = detectNestedLoops(ast, 'test.ts')
-      const deepNesting = detections.filter(d => d.message.includes('O(n^3)'))
+      const deepNesting = detections.filter((d) => d.message.includes('O(n^3)'))
 
       expect(deepNesting[0]?.severity).toBe('high')
     })
@@ -336,7 +336,7 @@ describe('Nested Loops Detector', () => {
       })
 
       const detections = detectNestedLoops(ast, 'test.ts')
-      const deepNesting = detections.filter(d => d.message.includes('O(n^3)'))
+      const deepNesting = detections.filter((d) => d.message.includes('O(n^3)'))
 
       expect(deepNesting[0]?.metadata?.suggestion).toContain('refactor')
     })

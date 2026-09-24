@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
 import { parseTypeScript } from '@rivet/parsers'
+import { describe, expect, it } from 'vitest'
 import { detectBlockingOperations } from './blocking-operations'
 
 describe('Blocking Operations Detector', () => {
@@ -21,7 +21,7 @@ describe('Blocking Operations Detector', () => {
       })
 
       const detections = detectBlockingOperations(ast, 'test.ts')
-      const syncDetections = detections.filter(d => d.ruleId === 'sync-fs-operation')
+      const syncDetections = detections.filter((d) => d.ruleId === 'sync-fs-operation')
 
       expect(syncDetections.length).toBeGreaterThan(0)
       expect(syncDetections[0]?.severity).toBe('high')
@@ -44,7 +44,7 @@ describe('Blocking Operations Detector', () => {
       })
 
       const detections = detectBlockingOperations(ast, 'test.ts')
-      const syncDetections = detections.filter(d => d.ruleId === 'sync-fs-operation')
+      const syncDetections = detections.filter((d) => d.ruleId === 'sync-fs-operation')
 
       expect(syncDetections.length).toBeGreaterThan(0)
       expect(syncDetections[0]?.message).toContain('writeFileSync')
@@ -66,7 +66,7 @@ describe('Blocking Operations Detector', () => {
       })
 
       const detections = detectBlockingOperations(ast, 'test.ts')
-      const syncDetections = detections.filter(d => d.ruleId === 'sync-fs-operation')
+      const syncDetections = detections.filter((d) => d.ruleId === 'sync-fs-operation')
 
       expect(syncDetections.length).toBeGreaterThan(0)
       expect(syncDetections[0]?.message).toContain('existsSync')
@@ -88,7 +88,7 @@ describe('Blocking Operations Detector', () => {
       })
 
       const detections = detectBlockingOperations(ast, 'test.ts')
-      const syncDetections = detections.filter(d => d.ruleId === 'sync-fs-operation')
+      const syncDetections = detections.filter((d) => d.ruleId === 'sync-fs-operation')
 
       expect(syncDetections.length).toBeGreaterThan(0)
     })
@@ -109,7 +109,7 @@ describe('Blocking Operations Detector', () => {
       })
 
       const detections = detectBlockingOperations(ast, 'test.ts')
-      const syncDetections = detections.filter(d => d.ruleId === 'sync-fs-operation')
+      const syncDetections = detections.filter((d) => d.ruleId === 'sync-fs-operation')
 
       expect(syncDetections.length).toBeGreaterThan(0)
     })
@@ -130,7 +130,7 @@ describe('Blocking Operations Detector', () => {
       })
 
       const detections = detectBlockingOperations(ast, 'test.ts')
-      const syncDetections = detections.filter(d => d.ruleId === 'sync-fs-operation')
+      const syncDetections = detections.filter((d) => d.ruleId === 'sync-fs-operation')
 
       expect(syncDetections.length).toBeGreaterThan(0)
     })
@@ -152,7 +152,7 @@ describe('Blocking Operations Detector', () => {
       })
 
       const detections = detectBlockingOperations(ast, 'test.ts')
-      const syncDetections = detections.filter(d => d.ruleId === 'sync-fs-operation')
+      const syncDetections = detections.filter((d) => d.ruleId === 'sync-fs-operation')
 
       expect(syncDetections).toEqual([])
     })
@@ -173,7 +173,7 @@ describe('Blocking Operations Detector', () => {
       })
 
       const detections = detectBlockingOperations(ast, 'test.ts')
-      const syncDetections = detections.filter(d => d.ruleId === 'sync-fs-operation')
+      const syncDetections = detections.filter((d) => d.ruleId === 'sync-fs-operation')
 
       expect(syncDetections).toEqual([])
     })
@@ -196,7 +196,7 @@ describe('Blocking Operations Detector', () => {
       })
 
       const detections = detectBlockingOperations(ast, 'test.ts')
-      const xhrDetections = detections.filter(d => d.ruleId === 'xmlhttprequest-usage')
+      const xhrDetections = detections.filter((d) => d.ruleId === 'xmlhttprequest-usage')
 
       expect(xhrDetections.length).toBeGreaterThan(0)
       expect(xhrDetections[0]?.severity).toBe('medium')
@@ -219,7 +219,7 @@ describe('Blocking Operations Detector', () => {
       })
 
       const detections = detectBlockingOperations(ast, 'test.ts')
-      const xhrDetections = detections.filter(d => d.ruleId === 'xmlhttprequest-usage')
+      const xhrDetections = detections.filter((d) => d.ruleId === 'xmlhttprequest-usage')
 
       expect(xhrDetections).toEqual([])
     })
@@ -241,7 +241,7 @@ describe('Blocking Operations Detector', () => {
       })
 
       const detections = detectBlockingOperations(ast, 'test.ts')
-      const xhrDetections = detections.filter(d => d.ruleId === 'xmlhttprequest-usage')
+      const xhrDetections = detections.filter((d) => d.ruleId === 'xmlhttprequest-usage')
 
       expect(xhrDetections).toEqual([])
     })
@@ -266,7 +266,7 @@ describe('Blocking Operations Detector', () => {
       })
 
       const detections = detectBlockingOperations(ast, 'test.ts')
-      const blockingLoopDetections = detections.filter(d => d.ruleId === 'blocking-loop')
+      const blockingLoopDetections = detections.filter((d) => d.ruleId === 'blocking-loop')
 
       expect(blockingLoopDetections.length).toBeGreaterThan(0)
       expect(blockingLoopDetections[0]?.severity).toBe('medium')
@@ -292,7 +292,7 @@ describe('Blocking Operations Detector', () => {
       })
 
       const detections = detectBlockingOperations(ast, 'test.ts')
-      const blockingLoopDetections = detections.filter(d => d.ruleId === 'blocking-loop')
+      const blockingLoopDetections = detections.filter((d) => d.ruleId === 'blocking-loop')
 
       expect(blockingLoopDetections.length).toBeGreaterThan(0)
     })
@@ -313,7 +313,7 @@ describe('Blocking Operations Detector', () => {
       })
 
       const detections = detectBlockingOperations(ast, 'test.ts')
-      const blockingLoopDetections = detections.filter(d => d.ruleId === 'blocking-loop')
+      const blockingLoopDetections = detections.filter((d) => d.ruleId === 'blocking-loop')
 
       expect(blockingLoopDetections).toEqual([])
     })
@@ -334,7 +334,7 @@ describe('Blocking Operations Detector', () => {
       })
 
       const detections = detectBlockingOperations(ast, 'test.ts')
-      const blockingLoopDetections = detections.filter(d => d.ruleId === 'blocking-loop')
+      const blockingLoopDetections = detections.filter((d) => d.ruleId === 'blocking-loop')
 
       expect(blockingLoopDetections).toEqual([])
     })
@@ -357,7 +357,7 @@ describe('Blocking Operations Detector', () => {
       })
 
       const detections = detectBlockingOperations(ast, 'test.ts')
-      const syncDetections = detections.filter(d => d.ruleId === 'sync-fs-operation')
+      const syncDetections = detections.filter((d) => d.ruleId === 'sync-fs-operation')
 
       expect(syncDetections[0]?.metadata?.method).toBe('readFileSync')
       expect(syncDetections[0]?.metadata?.suggestion).toContain('readFile')
@@ -378,7 +378,7 @@ describe('Blocking Operations Detector', () => {
       })
 
       const detections = detectBlockingOperations(ast, 'test.ts')
-      const xhrDetections = detections.filter(d => d.ruleId === 'xmlhttprequest-usage')
+      const xhrDetections = detections.filter((d) => d.ruleId === 'xmlhttprequest-usage')
 
       expect(xhrDetections[0]?.metadata?.suggestion).toContain('fetch')
     })
@@ -399,7 +399,7 @@ describe('Blocking Operations Detector', () => {
       })
 
       const detections = detectBlockingOperations(ast, 'test.ts')
-      const blockingLoopDetections = detections.filter(d => d.ruleId === 'blocking-loop')
+      const blockingLoopDetections = detections.filter((d) => d.ruleId === 'blocking-loop')
 
       expect(blockingLoopDetections[0]?.metadata?.suggestion).toContain('Web Workers')
     })
@@ -427,7 +427,7 @@ describe('Blocking Operations Detector', () => {
       })
 
       const detections = detectBlockingOperations(ast, 'test.ts')
-      const syncDetections = detections.filter(d => d.ruleId === 'sync-fs-operation')
+      const syncDetections = detections.filter((d) => d.ruleId === 'sync-fs-operation')
 
       expect(syncDetections.length).toBe(3)
     })
@@ -453,8 +453,8 @@ describe('Blocking Operations Detector', () => {
       const detections = detectBlockingOperations(ast, 'test.ts')
 
       // Should detect both the blocking loop and the sync fs operation
-      const syncDetections = detections.filter(d => d.ruleId === 'sync-fs-operation')
-      const blockingLoopDetections = detections.filter(d => d.ruleId === 'blocking-loop')
+      const syncDetections = detections.filter((d) => d.ruleId === 'sync-fs-operation')
+      const blockingLoopDetections = detections.filter((d) => d.ruleId === 'blocking-loop')
 
       expect(syncDetections.length).toBeGreaterThan(0)
       expect(blockingLoopDetections.length).toBeGreaterThan(0)
@@ -482,7 +482,7 @@ describe('Blocking Operations Detector', () => {
       })
 
       const detections = detectBlockingOperations(ast, 'test.ts')
-      const syncDetections = detections.filter(d => d.ruleId === 'sync-fs-operation')
+      const syncDetections = detections.filter((d) => d.ruleId === 'sync-fs-operation')
 
       expect(syncDetections).toEqual([])
     })

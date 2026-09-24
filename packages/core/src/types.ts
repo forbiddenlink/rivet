@@ -89,7 +89,7 @@ export interface AnalysisEngine {
  */
 export interface RivetConfig {
   /** Engines to run */
-  engines?: Record<string, unknown>
+  engines?: Category[]
   /** Files to include (glob patterns) */
   include?: string[]
   /** Files to exclude (glob patterns) */
@@ -107,6 +107,8 @@ export interface RivetConfig {
   }
   /** Maximum number of issues to report */
   maxIssues?: number
+  /** Skip files the project's .gitignore excludes (default: true) */
+  respectGitignore?: boolean
   /** Engine-specific configuration */
   engineConfig?: Record<string, unknown>
 }
@@ -115,8 +117,14 @@ export interface RivetConfig {
  * Result of running the RIVET engine
  */
 export interface AnalysisResult {
-  /** All detections found */
+  /** Detections being reported, after severity filtering and the maxIssues cap */
   detections: Detection[]
+  /**
+   * How many detections survived severity filtering before `maxIssues` truncated
+   * the list. Equal to `detections.length` unless the cap was hit — a caller that
+   * ignores this reports "100 issues" on a project that has a thousand.
+   */
+  totalDetections: number
   /** Files analyzed */
   filesAnalyzed: number
   /** Time taken (ms) */

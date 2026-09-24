@@ -31,7 +31,7 @@ export class TechDebtCalculator {
     }
 
     for (const detection of detections) {
-      const hours = this.TIME_ESTIMATES[detection.severity] || 0
+      const hours = TechDebtCalculator.TIME_ESTIMATES[detection.severity] || 0
 
       metrics.totalDebt += hours
 

@@ -2,7 +2,9 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
+
+import { clientKey, rateLimit, rateLimitHeaders } from '@/lib/rate-limit'
 
 interface AnalysisRequest {
   code: string
@@ -47,9 +49,30 @@ interface AnalysisResponse {
 const SEVERITY_RANK = { critical: 4, high: 3, medium: 2, low: 1, info: 0 }
 const MAX_CODE_BYTES = 200_000
 
+// The route writes to a temp directory and loads the engine packages, so it cannot
+// run on the edge runtime. Stating it explicitly stops a future config change from
+// silently moving it somewhere node:fs does not exist.
+export const runtime = 'nodejs'
+
+// Eight engines parsing up to 200KB of hostile input takes real time. Without this,
+// the platform default cuts the response off mid-scan and the caller sees a timeout
+// rather than a result.
+export const maxDuration = 60
+
+// Unauthenticated and CPU-bound: the limit is what stops one caller pinning a worker.
+const RATE_LIMIT = { limit: 10, windowMs: 60_000 }
+
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<AnalysisResponse | { error: string }>> {
+  const limit = rateLimit(clientKey(request), RATE_LIMIT)
+  if (!limit.ok) {
+    return NextResponse.json(
+      { error: `Too many analysis requests. Try again in ${limit.retryAfter}s.` },
+      { status: 429, headers: rateLimitHeaders(limit) }
+    )
+  }
+
   let tmpDir: string | null = null
 
   try {
@@ -61,7 +84,9 @@ export async function POST(
 
     if (Buffer.byteLength(body.code, 'utf8') > MAX_CODE_BYTES) {
       return NextResponse.json(
-        { error: `Code exceeds ${MAX_CODE_BYTES / 1000}KB limit for web analysis. Use the CLI for larger projects.` },
+        {
+          error: `Code exceeds ${MAX_CODE_BYTES / 1000}KB limit for web analysis. Use the CLI for larger projects.`,
+        },
         { status: 413 }
       )
     }
@@ -151,11 +176,11 @@ export async function POST(
       },
     })
   } catch (error) {
+    // Logged in full server-side; the client gets a fixed message. The raw error
+    // carries temp-directory paths and engine internals that a public endpoint
+    // should not hand back.
     console.error('Analysis error:', error)
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Analysis failed' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Analysis failed' }, { status: 500 })
   } finally {
     if (tmpDir) {
       try {

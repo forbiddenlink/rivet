@@ -1,5 +1,5 @@
-import type { ASTNode } from '@rivet/parsers'
 import type { Detection } from '@rivet/core'
+import type { ASTNode } from '@rivet/parsers'
 
 let detectionCounter = 0
 
@@ -20,11 +20,11 @@ export function detectDocumentation(ast: ASTNode, filePath: string): Detection[]
       node.children
     ) {
       const hasJSDoc = hasJSDocComment(node)
-      
+
       if (!hasJSDoc) {
         const nameNode = node.children.find((child) => child.type === 'Identifier')
         const name = nameNode?.raw.type === 'Identifier' ? nameNode.raw.name : '<anonymous>'
-        
+
         detections.push({
           id: `practices-${++detectionCounter}`,
           ruleId: 'missing-documentation',

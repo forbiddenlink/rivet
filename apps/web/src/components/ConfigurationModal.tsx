@@ -101,12 +101,7 @@ export function ConfigurationModal({
   return (
     <>
       <div className="modal-backdrop" onClick={onClose} aria-hidden="true" />
-      <div
-        className="modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="config-modal-title"
-      >
+      <div className="modal" role="dialog" aria-modal="true" aria-labelledby="config-modal-title">
         <div className="modal__header">
           <h2 id="config-modal-title" className="modal__title">
             Configuration

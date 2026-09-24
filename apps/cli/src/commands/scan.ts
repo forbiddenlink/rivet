@@ -1,20 +1,55 @@
-import { RivetEngine, type RivetConfig, type Severity } from '@rivet/core'
-import { SmellsEngine } from '@rivet/engine-smells'
-import { SecurityEngine } from '@rivet/engine-security'
-import { BugEngine } from '@rivet/engine-bugs'
-import { PerformanceEngine } from '@rivet/engine-performance'
-import { ArchitectureEngine } from '@rivet/engine-architecture'
-import { PracticesEngine } from '@rivet/engine-practices'
-import { DependenciesEngine } from '@rivet/engine-dependencies'
-import { AIEnhancer, TechDebtCalculator, type AIConfig } from '@rivet/ai'
-import { Command } from 'commander'
 import { resolve } from 'node:path'
+import {
+  type AIConfig,
+  AIEnhancer,
+  DEFAULT_OPENAI_MODEL,
+  resolveModel,
+  TechDebtCalculator,
+} from '@rivet/ai'
+import {
+  type Detection,
+  loadConfig,
+  type RivetConfig,
+  RivetEngine,
+  type Severity,
+} from '@rivet/core'
+import { ArchitectureEngine } from '@rivet/engine-architecture'
+import { BugEngine } from '@rivet/engine-bugs'
+import { DependenciesEngine } from '@rivet/engine-dependencies'
+import { FlowsEngine } from '@rivet/engine-flows'
+import { PerformanceEngine } from '@rivet/engine-performance'
+import { PracticesEngine } from '@rivet/engine-practices'
+import { SecurityEngine } from '@rivet/engine-security'
+import { SmellsEngine } from '@rivet/engine-smells'
 import chalk from 'chalk'
-import ora from 'ora'
 import chokidar from 'chokidar'
+import { Command } from 'commander'
+import ora from 'ora'
 
 import { formatResults, formatTechDebt } from '../formatter'
 import { createFormatter } from '../formatters'
+
+export function createAnalysisEngine(config: RivetConfig): RivetEngine {
+  const engine = new RivetEngine(config)
+
+  engine.registerEngine(new SmellsEngine())
+  engine.registerEngine(new SecurityEngine())
+  engine.registerEngine(new BugEngine())
+  engine.registerEngine(new PerformanceEngine())
+  engine.registerEngine(new ArchitectureEngine())
+  engine.registerEngine(new PracticesEngine())
+  engine.registerEngine(new DependenciesEngine())
+  engine.registerEngine(new FlowsEngine())
+
+  return engine
+}
+
+export function shouldFailForSeverity(detections: Detection[], failOn: Severity): boolean {
+  const severityOrder: Severity[] = ['critical', 'high', 'medium', 'low', 'info']
+  const threshold = severityOrder.indexOf(failOn)
+
+  return detections.some((detection) => severityOrder.indexOf(detection.severity) <= threshold)
+}
 
 /**
  * Run a single analysis with progress indicators
@@ -30,33 +65,25 @@ async function runAnalysis(
   }).start()
 
   try {
-    // Create and run engine
-    const engine = new RivetEngine(config)
-
-    // Register analysis engines
-    engine.registerEngine(new SmellsEngine())
-    engine.registerEngine(new SecurityEngine())
-    engine.registerEngine(new BugEngine())
-    engine.registerEngine(new PerformanceEngine())
-    engine.registerEngine(new ArchitectureEngine())
-    engine.registerEngine(new PracticesEngine())
-    engine.registerEngine(new DependenciesEngine())
+    const engine = createAnalysisEngine(config)
 
     spinner.text = `Scanning ${projectRoot}...`
 
     const result = await engine.analyze(projectRoot)
-    
-    spinner.succeed(`Analyzed ${result.detections.length} issues across ${result.filesAnalyzed} files`)
-    console.log('')
 
-    spinner.succeed(`Analyzed ${result.detections.length} issues across ${result.filesAnalyzed} files`)
+    const truncated = result.totalDetections > result.detections.length
+    spinner.succeed(
+      truncated
+        ? `Analyzed ${result.filesAnalyzed} files: showing ${result.detections.length} of ${result.totalDetections} issues (raise --max-issues to see the rest)`
+        : `Analyzed ${result.detections.length} issues across ${result.filesAnalyzed} files`
+    )
     console.log('')
 
     // AI Enhancement (if enabled)
     let enhancedResult = result
     if (options.ai) {
       const apiKey = process.env.OPENAI_API_KEY
-      
+
       if (apiKey === undefined || apiKey === '') {
         console.error(chalk.yellow('⚠️  Warning: --ai flag enabled but OPENAI_API_KEY not set'))
         console.error(chalk.dim('   Set your API key: export OPENAI_API_KEY=sk-...'))
@@ -66,25 +93,25 @@ async function runAnalysis(
         console.log('')
       } else {
         const aiSpinner = ora('Enhancing detections with AI...').start()
-        
+
         try {
           const aiConfig: AIConfig = {
             apiKey,
-            model: (options.aiModel as string) || 'gpt-4',
+            model: resolveModel(options.aiModel as string | undefined),
             temperature: 0.7,
             maxTokens: 500,
             enabled: true,
           }
 
           const enhancer = new AIEnhancer(aiConfig)
-          
+
           const enhancedDetections = await enhancer.enhanceDetections(result.detections, 5)
 
           enhancedResult = {
             ...result,
             detections: enhancedDetections,
           }
-          
+
           aiSpinner.succeed(`AI enhancement complete (${aiConfig.model})`)
           console.log('')
         } catch (error) {
@@ -97,7 +124,7 @@ async function runAnalysis(
     }
 
     // Tech Debt Calculation (if enabled)
-    let techDebtMetrics
+    let techDebtMetrics: ReturnType<typeof TechDebtCalculator.calculate> | undefined
     if (options.techDebt) {
       techDebtMetrics = TechDebtCalculator.calculate(enhancedResult.detections)
     }
@@ -107,7 +134,7 @@ async function runAnalysis(
     if (format === 'json' || format === 'sarif' || format === 'html') {
       const formatter = createFormatter(format as 'json' | 'sarif' | 'html')
       const output = formatter.format(enhancedResult.detections)
-      
+
       if (options.output) {
         formatter.write(enhancedResult.detections, options.output as string)
         console.log(chalk.green(`✓ Results written to ${options.output}`))
@@ -116,7 +143,7 @@ async function runAnalysis(
       }
     } else {
       console.log(formatResults(enhancedResult, Boolean(options.ai)))
-      
+
       if (techDebtMetrics) {
         console.log('')
         console.log(formatTechDebt(techDebtMetrics))
@@ -136,21 +163,27 @@ export const scanCommand = new Command('scan')
   .argument('[path]', 'Directory or file to scan', '.')
   .option('--format <format>', 'Output format (cli, json, sarif, html)', 'cli')
   .option('--output <path>', 'Output file path (for json/sarif/html formats)')
-  .option('--severity <level>', 'Minimum severity level (critical, high, medium, low, info)', 'info')
+  .option('--severity <level>', 'Minimum severity level (critical, high, medium, low, info)')
   .option('--max-issues <number>', 'Maximum number of issues to report', '100')
+  .option('--fail-on <level>', 'Exit non-zero for issues at or above this severity', 'high')
   .option('--ai', 'Enable AI-powered explanations and suggestions (requires OPENAI_API_KEY)')
-  .option('--ai-model <model>', 'AI model to use (gpt-4, gpt-3.5-turbo)', 'gpt-4')
+  .option(
+    '--ai-model <model>',
+    `OpenAI model for the --ai pass (defaults to $OPENAI_MODEL, then ${DEFAULT_OPENAI_MODEL})`
+  )
   .option('--tech-debt', 'Show technical debt metrics with time estimates')
   .option('--watch', 'Watch mode - re-run analysis when files change')
   .action(async (targetPath: string, options: Record<string, string | boolean>) => {
     try {
       const projectRoot = resolve(process.cwd(), targetPath)
 
-      // Build configuration
-      const severityLevel = (options.severity as string) || 'info'
+      const fileConfig = await loadConfig(projectRoot)
+      const severityLevel =
+        (options.severity as Severity | undefined) ?? fileConfig.severity?.minLevel ?? 'info'
       const config: RivetConfig = {
+        ...fileConfig,
         severity: { minLevel: severityLevel as Severity },
-        maxIssues: Number.parseInt(options.maxIssues as string || '100', 10),
+        maxIssues: Number.parseInt((options.maxIssues as string) || '100', 10),
       }
 
       // Run initial analysis
@@ -194,7 +227,10 @@ export const scanCommand = new Command('scan')
           try {
             await runAnalysis(projectRoot, options, config)
           } catch (error) {
-            console.error(chalk.red('Error during re-analysis:'), error instanceof Error ? error.message : error)
+            console.error(
+              chalk.red('Error during re-analysis:'),
+              error instanceof Error ? error.message : error
+            )
           }
 
           isAnalyzing = false
@@ -213,15 +249,14 @@ export const scanCommand = new Command('scan')
         await new Promise(() => {})
       }
 
-      // Exit with error code if critical or high severity issues found
-      const hasCriticalIssues = result.detections.some(
-        (d) => d.severity === 'critical' || d.severity === 'high'
-      )
-      if (hasCriticalIssues) {
+      if (shouldFailForSeverity(result.detections, options.failOn as Severity)) {
         process.exit(1)
       }
     } catch (error) {
-      console.error(chalk.red('Error during analysis:'), error instanceof Error ? error.message : error)
+      console.error(
+        chalk.red('Error during analysis:'),
+        error instanceof Error ? error.message : error
+      )
       process.exit(1)
     }
   })

@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
 import { parseTypeScript } from '@rivet/parsers'
+import { describe, expect, it } from 'vitest'
 
 import { detectErrorHandling } from './error-handling'
 
@@ -41,9 +41,7 @@ describe('Error Handling Detector', () => {
 
       const detections = detectErrorHandling(ast, 'test.ts')
 
-      const throwStringDetections = detections.filter(
-        (d) => d.ruleId === 'throw-string'
-      )
+      const throwStringDetections = detections.filter((d) => d.ruleId === 'throw-string')
       expect(throwStringDetections).toEqual([])
     })
   })
@@ -60,9 +58,7 @@ describe('Error Handling Detector', () => {
 
       const detections = detectErrorHandling(ast, 'test.ts')
 
-      const genericDetections = detections.filter(
-        (d) => d.ruleId === 'generic-error-message'
-      )
+      const genericDetections = detections.filter((d) => d.ruleId === 'generic-error-message')
       expect(genericDetections.length).toBe(1)
     })
 
@@ -77,9 +73,7 @@ describe('Error Handling Detector', () => {
 
       const detections = detectErrorHandling(ast, 'test.ts')
 
-      const genericDetections = detections.filter(
-        (d) => d.ruleId === 'generic-error-message'
-      )
+      const genericDetections = detections.filter((d) => d.ruleId === 'generic-error-message')
       expect(genericDetections.length).toBe(1)
     })
 

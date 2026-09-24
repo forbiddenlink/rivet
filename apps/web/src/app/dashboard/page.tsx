@@ -87,12 +87,7 @@ const DEFAULT_CONFIG: AnalysisConfig = {
   ],
 }
 
-const ANALYZE_STAGES = [
-  'Parsing AST…',
-  'Running engines…',
-  'Scoring severity…',
-  'Building report…',
-]
+const ANALYZE_STAGES = ['Parsing AST…', 'Running engines…', 'Scoring severity…', 'Building report…']
 
 const DEMO_CODE = `// Demo snippet with intentional issues for RIVET
 const API_KEY = "sk-live-demo-do-not-use";
@@ -290,7 +285,12 @@ export default function Dashboard() {
           <div className="panel">
             <div className="panel__header">
               <h2 className="panel__title">Analyze</h2>
-              <button type="button" className="btn btn--ghost btn--sm" onClick={loadDemo} disabled={loading}>
+              <button
+                type="button"
+                className="btn btn--ghost btn--sm"
+                onClick={loadDemo}
+                disabled={loading}
+              >
                 Load demo
               </button>
             </div>
@@ -328,22 +328,18 @@ export default function Dashboard() {
                     </span>
                   </div>
                   <div className="analyze-progress__track">
-                    <div
-                      className="analyze-progress__bar"
-                      style={{ width: `${progress}%` }}
-                    />
+                    <div className="analyze-progress__bar" style={{ width: `${progress}%` }} />
                   </div>
                 </div>
               )}
 
-              <div
+              <section
                 style={{
                   marginTop: '1.5rem',
                   marginBottom: '1.5rem',
                   paddingTop: '1.5rem',
                   borderTop: '1px solid var(--border-subtle)',
                 }}
-                role="region"
                 aria-labelledby="file-upload-heading"
               >
                 <h3
@@ -354,9 +350,11 @@ export default function Dashboard() {
                   Or upload a file
                 </h3>
                 <FileUpload onAnalyze={handleFileUpload} isAnalyzing={loading} />
-              </div>
+              </section>
 
-              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.75rem' }}>
+              <div
+                style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.75rem' }}
+              >
                 <button
                   type="button"
                   className="btn btn--primary btn--lg"
@@ -414,7 +412,7 @@ export default function Dashboard() {
               <div className="panel">
                 <div className="empty-state--rich">
                   <div className="empty-state__mark" aria-hidden="true">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                       <path
                         d="M20 6L9 17l-5-5"
                         stroke="currentColor"

@@ -13,7 +13,7 @@ export function detectTypeCoercion(ast: ASTNode, filePath: string): Detection[] 
     // Check for loose equality (== or !=) with non-null values
     if (node.type === 'BinaryExpression' && node.raw.type === 'BinaryExpression') {
       const operator = node.raw.operator
-      
+
       if (operator === '==' || operator === '!=') {
         // Check if comparing to null (which might be intentional)
         const hasNull = node.children?.some(
@@ -69,7 +69,8 @@ export function detectTypeCoercion(ast: ASTNode, filePath: string): Detection[] 
             message: 'Comparing to NaN: use Number.isNaN() instead',
             metadata: {
               pattern: 'nan-comparison',
-              explanation: 'NaN is never equal to anything, including itself. Comparisons always return false.',
+              explanation:
+                'NaN is never equal to anything, including itself. Comparisons always return false.',
               recommendation: 'Use Number.isNaN(value) or isNaN(value) instead',
             },
           })
@@ -130,10 +131,7 @@ export function detectTypeCoercion(ast: ASTNode, filePath: string): Detection[] 
     }
 
     // Check for array/object in boolean context
-    if (
-      (node.type === 'IfStatement' || node.type === 'WhileStatement') &&
-      node.children
-    ) {
+    if ((node.type === 'IfStatement' || node.type === 'WhileStatement') && node.children) {
       const testNode = node.children.find(
         (child) => child.type === 'ArrayExpression' || child.type === 'ObjectExpression'
       )

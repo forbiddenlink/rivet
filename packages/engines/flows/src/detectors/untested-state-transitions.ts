@@ -1,4 +1,4 @@
-import type { Detection, AnalysisContext } from '@rivet/core'
+import type { AnalysisContext, Detection } from '@rivet/core'
 import type { ASTNode } from '@rivet/parsers'
 
 /**
@@ -27,7 +27,8 @@ export function detectUntestedStateTransitions(context: AnalysisContext): Detect
           message: 'useState hook found - ensure state transitions are tested',
           metadata: {
             pattern: 'untested-state',
-            explanation: 'State management logic should be tested to verify correct state transitions',
+            explanation:
+              'State management logic should be tested to verify correct state transitions',
             recommendation: 'Add tests using @testing-library/react to verify state changes',
           },
         })
@@ -58,8 +59,12 @@ export function detectUntestedStateTransitions(context: AnalysisContext): Detect
     // Detect Redux action creators
     if (node.type === 'CallExpression' && node.children) {
       const callee = node.children.find((child) => child.type === 'Identifier')
-      if (callee && callee.raw.type === 'Identifier' && 
-          (callee.raw.name === 'createAction' || callee.raw.name === 'createAsyncThunk') && node.loc) {
+      if (
+        callee &&
+        callee.raw.type === 'Identifier' &&
+        (callee.raw.name === 'createAction' || callee.raw.name === 'createAsyncThunk') &&
+        node.loc
+      ) {
         detections.push({
           id: `untested-action-${++detectionCounter}`,
           ruleId: 'untested-redux-action',
@@ -73,7 +78,8 @@ export function detectUntestedStateTransitions(context: AnalysisContext): Detect
           message: 'Redux action found - ensure action creators and reducers are tested',
           metadata: {
             pattern: 'untested-redux-action',
-            explanation: 'Redux actions and reducers should be tested to verify state management logic',
+            explanation:
+              'Redux actions and reducers should be tested to verify state management logic',
             recommendation: 'Add tests for action creators and verify reducer behavior',
           },
         })

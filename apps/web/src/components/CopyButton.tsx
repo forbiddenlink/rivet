@@ -8,7 +8,11 @@ interface CopyButtonProps {
   className?: string
 }
 
-export function CopyButton({ text, label = 'Copy', className = 'btn btn--ghost btn--sm' }: CopyButtonProps) {
+export function CopyButton({
+  text,
+  label = 'Copy',
+  className = 'btn btn--ghost btn--sm',
+}: CopyButtonProps) {
   const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {

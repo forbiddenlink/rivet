@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
 import { parseTypeScript } from '@rivet/parsers'
+import { describe, expect, it } from 'vitest'
 
 import { detectUnusedCode } from './unused-code'
 
@@ -59,9 +59,7 @@ describe('Unused Code Detector', () => {
 
       const detections = detectUnusedCode(ast, 'test.ts')
 
-      const unusedVarDetection = detections.find((d) =>
-        d.message.includes('unusedVar')
-      )
+      const unusedVarDetection = detections.find((d) => d.message.includes('unusedVar'))
       expect(unusedVarDetection).toBeDefined()
       expect(unusedVarDetection?.severity).toBe('low')
     })
@@ -81,9 +79,7 @@ describe('Unused Code Detector', () => {
 
       const detections = detectUnusedCode(ast, 'test.ts')
 
-      expect(
-        detections.find((d) => d.message.includes('value'))
-      ).toBeUndefined()
+      expect(detections.find((d) => d.message.includes('value'))).toBeUndefined()
     })
   })
 

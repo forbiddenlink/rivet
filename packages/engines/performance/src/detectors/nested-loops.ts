@@ -1,5 +1,5 @@
-import type { ASTNode } from '@rivet/parsers'
 import type { Detection } from '@rivet/core'
+import type { ASTNode } from '@rivet/parsers'
 
 let detectionCounter = 0
 
@@ -44,10 +44,14 @@ export function detectNestedLoops(ast: ASTNode, filePath: string): Detection[] {
       }
 
       // Continue visiting children with increased depth
-      node.children?.forEach((child) => visit(child, depth + 1))
+      node.children?.forEach((child) => {
+        visit(child, depth + 1)
+      })
     } else {
       // Not a loop, maintain current depth
-      node.children?.forEach((child) => visit(child, depth))
+      node.children?.forEach((child) => {
+        visit(child, depth)
+      })
     }
   }
 

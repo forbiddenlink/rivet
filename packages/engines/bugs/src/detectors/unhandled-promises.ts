@@ -118,13 +118,15 @@ function getMethodName(node: ASTNode): string {
 
 function hasErrorHandling(node: ASTNode): boolean {
   // Check if call has .catch() chained
-  return node.children?.some(
-    (child) =>
-      child.type === 'MemberExpression' &&
-      child.children?.some(
-        (c) => c.type === 'Identifier' && c.raw.type === 'Identifier' && c.raw.name === 'catch'
-      )
-  ) || false
+  return (
+    node.children?.some(
+      (child) =>
+        child.type === 'MemberExpression' &&
+        child.children?.some(
+          (c) => c.type === 'Identifier' && c.raw.type === 'Identifier' && c.raw.name === 'catch'
+        )
+    ) || false
+  )
 }
 
 function isAwaitedCall(node: ASTNode): boolean {

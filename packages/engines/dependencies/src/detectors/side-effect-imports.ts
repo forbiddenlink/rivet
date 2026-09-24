@@ -1,15 +1,12 @@
-import type { ASTNode } from '@rivet/parsers'
 import type { Detection } from '@rivet/core'
+import type { ASTNode } from '@rivet/parsers'
 
 let detectionCounter = 0
 
 /**
  * Detect side-effect imports
  */
-export function detectSideEffectImports(
-  ast: ASTNode,
-  filePath: string
-): Detection[] {
+export function detectSideEffectImports(ast: ASTNode, filePath: string): Detection[] {
   const detections: Detection[] = []
 
   function visit(node: ASTNode): void {

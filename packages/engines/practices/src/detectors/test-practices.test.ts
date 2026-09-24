@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
 import { parseTypeScript } from '@rivet/parsers'
+import { describe, expect, it } from 'vitest'
 
 import { detectTestPractices } from './test-practices'
 
@@ -22,9 +22,7 @@ describe('Test Practices Detector', () => {
 
       const detections = detectTestPractices(ast, 'test.test.ts')
 
-      const skipDetections = detections.filter(
-        (d) => d.ruleId === 'test-modifier'
-      )
+      const skipDetections = detections.filter((d) => d.ruleId === 'test-modifier')
       expect(skipDetections.length).toBe(1)
       expect(skipDetections[0]?.message).toContain('.skip()')
     })
@@ -46,9 +44,7 @@ describe('Test Practices Detector', () => {
 
       const detections = detectTestPractices(ast, 'test.test.ts')
 
-      const onlyDetections = detections.filter(
-        (d) => d.ruleId === 'test-modifier'
-      )
+      const onlyDetections = detections.filter((d) => d.ruleId === 'test-modifier')
       expect(onlyDetections.length).toBe(1)
       expect(onlyDetections[0]?.message).toContain('.only()')
     })
@@ -106,9 +102,7 @@ describe('Test Practices Detector', () => {
 
       const detections = detectTestPractices(ast, 'test.ts')
 
-      const debuggerDetections = detections.filter(
-        (d) => d.ruleId === 'debugger-statement'
-      )
+      const debuggerDetections = detections.filter((d) => d.ruleId === 'debugger-statement')
       expect(debuggerDetections.length).toBe(1)
       expect(debuggerDetections[0]?.severity).toBe('medium')
     })
@@ -127,9 +121,7 @@ describe('Test Practices Detector', () => {
 
       const detections = detectTestPractices(ast, 'test.ts')
 
-      const debuggerDetections = detections.filter(
-        (d) => d.ruleId === 'debugger-statement'
-      )
+      const debuggerDetections = detections.filter((d) => d.ruleId === 'debugger-statement')
       expect(debuggerDetections.length).toBe(2)
     })
 

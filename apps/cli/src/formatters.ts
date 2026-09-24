@@ -1,5 +1,6 @@
-import type { Detection } from '@rivet/core'
 import { writeFileSync } from 'node:fs'
+import { isAbsolute, relative, sep } from 'node:path'
+import type { Detection } from '@rivet/core'
 
 /**
  * Output formatter interface
@@ -54,9 +55,7 @@ export class JSONFormatter implements OutputFormatter {
     writeFileSync(outputPath, json, 'utf-8')
   }
 
-  private groupBySeverity(
-    detections: Detection[]
-  ): Record<string, number> {
+  private groupBySeverity(detections: Detection[]): Record<string, number> {
     return detections.reduce(
       (acc, d) => {
         acc[d.severity] = (acc[d.severity] || 0) + 1
@@ -66,9 +65,7 @@ export class JSONFormatter implements OutputFormatter {
     )
   }
 
-  private groupByCategory(
-    detections: Detection[]
-  ): Record<string, number> {
+  private groupByCategory(detections: Detection[]): Record<string, number> {
     return detections.reduce(
       (acc, d) => {
         acc[d.category] = (acc[d.category] || 0) + 1
@@ -83,10 +80,21 @@ export class JSONFormatter implements OutputFormatter {
  * SARIF (Static Analysis Results Interchange Format) formatter
  * Produces SARIF 2.1.0 format for integration with GitHub Code Scanning,
  * Azure DevOps, and other CI/CD tools
- * 
+ *
  * Spec: https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html
  */
 export class SARIFFormatter implements OutputFormatter {
+  /**
+   * SARIF consumers resolve `artifactLocation.uri` against the repository root.
+   * An absolute path from the scanning machine resolves to nothing, so GitHub
+   * code scanning shows the finding with no file to click through to.
+   */
+  private readonly baseUri: string
+
+  constructor(baseUri: string = process.cwd()) {
+    this.baseUri = baseUri
+  }
+
   format(detections: Detection[]): string {
     const rules = this.extractRules(detections)
 
@@ -99,7 +107,7 @@ export class SARIFFormatter implements OutputFormatter {
             driver: {
               name: 'RIVET',
               version: '0.1.0',
-              informationUri: 'https://github.com/yourusername/rivet',
+              informationUri: 'https://github.com/forbiddenlink/rivet',
               rules: rules.map((rule) => ({
                 id: rule.ruleId,
                 shortDescription: {
@@ -120,11 +128,16 @@ export class SARIFFormatter implements OutputFormatter {
             message: {
               text: d.message,
             },
+            // Lets GitHub code scanning match this finding to the same finding on
+            // the next run instead of closing it and opening a new alert.
+            partialFingerprints: {
+              rivetDetectionId: d.id,
+            },
             locations: [
               {
                 physicalLocation: {
                   artifactLocation: {
-                    uri: d.filePath,
+                    uri: this.toRepositoryUri(d.filePath),
                   },
                   region: {
                     startLine: d.loc.start.line,
@@ -157,6 +170,14 @@ export class SARIFFormatter implements OutputFormatter {
     return JSON.stringify(sarif, null, 2)
   }
 
+  /**
+   * Convert an absolute scan path into a repository-relative POSIX URI.
+   */
+  private toRepositoryUri(filePath: string): string {
+    const relativePath = isAbsolute(filePath) ? relative(this.baseUri, filePath) : filePath
+    return relativePath.split(sep).join('/')
+  }
+
   write(detections: Detection[], outputPath: string): void {
     const sarif = this.format(detections)
     writeFileSync(outputPath, sarif, 'utf-8')
@@ -168,7 +189,7 @@ export class SARIFFormatter implements OutputFormatter {
     severity: string
     message: string
   }> {
-    const rulesMap = new Map<string, typeof detections[0]>()
+    const rulesMap = new Map<string, (typeof detections)[0]>()
 
     for (const detection of detections) {
       if (!rulesMap.has(detection.ruleId)) {
@@ -188,9 +209,7 @@ export class SARIFFormatter implements OutputFormatter {
    * Map RIVET severity levels to SARIF levels
    * https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html#_Toc34317648
    */
-  private mapSeverityToLevel(
-    severity: string
-  ): 'error' | 'warning' | 'note' | 'none' {
+  private mapSeverityToLevel(severity: string): 'error' | 'warning' | 'note' | 'none' {
     switch (severity) {
       case 'critical':
       case 'high':
@@ -631,9 +650,7 @@ export class HTMLFormatter implements OutputFormatter {
     writeFileSync(outputPath, html, 'utf-8')
   }
 
-  private groupBySeverity(
-    detections: Detection[]
-  ): Record<string, number> {
+  private groupBySeverity(detections: Detection[]): Record<string, number> {
     return detections.reduce(
       (acc, d) => {
         acc[d.severity] = (acc[d.severity] || 0) + 1
@@ -643,9 +660,7 @@ export class HTMLFormatter implements OutputFormatter {
     )
   }
 
-  private groupByCategory(
-    detections: Detection[]
-  ): Record<string, number> {
+  private groupByCategory(detections: Detection[]): Record<string, number> {
     return detections.reduce(
       (acc, d) => {
         acc[d.category] = (acc[d.category] || 0) + 1

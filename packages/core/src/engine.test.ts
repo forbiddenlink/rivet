@@ -1,13 +1,13 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { RivetEngine } from './engine'
-import type { AnalysisEngine, AnalysisContext, Detection } from './types'
+import type { AnalysisContext, AnalysisEngine, Detection } from './types'
 
 // Mock engine for testing
 class MockEngine implements AnalysisEngine {
   name = 'mock-engine'
   category = 'smells' as const
   description = 'Mock engine for testing'
-  
+
   async analyze(context: AnalysisContext): Promise<Detection[]> {
     return [
       {
@@ -64,7 +64,7 @@ describe('RivetEngine', () => {
     it('should register multiple engines', () => {
       const engine1 = new MockEngine()
       engine1.name = 'engine-1'
-      
+
       const engine2: AnalysisEngine = new MockEngine()
       engine2.name = 'engine-2'
       engine2.category = 'security'
@@ -78,7 +78,7 @@ describe('RivetEngine', () => {
     it('should allow multiple engines per category', () => {
       const engine1 = new MockEngine()
       engine1.name = 'engine-1'
-      
+
       const engine2 = new MockEngine()
       engine2.name = 'engine-2'
 
@@ -156,7 +156,7 @@ describe('RivetEngine', () => {
         name = 'error-engine'
         category = 'bugs' as const
         description = 'Engine that throws errors'
-        
+
         async analyze(): Promise<Detection[]> {
           throw new Error('Test error')
         }
@@ -174,7 +174,7 @@ describe('RivetEngine', () => {
         name = 'empty-engine'
         category = 'smells' as const
         description = 'Engine with no detections'
-        
+
         async analyze(): Promise<Detection[]> {
           return []
         }

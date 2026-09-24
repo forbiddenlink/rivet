@@ -1,5 +1,5 @@
-import type { ASTNode } from '@rivet/parsers'
 import type { Detection } from '@rivet/core'
+import type { ASTNode } from '@rivet/parsers'
 
 let detectionCounter = 0
 
@@ -16,7 +16,7 @@ export function detectUnnecessaryRenders(ast: ASTNode, filePath: string): Detect
     // Detect useEffect/useMemo/useCallback without dependency array
     if (node.type === 'CallExpression' && node.children) {
       const callee = node.children[0]
-      
+
       if (
         callee &&
         callee.type === 'Identifier' &&
@@ -51,10 +51,10 @@ export function detectUnnecessaryRenders(ast: ASTNode, filePath: string): Detect
     // Detect inline function/object in JSX attributes
     if (node.type === 'JSXAttribute' && node.children) {
       const value = node.children[1]
-      
+
       if (value && value.type === 'JSXExpressionContainer' && value.children) {
         const expr = value.children[0]
-        
+
         if (
           expr &&
           (expr.type === 'ArrowFunctionExpression' ||

@@ -1,5 +1,5 @@
-import type { ASTNode } from '@rivet/parsers'
 import type { Detection } from '@rivet/core'
+import type { ASTNode } from '@rivet/parsers'
 
 export interface DeepNestingConfig {
   maxDepth?: number
@@ -75,7 +75,9 @@ export function detectDeepNesting(
 
     // Recursively check children with updated depth
     if (node.children) {
-      node.children.forEach(child => visit(child, depth))
+      node.children.forEach((child) => {
+        visit(child, depth)
+      })
     }
   }
 

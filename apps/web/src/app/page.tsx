@@ -69,7 +69,7 @@ export default function Home() {
               Open dashboard
             </Link>
             <a
-              href="https://github.com/elizabethstein/rivet"
+              href="https://github.com/forbiddenlink/rivet"
               className="btn btn--ghost btn--lg"
               target="_blank"
               rel="noopener noreferrer"
@@ -80,14 +80,15 @@ export default function Home() {
         </div>
 
         <div className="hero__visual">
-          <div className="terminal" aria-label="Example RIVET CLI session">
+          <div className="terminal" role="img" aria-label="Example RIVET CLI session">
             <div className="terminal__chrome">
               <span className="terminal__dot terminal__dot--accent" />
               <span className="terminal__dot" />
               <span className="terminal__dot" />
               <span className="terminal__title">rivet — scan</span>
             </div>
-            <pre className="terminal__body">{`$ `}
+            <pre className="terminal__body">
+              {`$ `}
               <span className="terminal__cmd">rivet scan . --ai --tech-debt</span>
               {`
 
@@ -118,7 +119,7 @@ export default function Home() {
               <span className="terminal__prompt">→</span>
               {` SQL injection in auth.ts:42
 `}
-              <span className="terminal__comment">  Tech debt: 8.0h security · 24.5h total</span>
+              <span className="terminal__comment"> Tech debt: 8.0h security · 24.5h total</span>
               {`
 $ `}
               <span className="cursor-blink" aria-hidden="true" />
@@ -257,7 +258,9 @@ $ `}
 
       <div className="cta-band" style={{ marginLeft: '1.5rem', marginRight: '1.5rem' }}>
         <h2 className="cta-band__title">Rivet your codebase.</h2>
-        <p className="cta-band__lede">Paste a file, run a scan, see what holds — and what doesn’t.</p>
+        <p className="cta-band__lede">
+          Paste a file, run a scan, see what holds — and what doesn’t.
+        </p>
         <Link href="/dashboard" className="btn btn--primary btn--lg">
           Try the dashboard
         </Link>

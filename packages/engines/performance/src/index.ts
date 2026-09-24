@@ -1,10 +1,9 @@
 import type { AnalysisContext, AnalysisEngine, Detection } from '@rivet/core'
-
+import { detectBigOViolations } from './detectors/big-o-violations'
+import { detectBlockingOperations } from './detectors/blocking-operations'
 import { detectInefficientLoops } from './detectors/inefficient-loops'
 import { detectNestedLoops } from './detectors/nested-loops'
-import { detectBigOViolations } from './detectors/big-o-violations'
 import { detectUnnecessaryRenders } from './detectors/unnecessary-renders'
-import { detectBlockingOperations } from './detectors/blocking-operations'
 
 export class PerformanceEngine implements AnalysisEngine {
   name = 'PerformanceEngine'
@@ -26,8 +25,8 @@ export class PerformanceEngine implements AnalysisEngine {
   }
 }
 
+export * from './detectors/big-o-violations'
+export * from './detectors/blocking-operations'
 export * from './detectors/inefficient-loops'
 export * from './detectors/nested-loops'
-export * from './detectors/big-o-violations'
 export * from './detectors/unnecessary-renders'
-export * from './detectors/blocking-operations'

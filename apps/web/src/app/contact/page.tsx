@@ -50,9 +50,7 @@ export default function ContactPage(): React.ReactElement {
 
       <section>
         <h2>Community</h2>
-        <p>
-          Join developers working to improve code quality. Star the repo and watch for updates.
-        </p>
+        <p>Join developers working to improve code quality. Star the repo and watch for updates.</p>
       </section>
     </main>
   )

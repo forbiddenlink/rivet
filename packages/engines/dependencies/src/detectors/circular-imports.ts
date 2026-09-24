@@ -1,5 +1,5 @@
-import type { ASTNode } from '@rivet/parsers'
 import type { Detection } from '@rivet/core'
+import type { ASTNode } from '@rivet/parsers'
 
 let detectionCounter = 0
 
@@ -27,7 +27,7 @@ export function detectCircularImports(ast: ASTNode, filePath: string): Detection
   // requires analyzing the full dependency graph across all files
   // For now, we just detect potential issues
   const relativePaths = imports.filter((imp) => imp.startsWith('.'))
-  
+
   if (relativePaths.length > 10) {
     detections.push({
       id: `dependencies-${++detectionCounter}`,

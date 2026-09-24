@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
 import { parseTypeScript } from '@rivet/parsers'
+import { describe, expect, it } from 'vitest'
 import { detectUnnecessaryRenders } from './unnecessary-renders'
 
 describe('Unnecessary Renders Detector', () => {
@@ -21,7 +21,7 @@ describe('Unnecessary Renders Detector', () => {
       })
 
       const detections = detectUnnecessaryRenders(ast, 'test.tsx')
-      const effectDetections = detections.filter(d => d.ruleId === 'missing-dependency-array')
+      const effectDetections = detections.filter((d) => d.ruleId === 'missing-dependency-array')
 
       expect(effectDetections.length).toBeGreaterThan(0)
       expect(effectDetections[0]?.severity).toBe('high')
@@ -45,7 +45,7 @@ describe('Unnecessary Renders Detector', () => {
       })
 
       const detections = detectUnnecessaryRenders(ast, 'test.tsx')
-      const memoDetections = detections.filter(d => d.ruleId === 'missing-dependency-array')
+      const memoDetections = detections.filter((d) => d.ruleId === 'missing-dependency-array')
 
       expect(memoDetections.length).toBeGreaterThan(0)
       expect(memoDetections[0]?.message).toContain('useMemo')
@@ -68,7 +68,7 @@ describe('Unnecessary Renders Detector', () => {
       })
 
       const detections = detectUnnecessaryRenders(ast, 'test.tsx')
-      const callbackDetections = detections.filter(d => d.ruleId === 'missing-dependency-array')
+      const callbackDetections = detections.filter((d) => d.ruleId === 'missing-dependency-array')
 
       expect(callbackDetections.length).toBeGreaterThan(0)
       expect(callbackDetections[0]?.message).toContain('useCallback')
@@ -91,7 +91,7 @@ describe('Unnecessary Renders Detector', () => {
       })
 
       const detections = detectUnnecessaryRenders(ast, 'test.tsx')
-      const effectDetections = detections.filter(d => d.ruleId === 'missing-dependency-array')
+      const effectDetections = detections.filter((d) => d.ruleId === 'missing-dependency-array')
 
       expect(effectDetections).toEqual([])
     })
@@ -113,7 +113,7 @@ describe('Unnecessary Renders Detector', () => {
       })
 
       const detections = detectUnnecessaryRenders(ast, 'test.tsx')
-      const effectDetections = detections.filter(d => d.ruleId === 'missing-dependency-array')
+      const effectDetections = detections.filter((d) => d.ruleId === 'missing-dependency-array')
 
       expect(effectDetections).toEqual([])
     })
@@ -133,7 +133,7 @@ describe('Unnecessary Renders Detector', () => {
       })
 
       const detections = detectUnnecessaryRenders(ast, 'test.tsx')
-      const memoDetections = detections.filter(d => d.ruleId === 'missing-dependency-array')
+      const memoDetections = detections.filter((d) => d.ruleId === 'missing-dependency-array')
 
       expect(memoDetections).toEqual([])
     })
@@ -155,7 +155,7 @@ describe('Unnecessary Renders Detector', () => {
       })
 
       const detections = detectUnnecessaryRenders(ast, 'test.tsx')
-      const callbackDetections = detections.filter(d => d.ruleId === 'missing-dependency-array')
+      const callbackDetections = detections.filter((d) => d.ruleId === 'missing-dependency-array')
 
       expect(callbackDetections).toEqual([])
     })
@@ -176,7 +176,7 @@ describe('Unnecessary Renders Detector', () => {
       })
 
       const detections = detectUnnecessaryRenders(ast, 'test.tsx')
-      const inlineDetections = detections.filter(d => d.ruleId === 'inline-function-in-jsx')
+      const inlineDetections = detections.filter((d) => d.ruleId === 'inline-function-in-jsx')
 
       expect(inlineDetections.length).toBeGreaterThan(0)
       expect(inlineDetections[0]?.severity).toBe('medium')
@@ -197,7 +197,7 @@ describe('Unnecessary Renders Detector', () => {
       })
 
       const detections = detectUnnecessaryRenders(ast, 'test.tsx')
-      const inlineDetections = detections.filter(d => d.ruleId === 'inline-function-in-jsx')
+      const inlineDetections = detections.filter((d) => d.ruleId === 'inline-function-in-jsx')
 
       expect(inlineDetections.length).toBeGreaterThan(0)
       expect(inlineDetections[0]?.message).toContain('object')
@@ -217,7 +217,7 @@ describe('Unnecessary Renders Detector', () => {
       })
 
       const detections = detectUnnecessaryRenders(ast, 'test.tsx')
-      const inlineDetections = detections.filter(d => d.ruleId === 'inline-function-in-jsx')
+      const inlineDetections = detections.filter((d) => d.ruleId === 'inline-function-in-jsx')
 
       expect(inlineDetections.length).toBeGreaterThan(0)
     })
@@ -236,7 +236,7 @@ describe('Unnecessary Renders Detector', () => {
       })
 
       const detections = detectUnnecessaryRenders(ast, 'test.tsx')
-      const inlineDetections = detections.filter(d => d.ruleId === 'inline-function-in-jsx')
+      const inlineDetections = detections.filter((d) => d.ruleId === 'inline-function-in-jsx')
 
       expect(inlineDetections.length).toBeGreaterThan(0)
     })
@@ -257,7 +257,7 @@ describe('Unnecessary Renders Detector', () => {
       })
 
       const detections = detectUnnecessaryRenders(ast, 'test.tsx')
-      const inlineDetections = detections.filter(d => d.ruleId === 'inline-function-in-jsx')
+      const inlineDetections = detections.filter((d) => d.ruleId === 'inline-function-in-jsx')
 
       expect(inlineDetections).toEqual([])
     })
@@ -280,7 +280,7 @@ describe('Unnecessary Renders Detector', () => {
       })
 
       const detections = detectUnnecessaryRenders(ast, 'test.tsx')
-      const stateUpdateDetections = detections.filter(d => d.ruleId === 'state-update-in-render')
+      const stateUpdateDetections = detections.filter((d) => d.ruleId === 'state-update-in-render')
 
       expect(stateUpdateDetections.length).toBeGreaterThan(0)
       expect(stateUpdateDetections[0]?.severity).toBe('critical')
@@ -303,7 +303,7 @@ describe('Unnecessary Renders Detector', () => {
       })
 
       const detections = detectUnnecessaryRenders(ast, 'test.tsx')
-      const stateUpdateDetections = detections.filter(d => d.ruleId === 'state-update-in-render')
+      const stateUpdateDetections = detections.filter((d) => d.ruleId === 'state-update-in-render')
 
       expect(stateUpdateDetections.length).toBeGreaterThan(0)
     })
@@ -327,7 +327,7 @@ describe('Unnecessary Renders Detector', () => {
       })
 
       const detections = detectUnnecessaryRenders(ast, 'test.tsx')
-      const effectDetections = detections.filter(d => d.ruleId === 'missing-dependency-array')
+      const effectDetections = detections.filter((d) => d.ruleId === 'missing-dependency-array')
 
       expect(effectDetections[0]?.metadata?.hook).toBe('useEffect')
     })
@@ -346,7 +346,7 @@ describe('Unnecessary Renders Detector', () => {
       })
 
       const detections = detectUnnecessaryRenders(ast, 'test.tsx')
-      const inlineDetections = detections.filter(d => d.ruleId === 'inline-function-in-jsx')
+      const inlineDetections = detections.filter((d) => d.ruleId === 'inline-function-in-jsx')
 
       expect(inlineDetections[0]?.metadata?.suggestion).toContain('useCallback')
     })
@@ -367,7 +367,7 @@ describe('Unnecessary Renders Detector', () => {
       })
 
       const detections = detectUnnecessaryRenders(ast, 'test.tsx')
-      const stateUpdateDetections = detections.filter(d => d.ruleId === 'state-update-in-render')
+      const stateUpdateDetections = detections.filter((d) => d.ruleId === 'state-update-in-render')
 
       expect(stateUpdateDetections[0]?.metadata?.suggestion).toContain('useEffect')
     })
@@ -397,7 +397,9 @@ describe('Unnecessary Renders Detector', () => {
       })
 
       const detections = detectUnnecessaryRenders(ast, 'test.tsx')
-      const missingDepsDetections = detections.filter(d => d.ruleId === 'missing-dependency-array')
+      const missingDepsDetections = detections.filter(
+        (d) => d.ruleId === 'missing-dependency-array'
+      )
 
       expect(missingDepsDetections.length).toBe(3)
     })
@@ -445,7 +447,7 @@ describe('Unnecessary Renders Detector', () => {
       })
 
       const detections = detectUnnecessaryRenders(ast, 'test.tsx')
-      const inlineDetections = detections.filter(d => d.ruleId === 'inline-function-in-jsx')
+      const inlineDetections = detections.filter((d) => d.ruleId === 'inline-function-in-jsx')
 
       expect(inlineDetections.length).toBeGreaterThan(0)
     })

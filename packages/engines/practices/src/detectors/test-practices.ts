@@ -1,5 +1,5 @@
-import type { ASTNode } from '@rivet/parsers'
 import type { Detection } from '@rivet/core'
+import type { ASTNode } from '@rivet/parsers'
 
 let detectionCounter = 0
 
@@ -16,10 +16,10 @@ export function detectTestPractices(ast: ASTNode, filePath: string): Detection[]
     // Check for .skip() or .only() in tests
     if (node.type === 'CallExpression' && node.children) {
       const callee = node.children[0]
-      
+
       if (callee && callee.type === 'MemberExpression' && callee.children) {
         const prop = callee.children[1]
-        
+
         if (
           prop &&
           prop.type === 'Identifier' &&

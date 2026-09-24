@@ -1,5 +1,5 @@
-import type { ASTNode } from '@rivet/parsers'
 import type { Detection } from '@rivet/core'
+import type { ASTNode } from '@rivet/parsers'
 
 let detectionCounter = 0
 
@@ -17,7 +17,7 @@ export function detectTightCoupling(ast: ASTNode, filePath: string): Detection[]
     // Detect member access chains (a.b.c.d)
     if (node.type === 'MemberExpression' && node.children) {
       const depth = getMemberAccessDepth(node)
-      
+
       if (depth >= 3) {
         // Law of Demeter violation
         detections.push({
@@ -33,7 +33,8 @@ export function detectTightCoupling(ast: ASTNode, filePath: string): Detection[]
           message: `Member access chain depth ${depth} violates Law of Demeter`,
           metadata: {
             depth,
-            suggestion: 'Use wrapper methods instead of chaining - each object should only talk to its immediate friends',
+            suggestion:
+              'Use wrapper methods instead of chaining - each object should only talk to its immediate friends',
           },
         })
       }
@@ -92,10 +93,10 @@ function getObjectName(node: ASTNode): string | undefined {
   if (node.type === 'Identifier' && node.raw.type === 'Identifier') {
     return node.raw.name
   }
-  
+
   if (node.type === 'MemberExpression' && node.children) {
     return getObjectName(node.children[0]!)
   }
-  
+
   return undefined
 }

@@ -1,5 +1,5 @@
-import type { ASTNode } from '@rivet/parsers'
 import type { Detection } from '@rivet/core'
+import type { ASTNode } from '@rivet/parsers'
 
 export interface MagicNumberConfig {
   allowedNumbers?: number[]
@@ -11,7 +11,7 @@ const DEFAULT_CONFIG: Required<MagicNumberConfig> = {
 
 /**
  * Detects magic numbers - hardcoded numeric literals without explanation
- * 
+ *
  * Magic numbers are unexplained numeric literals that make code hard to understand
  * and maintain. They should be replaced with named constants that explain their
  * meaning.
@@ -28,7 +28,10 @@ export function detectMagicNumbers(
     return cfg.allowedNumbers.includes(value)
   }
 
-  function visit(node: ASTNode, context: { inVariableDeclarator: boolean } = { inVariableDeclarator: false }): void {
+  function visit(
+    node: ASTNode,
+    context: { inVariableDeclarator: boolean } = { inVariableDeclarator: false }
+  ): void {
     // Track if we're inside a VariableDeclarator (named constant assignment)
     let newContext = context
     if (node.type === 'VariableDeclarator') {
@@ -43,7 +46,9 @@ export function detectMagicNumbers(
       // Skip allowed numbers
       if (isAllowedNumber(value)) {
         if (node.children) {
-          node.children.forEach(child => visit(child, newContext))
+          node.children.forEach((child) => {
+            visit(child, newContext)
+          })
         }
         return
       }
@@ -51,7 +56,9 @@ export function detectMagicNumbers(
       // Skip numbers in variable declarations (assigned to a named variable)
       if (newContext.inVariableDeclarator) {
         if (node.children) {
-          node.children.forEach(child => visit(child, newContext))
+          node.children.forEach((child) => {
+            visit(child, newContext)
+          })
         }
         return
       }
@@ -77,7 +84,9 @@ export function detectMagicNumbers(
 
     // Recursively check children
     if (node.children) {
-      node.children.forEach(child => visit(child, newContext))
+      node.children.forEach((child) => {
+        visit(child, newContext)
+      })
     }
   }
 

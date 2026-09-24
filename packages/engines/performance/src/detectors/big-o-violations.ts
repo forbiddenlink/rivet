@@ -1,5 +1,5 @@
-import type { ASTNode } from '@rivet/parsers'
 import type { Detection } from '@rivet/core'
+import type { ASTNode } from '@rivet/parsers'
 
 let detectionCounter = 0
 
@@ -30,9 +30,7 @@ export function detectBigOViolations(ast: ASTNode, filePath: string): Detection[
         const identifiers = memberExpr.children?.filter((c) => c.type === 'Identifier') || []
         const methodNode = identifiers[identifiers.length - 1]
         if (methodNode) {
-          const methodName = methodNode.raw.type === 'Identifier'
-            ? methodNode.raw.name
-            : undefined
+          const methodName = methodNode.raw.type === 'Identifier' ? methodNode.raw.name : undefined
 
           if (
             methodName === 'indexOf' ||
@@ -89,7 +87,9 @@ export function detectBigOViolations(ast: ASTNode, filePath: string): Detection[
     }
 
     // Always visit children
-    node.children?.forEach((child) => visit(child, currentInLoop))
+    node.children?.forEach((child) => {
+      visit(child, currentInLoop)
+    })
   }
 
   visit(ast)
@@ -97,7 +97,11 @@ export function detectBigOViolations(ast: ASTNode, filePath: string): Detection[
 }
 
 function checkForStringOperand(node: ASTNode): boolean {
-  if (node.type === 'Literal' && node.raw.type === 'Literal' && typeof node.raw.value === 'string') {
+  if (
+    node.type === 'Literal' &&
+    node.raw.type === 'Literal' &&
+    typeof node.raw.value === 'string'
+  ) {
     return true
   }
   if (node.type === 'TemplateLiteral') {

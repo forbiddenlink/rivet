@@ -1,5 +1,5 @@
-import type { ASTNode } from '@rivet/parsers'
 import type { Detection } from '@rivet/core'
+import type { ASTNode } from '@rivet/parsers'
 
 let detectionCounter = 0
 
@@ -18,11 +18,9 @@ export function detectSOLIDViolations(ast: ASTNode, filePath: string): Detection
     // Single Responsibility - class with too many methods
     if (node.type === 'ClassDeclaration' && node.children) {
       const methods = node.children.filter(
-        (child) =>
-          child.type === 'MethodDefinition' ||
-          child.type === 'PropertyDefinition'
+        (child) => child.type === 'MethodDefinition' || child.type === 'PropertyDefinition'
       )
-      
+
       if (methods.length > 15) {
         detections.push({
           id: `architecture-${++detectionCounter}`,
@@ -46,7 +44,7 @@ export function detectSOLIDViolations(ast: ASTNode, filePath: string): Detection
     // Dependency Inversion - direct instantiation with 'new'
     if (node.type === 'NewExpression' && node.children) {
       const className = node.children[0]
-      
+
       if (
         className &&
         className.type === 'Identifier' &&
@@ -103,7 +101,7 @@ export function detectSOLIDViolations(ast: ASTNode, filePath: string): Detection
       const properties = node.children.filter(
         (child) => child.type === 'TSPropertySignature' || child.type === 'TSMethodSignature'
       )
-      
+
       if (properties.length > 10) {
         detections.push({
           id: `architecture-${++detectionCounter}`,

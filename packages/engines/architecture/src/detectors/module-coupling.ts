@@ -1,5 +1,5 @@
-import type { ASTNode } from '@rivet/parsers'
 import type { Detection } from '@rivet/core'
+import type { ASTNode } from '@rivet/parsers'
 
 let detectionCounter = 0
 
@@ -23,7 +23,7 @@ export function detectModuleCoupling(ast: ASTNode, filePath: string): Detection[
       const importPath = node.children[0]
       if (importPath.raw.type === 'Literal' && typeof importPath.raw.value === 'string') {
         imports.push(importPath.raw.value)
-        
+
         // Detect deep relative imports (../../..)
         const relativeDepth = (importPath.raw.value.match(/\.\.\//g) || []).length
         if (relativeDepth >= 3) {

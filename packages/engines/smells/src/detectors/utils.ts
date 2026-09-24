@@ -40,7 +40,7 @@ export function calculateComplexity(node: ASTNode): number {
 
       case 'SwitchStatement': {
         // Each case adds a path
-        const cases = n.children?.filter(c => c.type === 'SwitchCase') ?? []
+        const cases = n.children?.filter((c) => c.type === 'SwitchCase') ?? []
         complexity += cases.length
         break
       }

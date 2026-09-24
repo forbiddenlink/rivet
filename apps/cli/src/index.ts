@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander'
-
-import { scanCommand } from './commands/scan'
 import { fixCommand } from './commands/fix'
+import { scanCommand } from './commands/scan'
 
 const program = new Command()
 

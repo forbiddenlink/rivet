@@ -47,8 +47,8 @@ export default function AboutPage(): React.ReactElement {
       <section>
         <h2>Technology</h2>
         <p>
-          Built in TypeScript with a modular engine architecture. AST analysis runs in parallel;
-          an optional AI layer adds context, analogies, and tech-debt estimates.
+          Built in TypeScript with a modular engine architecture. AST analysis runs in parallel; an
+          optional AI layer adds context, analogies, and tech-debt estimates.
         </p>
       </section>
 

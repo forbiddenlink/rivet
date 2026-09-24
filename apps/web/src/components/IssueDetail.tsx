@@ -65,7 +65,15 @@ export default function IssueDetail({ issue }: IssueDetailProps) {
   }, [issue.id, issue.message, issue.severity, issue.category, issue.ruleId])
 
   return (
-    <aside className="panel" style={{ position: 'sticky', top: 'calc(var(--nav-height) + 1rem)', maxHeight: '700px', overflowY: 'auto' }}>
+    <aside
+      className="panel"
+      style={{
+        position: 'sticky',
+        top: 'calc(var(--nav-height) + 1rem)',
+        maxHeight: '700px',
+        overflowY: 'auto',
+      }}
+    >
       <div className="panel__header">
         <h3 className="panel__title">Detail</h3>
         <span className={`badge badge--${issue.severity}`}>{issue.severity}</span>
@@ -111,8 +119,8 @@ export default function IssueDetail({ issue }: IssueDetailProps) {
             {issue.filePath}
           </div>
           <div style={{ color: 'var(--text-secondary)' }}>
-            <span style={{ color: 'var(--text-muted)' }}>loc </span>
-            L{issue.loc.start.line}:{issue.loc.start.column}
+            <span style={{ color: 'var(--text-muted)' }}>loc </span>L{issue.loc.start.line}:
+            {issue.loc.start.column}
           </div>
         </div>
 

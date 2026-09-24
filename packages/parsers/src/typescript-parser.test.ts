@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { parseTypeScript } from './typescript-parser'
 
 describe('TypeScript Parser', () => {
@@ -9,7 +9,7 @@ describe('TypeScript Parser', () => {
           return \`Hello, \${name}!\`
         }
       `
-      
+
       const result = parseTypeScript({
         filePath: 'test.ts',
         sourceCode: code,
@@ -28,7 +28,7 @@ describe('TypeScript Parser', () => {
           return a + b
         }
       `
-      
+
       const result = parseTypeScript({
         filePath: 'test.js',
         sourceCode: code,
@@ -45,7 +45,7 @@ describe('TypeScript Parser', () => {
           return <div>Hello World</div>
         }
       `
-      
+
       const result = parseTypeScript({
         filePath: 'test.tsx',
         sourceCode: code,
@@ -69,7 +69,7 @@ describe('TypeScript Parser', () => {
           return { name: 'John', age: 30 }
         }
       `
-      
+
       const result = parseTypeScript({
         filePath: 'test.ts',
         sourceCode: code,
@@ -82,7 +82,7 @@ describe('TypeScript Parser', () => {
 
     it('should work without type extraction', () => {
       const code = `const x = 42`
-      
+
       const result = parseTypeScript({
         filePath: 'test.ts',
         sourceCode: code,
@@ -103,7 +103,7 @@ describe('TypeScript Parser', () => {
         function broken(
           // Missing closing parenthesis and body
       `
-      
+
       const result = parseTypeScript({
         filePath: 'test.ts',
         sourceCode: code,
@@ -115,7 +115,7 @@ describe('TypeScript Parser', () => {
 
     it('should still return AST on recoverable errors', () => {
       const code = `const x = 42\nconst y =` // Incomplete
-      
+
       const result = parseTypeScript({
         filePath: 'test.ts',
         sourceCode: code,
@@ -136,7 +136,7 @@ describe('TypeScript Parser', () => {
           }
         }
       `
-      
+
       const result = parseTypeScript({
         filePath: 'test.ts',
         sourceCode: code,
@@ -154,7 +154,7 @@ describe('TypeScript Parser', () => {
           return response.json()
         }
       `
-      
+
       const result = parseTypeScript({
         filePath: 'test.ts',
         sourceCode: code,
@@ -173,7 +173,7 @@ describe('TypeScript Parser', () => {
           return result.value
         }
       `
-      
+
       const result = parseTypeScript({
         filePath: 'test.ts',
         sourceCode: code,

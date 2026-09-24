@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
 import { parseTypeScript } from '@rivet/parsers'
+import { describe, expect, it } from 'vitest'
 
 import { detectDuplicateImports } from './duplicate-imports'
 
@@ -45,12 +45,8 @@ describe('Duplicate Imports Detector', () => {
 
       expect(detections.length).toBe(2)
 
-      const moduleADetection = detections.find((d) =>
-        d.message.includes('./moduleA')
-      )
-      const moduleBDetection = detections.find((d) =>
-        d.message.includes('./moduleB')
-      )
+      const moduleADetection = detections.find((d) => d.message.includes('./moduleA'))
+      const moduleBDetection = detections.find((d) => d.message.includes('./moduleB'))
 
       expect(moduleADetection?.message).toContain('2 times')
       expect(moduleBDetection?.message).toContain('3 times')
@@ -129,8 +125,7 @@ describe('Duplicate Imports Detector', () => {
       expect(detections[0]?.metadata).toEqual({
         module: './utils',
         count: 2,
-        suggestion:
-          'Consolidate imports from the same module into a single import statement',
+        suggestion: 'Consolidate imports from the same module into a single import statement',
       })
     })
 

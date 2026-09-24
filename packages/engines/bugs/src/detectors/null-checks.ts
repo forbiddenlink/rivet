@@ -24,9 +24,10 @@ export function detectNullChecks(ast: ASTNode, filePath: string): Detection[] {
     // Check for unsafe property access
     if (node.type === 'MemberExpression' && node.children && !hasNullCheck(node)) {
       const identifiers = node.children.filter((child) => child.type === 'Identifier')
-      const propName = identifiers[identifiers.length - 1]?.raw.type === 'Identifier'
-        ? (identifiers[identifiers.length - 1]!.raw as { name: string }).name
-        : 'property'
+      const propName =
+        identifiers[identifiers.length - 1]?.raw.type === 'Identifier'
+          ? (identifiers[identifiers.length - 1]!.raw as { name: string }).name
+          : 'property'
 
       // Check two cases:
       // 1. Chained access: a.b.c (object is MemberExpression)
@@ -57,7 +58,8 @@ export function detectNullChecks(ast: ASTNode, filePath: string): Detection[] {
             property: propName,
             explanation:
               'Accessing properties on potentially null/undefined values can cause runtime errors.',
-            recommendation: 'Use optional chaining (?.) or check for null/undefined before accessing',
+            recommendation:
+              'Use optional chaining (?.) or check for null/undefined before accessing',
           },
         })
       }
@@ -66,9 +68,10 @@ export function detectNullChecks(ast: ASTNode, filePath: string): Detection[] {
     // Check for == null comparisons (should use === null or == null intentionally)
     if (node.type === 'BinaryExpression' && node.children) {
       const hasNullLiteral = node.children.some(
-        (child) => child.type === 'Literal' && child.raw.type === 'Literal' && child.raw.value === null
+        (child) =>
+          child.type === 'Literal' && child.raw.type === 'Literal' && child.raw.value === null
       )
-      
+
       if (hasNullLiteral && node.raw.type === 'BinaryExpression') {
         const operator = node.raw.operator
         if (operator === '==' || operator === '!=') {
