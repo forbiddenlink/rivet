@@ -188,16 +188,39 @@ export class RivetEngine {
   }
 
   /**
+   * Every pattern the scan must skip.
+   *
+   * `ignore` is the name the config file and the documentation use; `exclude` is the
+   * name the engine was written against. Only `exclude` was ever read, so a
+   * `.rivetrc.json` asking to skip test files was parsed, stored and then dropped.
+   * This repository's own config asks for exactly that and still reported 265 findings
+   * in test files. Both names now apply.
+   *
+   * The built-in excludes are always included rather than defaulted, so a config that
+   * sets its own list cannot accidentally re-admit node_modules.
+   */
+  private excludePatterns(): string[] {
+    return [
+      ...new Set([
+        ...DEFAULT_EXCLUDE,
+        ...(this.config.exclude ?? []),
+        ...(this.config.ignore ?? []),
+      ]),
+    ]
+  }
+
+  /**
    * Find files to analyze based on include/exclude patterns
    */
   private async findFiles(projectRoot: string): Promise<string[]> {
     const files: string[] = []
+    const ignorePatterns = this.excludePatterns()
 
     for (const pattern of this.config.include || []) {
       const matches = await glob(pattern, {
         cwd: projectRoot,
         absolute: true,
-        ignore: this.config.exclude,
+        ignore: ignorePatterns,
         nodir: true,
       })
       files.push(...matches)
