@@ -48,6 +48,19 @@ describe('RivetEngine file discovery', () => {
     return result.detections.map((d) => d.filePath.replace(`${projectRoot}/`, '')).sort()
   }
 
+  it('reports a file the parser could not read instead of calling it clean', async () => {
+    await writeFile(join(projectRoot, 'src', 'broken.ts'), 'export const x = <div>hi</div>\n')
+
+    const engine = new RivetEngine({ ignore: ['**/*.test.ts'] })
+    engine.registerEngine(new FileCountingEngine())
+    const result = await engine.analyze(projectRoot)
+
+    const parserErrors = result.errors.filter((e) => e.engine === 'parser')
+
+    expect(parserErrors).toHaveLength(1)
+    expect(parserErrors[0]?.error).toContain('broken.ts')
+  })
+
   it('honours the documented ignore list, not only exclude', async () => {
     const files = await scannedFiles({ ignore: ['**/*.test.ts'] })
 

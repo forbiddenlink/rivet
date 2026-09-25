@@ -155,6 +155,20 @@ export class RivetEngine {
       return []
     }
 
+    // parseTypeScript reports a syntax error rather than throwing, and returns an empty
+    // Program. Every detector then runs against nothing and finds nothing, so a file
+    // the parser choked on used to be reported as clean. examples/test-project held a
+    // .ts file containing JSX, which meant its hardcoded key, its SQL injection and its
+    // XSS were all invisible while the scan claimed success.
+    const syntaxErrors = parseResult.errors.filter((e) => e.severity === 'error')
+    if (syntaxErrors.length > 0) {
+      const detail = syntaxErrors[0]?.message ?? 'unknown syntax error'
+      errors.push({
+        engine: 'parser',
+        error: `Skipped ${filePath}: ${detail}${syntaxErrors.length > 1 ? ` (+${syntaxErrors.length - 1} more)` : ''}`,
+      })
+    }
+
     const detectionPromises: Promise<Detection[]>[] = []
 
     for (const [category, engines] of this.engines.entries()) {
