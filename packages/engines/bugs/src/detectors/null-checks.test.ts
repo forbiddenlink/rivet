@@ -125,6 +125,78 @@ describe('Null Check Detector', () => {
       expect(missingChecks).toEqual([])
     })
 
+    it('should not flag a parameter TypeScript guarantees', () => {
+      const code = `
+        function shout(name: string) {
+          return name.length
+        }
+      `
+
+      const { ast } = parseTypeScript({
+        filePath: 'test.ts',
+        sourceCode: code,
+        extractTypes: false,
+      })
+
+      const detections = detectNullChecks(ast, 'test.ts')
+
+      expect(detections.filter((d) => d.ruleId === 'missing-null-check')).toEqual([])
+    })
+
+    it('should still flag an optional parameter', () => {
+      const code = `
+        function shout(name?: string) {
+          return name.length
+        }
+      `
+
+      const { ast } = parseTypeScript({
+        filePath: 'test.ts',
+        sourceCode: code,
+        extractTypes: false,
+      })
+
+      const detections = detectNullChecks(ast, 'test.ts')
+
+      expect(detections.filter((d) => d.ruleId === 'missing-null-check').length).toBeGreaterThan(0)
+    })
+
+    it('should still flag a parameter whose type includes null', () => {
+      const code = `
+        function shout(name: string | null) {
+          return name.length
+        }
+      `
+
+      const { ast } = parseTypeScript({
+        filePath: 'test.ts',
+        sourceCode: code,
+        extractTypes: false,
+      })
+
+      const detections = detectNullChecks(ast, 'test.ts')
+
+      expect(detections.filter((d) => d.ruleId === 'missing-null-check').length).toBeGreaterThan(0)
+    })
+
+    it('should still flag an unannotated parameter in a JavaScript file', () => {
+      const code = `
+        function shout(name) {
+          return name.length
+        }
+      `
+
+      const { ast } = parseTypeScript({
+        filePath: 'test.js',
+        sourceCode: code,
+        extractTypes: false,
+      })
+
+      const detections = detectNullChecks(ast, 'test.js')
+
+      expect(detections.filter((d) => d.ruleId === 'missing-null-check').length).toBeGreaterThan(0)
+    })
+
     it('should detect accessing array methods without null check', () => {
       const code = `
         function getItems(data: any) {

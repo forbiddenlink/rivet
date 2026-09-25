@@ -121,6 +121,70 @@ function collectInitializedBindings(ast: ASTNode, names: Set<string>): void {
   walk(ast)
 }
 
+const FUNCTION_NODE_TYPES = new Set([
+  'FunctionDeclaration',
+  'FunctionExpression',
+  'ArrowFunctionExpression',
+])
+
+/** Annotations that admit a missing value, and so leave a parameter worth checking. */
+const NULLABLE_TYPE_NODES = new Set([
+  'TSAnyKeyword',
+  'TSUnknownKeyword',
+  'TSNullKeyword',
+  'TSUndefinedKeyword',
+  'TSVoidKeyword',
+])
+
+function annotationAdmitsNullish(node: ASTNode): boolean {
+  if (NULLABLE_TYPE_NODES.has(node.type)) {
+    return true
+  }
+  return (node.children ?? []).some(annotationAdmitsNullish)
+}
+
+/**
+ * Parameters TypeScript already guarantees.
+ *
+ * A parameter annotated `string` cannot be null under strict mode, so reading
+ * `value.length` on it is not a missing null check. A parameter annotated `any`, an
+ * optional one, and one whose type includes null or undefined all still are.
+ *
+ * In a .js file nothing is annotated and nothing is checked, so every parameter there
+ * stays suspect; this only narrows the rule where the compiler is doing the work.
+ */
+function collectCheckedParameters(ast: ASTNode, names: Set<string>, filePath: string): void {
+  const isTypeScript = /\.tsx?$/.test(filePath)
+
+  function walk(node: ASTNode): void {
+    if (FUNCTION_NODE_TYPES.has(node.type)) {
+      for (const child of node.children ?? []) {
+        if (child.type !== 'Identifier' || child.raw.type !== 'Identifier') {
+          continue
+        }
+        const isOptional = 'optional' in child.raw && child.raw.optional === true
+        const annotation = child.children?.find((c) => c.type === 'TSTypeAnnotation')
+        if (isOptional) {
+          continue
+        }
+        if (!annotation) {
+          if (isTypeScript) {
+            names.add(child.raw.name)
+          }
+          continue
+        }
+        if (!annotationAdmitsNullish(annotation)) {
+          names.add(child.raw.name)
+        }
+      }
+    }
+    for (const child of node.children ?? []) {
+      walk(child)
+    }
+  }
+  walk(ast)
+}
+
 /**
  * The object half of a member expression, which in this AST is always the first child.
  */
@@ -157,6 +221,7 @@ export function detectNullChecks(ast: ASTNode, filePath: string): Detection[] {
   const definedNames = new Set(ALWAYS_DEFINED_ROOTS)
   collectDefinedNames(ast, definedNames)
   collectInitializedBindings(ast, definedNames)
+  collectCheckedParameters(ast, definedNames, filePath)
 
   // `a.b.c.d` is one access to report, not three. Mark every link that another
   // member expression reads through so only the outermost one is reported.
