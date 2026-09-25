@@ -1,15 +1,28 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": ["**/.env.*local", "tsconfig.json"],
+  "globalDependencies": [
+    "**/.env.*local",
+    "tsconfig.json"
+  ],
   "ui": "tui",
   "remoteCache": {
     "enabled": true
   },
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", "!**/*.test.ts", "!**/*.spec.ts"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!**/*.test.ts",
+        "!**/*.spec.ts"
+      ],
+      "outputs": [
+        "dist/**",
+        ".next/**",
+        "!.next/cache/**"
+      ],
       "outputLogs": "new-only"
     },
     "dev": {
@@ -17,8 +30,14 @@
       "persistent": true
     },
     "test": {
-      "dependsOn": ["build"],
-      "inputs": ["$TURBO_DEFAULT$", "**/*.test.ts", "**/*.spec.ts"],
+      "dependsOn": [
+        "build"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "**/*.test.ts",
+        "**/*.spec.ts"
+      ],
       "outputs": [],
       "outputLogs": "new-only"
     },
@@ -27,9 +46,14 @@
       "persistent": true
     },
     "typecheck": {
-      "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", "tsconfig.json"],
-      "outputs": ["*.tsbuildinfo"],
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "tsconfig.json"
+      ],
+      "outputs": [],
       "outputLogs": "new-only"
     },
     "clean": {
