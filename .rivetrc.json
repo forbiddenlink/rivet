@@ -11,16 +11,11 @@
       "practices",
       "dependencies"
     ],
-    "disabled": [
-      "flows"
-    ]
+    "disabled": ["flows"]
   },
   "severity": {
     "minimum": "medium",
-    "failOn": [
-      "critical",
-      "high"
-    ]
+    "failOn": ["critical", "high"]
   },
   "ignore": {
     "paths": [
