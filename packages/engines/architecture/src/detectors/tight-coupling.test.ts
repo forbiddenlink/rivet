@@ -98,16 +98,55 @@ describe('Tight Coupling Detector', () => {
   })
 
   describe('feature-envy', () => {
+    it('should flag a method that reads another object more than its own state', () => {
+      const detections = analyze(`
+        class Invoice {
+          total(order: any) {
+            return order.subtotal + order.tax + order.shipping - order.discount
+          }
+        }
+      `)
+
+      const envy = detections.filter((d) => d.ruleId === 'feature-envy')
+
+      expect(envy).toHaveLength(1)
+      expect(envy[0]?.message).toContain("'total'")
+      expect(envy[0]?.message).toContain("'order'")
+      expect(envy[0]?.loc.start.line).toBeGreaterThan(1)
+    })
+
+    it('should not flag a method that mostly uses its own state', () => {
+      const detections = analyze(`
+        class Invoice {
+          total(order: any) {
+            return this.base + this.tax + this.shipping + this.discount + order.subtotal
+          }
+        }
+      `)
+
+      expect(detections.filter((d) => d.ruleId === 'feature-envy')).toEqual([])
+    })
+
     it('should not count a namespace as an envied object', () => {
       const detections = analyze(`
-        function log() {
-          console.log(process.env.A)
-          console.log(process.env.B)
-          console.log(process.env.C)
-          console.log(process.env.D)
-          console.log(process.env.E)
-          console.log(process.env.F)
-          console.log(process.env.G)
+        class Reporter {
+          log() {
+            console.log(process.env.A)
+            console.log(process.env.B)
+            console.log(process.env.C)
+            console.log(process.env.D)
+            console.log(process.env.E)
+          }
+        }
+      `)
+
+      expect(detections.filter((d) => d.ruleId === 'feature-envy')).toEqual([])
+    })
+
+    it('should not report a free function, which has no own state to envy', () => {
+      const detections = analyze(`
+        function total(order: any) {
+          return order.subtotal + order.tax + order.shipping - order.discount
         }
       `)
 

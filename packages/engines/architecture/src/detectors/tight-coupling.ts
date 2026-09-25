@@ -59,7 +59,6 @@ function collectImportedNames(ast: ASTNode, names: Set<string>): void {
  */
 export function detectTightCoupling(ast: ASTNode, filePath: string): Detection[] {
   const detections: Detection[] = []
-  const externalAccess = new Map<string, number>()
   // Was module scope, so two files scanned in the same process shared a counter and
   // produced ids that depended on scan order.
   let detectionCounter = 0
@@ -113,12 +112,6 @@ export function detectTightCoupling(ast: ASTNode, filePath: string): Detection[]
           },
         })
       }
-
-      // Track external object usage
-      const objName = isExempt ? undefined : rootName
-      if (objName && objName[0] === objName[0]?.toLowerCase()) {
-        externalAccess.set(objName, (externalAccess.get(objName) || 0) + 1)
-      }
     }
 
     node.children?.forEach(visit)
@@ -126,28 +119,7 @@ export function detectTightCoupling(ast: ASTNode, filePath: string): Detection[]
 
   visit(ast)
 
-  // Check for feature envy (excessive use of external objects)
-  for (const [objName, count] of externalAccess.entries()) {
-    if (count > 5) {
-      detections.push({
-        id: `architecture-${++detectionCounter}`,
-        ruleId: 'feature-envy',
-        filePath,
-        loc: {
-          start: { line: 1, column: 0 },
-          end: { line: 1, column: 0 },
-        },
-        severity: 'medium',
-        category: 'architecture',
-        message: `Excessive use of '${objName}' (${count} times) indicates feature envy`,
-        metadata: {
-          object: objName,
-          accessCount: count,
-          suggestion: 'Move behavior to the object being frequently accessed',
-        },
-      })
-    }
-  }
+  detections.push(...detectFeatureEnvy(ast, filePath, exemptRoots, () => ++detectionCounter))
 
   return detections
 }
@@ -205,4 +177,82 @@ function getObjectName(node: ASTNode): string | undefined {
   }
 
   return undefined
+}
+
+/**
+ * Feature envy is a method smell: a method that reaches into another object's data
+ * more than its own. The previous version counted every lowercase identifier root in
+ * the whole FILE and reported anything over five at line 1, with no method name and
+ * no location, which is not the smell and was 67 findings here.
+ *
+ * It is now scoped to a method, and reported only when a single foreign object is
+ * read more often than `this`.
+ */
+function detectFeatureEnvy(
+  ast: ASTNode,
+  filePath: string,
+  exemptRoots: Set<string>,
+  nextId: () => number
+): Detection[] {
+  const detections: Detection[] = []
+
+  function methodName(method: ASTNode): string {
+    const identifier = method.children?.find((child) => child.type === 'Identifier')
+    return identifier?.raw.type === 'Identifier' ? identifier.raw.name : 'method'
+  }
+
+  function countAccesses(node: ASTNode, ownCount: { value: number }, foreign: Map<string, number>) {
+    if (node.type === 'MemberExpression') {
+      const root = getObjectName(node)
+      if (node.children?.[0]?.type === 'ThisExpression' || root === 'this') {
+        ownCount.value++
+      } else if (root && !exemptRoots.has(root) && root[0] === root[0]?.toLowerCase()) {
+        foreign.set(root, (foreign.get(root) ?? 0) + 1)
+      }
+    }
+    for (const child of node.children ?? []) {
+      countAccesses(child, ownCount, foreign)
+    }
+  }
+
+  function visitMethods(node: ASTNode): void {
+    if (node.type === 'MethodDefinition') {
+      const ownCount = { value: 0 }
+      const foreign = new Map<string, number>()
+      countAccesses(node, ownCount, foreign)
+
+      for (const [objName, count] of foreign) {
+        // Four is where a method stops incidentally touching another object and
+        // starts operating on it, and the comparison against `this` is what makes
+        // it envy rather than ordinary collaboration.
+        if (count < 4 || count <= ownCount.value) {
+          continue
+        }
+        detections.push({
+          id: `architecture-${nextId()}`,
+          ruleId: 'feature-envy',
+          filePath,
+          loc: {
+            start: { line: node.loc?.start.line || 0, column: node.loc?.start.column || 0 },
+            end: { line: node.loc?.end.line || 0, column: node.loc?.end.column || 0 },
+          },
+          severity: 'medium',
+          category: 'architecture',
+          message: `Method '${methodName(node)}' reads '${objName}' ${count} times but its own state ${ownCount.value} times`,
+          metadata: {
+            object: objName,
+            accessCount: count,
+            ownAccessCount: ownCount.value,
+            suggestion: `Move this behaviour onto '${objName}', or pass it the decision instead of its data`,
+          },
+        })
+      }
+    }
+    for (const child of node.children ?? []) {
+      visitMethods(child)
+    }
+  }
+
+  visitMethods(ast)
+  return detections
 }
