@@ -14,7 +14,20 @@ export interface OutputFormatter {
  * JSON output formatter
  * Produces structured JSON output suitable for parsing by other tools
  */
+/**
+ * A report is read somewhere other than the machine that produced it: in CI, in a
+ * review, in a diff between two runs. An absolute path from the scanning machine is
+ * useless in all three, so every report says where a finding is relative to the
+ * project. SARIF already did this; JSON and HTML did not.
+ */
+function toProjectRelativePath(filePath: string, baseUri: string): string {
+  const relativePath = isAbsolute(filePath) ? relative(baseUri, filePath) : filePath
+  return relativePath.split(sep).join('/')
+}
+
 export class JSONFormatter implements OutputFormatter {
+  constructor(private readonly baseUri: string = process.cwd()) {}
+
   format(detections: Detection[]): string {
     const output = {
       version: '0.1.0',
@@ -30,7 +43,7 @@ export class JSONFormatter implements OutputFormatter {
         category: d.category,
         severity: d.severity,
         message: d.message,
-        filePath: d.filePath,
+        filePath: toProjectRelativePath(d.filePath, this.baseUri),
         location: {
           start: {
             line: d.loc.start.line,
@@ -174,8 +187,7 @@ export class SARIFFormatter implements OutputFormatter {
    * Convert an absolute scan path into a repository-relative POSIX URI.
    */
   private toRepositoryUri(filePath: string): string {
-    const relativePath = isAbsolute(filePath) ? relative(this.baseUri, filePath) : filePath
-    return relativePath.split(sep).join('/')
+    return toProjectRelativePath(filePath, this.baseUri)
   }
 
   write(detections: Detection[], outputPath: string): void {
@@ -230,6 +242,8 @@ export class SARIFFormatter implements OutputFormatter {
  * Produces a styled, interactive HTML report
  */
 export class HTMLFormatter implements OutputFormatter {
+  constructor(private readonly baseUri: string = process.cwd()) {}
+
   format(detections: Detection[]): string {
     const summary = {
       total: detections.length,
@@ -568,7 +582,7 @@ export class HTMLFormatter implements OutputFormatter {
         </div>
         
         <div class="detection-meta">
-          <span>📁 ${this.escapeHtml(d.filePath)}</span>
+          <span>📁 ${this.escapeHtml(toProjectRelativePath(d.filePath, this.baseUri))}</span>
           <span>📍 Line ${d.loc.start.line}:${d.loc.start.column}</span>
           <span>🏷️ ${this.escapeHtml(d.category)}</span>
           <span>🔖 ${this.escapeHtml(d.ruleId)}</span>
