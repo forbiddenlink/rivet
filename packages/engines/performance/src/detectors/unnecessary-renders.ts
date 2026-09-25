@@ -29,6 +29,25 @@ type RenderContext = {
   functionDepth: number
   /** Whether the outermost function we are inside produces JSX. */
   inComponentBody: boolean
+  /**
+   * The JSX element whose attributes we are reading, if any, and whether it is a
+   * DOM element rather than a component.
+   */
+  jsxElementIsHost: boolean
+}
+
+/** A lowercase JSX name is a DOM element; an uppercase one is a component. */
+function isHostElementName(name: string): boolean {
+  const first = name[0]
+  return first !== undefined && first === first.toLowerCase()
+}
+
+function openingElementName(node: ASTNode): string | undefined {
+  const identifier = node.children?.find((child) => child.type === 'JSXIdentifier')
+  if (identifier?.raw && typeof (identifier.raw as { name?: unknown }).name === 'string') {
+    return (identifier.raw as { name: string }).name
+  }
+  return undefined
 }
 
 /**
@@ -78,7 +97,15 @@ export function detectUnnecessaryRenders(ast: ASTNode, filePath: string): Detect
       }
     }
 
-    // Detect inline function/object in JSX attributes
+    // Detect inline function/object in JSX attributes.
+    //
+    // What this costs depends entirely on what receives the prop. A new arrow handed
+    // to <button onClick> changes nothing a user can measure: React DOM does not
+    // re-render because a listener's identity changed. On <Component onClick> a new
+    // reference each render defeats memoization, which is a real cost. The rule made
+    // no distinction, so 63 findings here were mostly advice React's own docs argue
+    // against. The DOM case is now info rather than medium, which keeps it out of a
+    // default report without pretending the rule does not apply.
     if (node.type === 'JSXAttribute' && node.children) {
       const value = node.children[1]
 
@@ -100,12 +127,17 @@ export function detectUnnecessaryRenders(ast: ASTNode, filePath: string): Detect
               start: { line: node.loc?.start.line || 0, column: node.loc?.start.column || 0 },
               end: { line: node.loc?.end.line || 0, column: node.loc?.end.column || 0 },
             },
-            severity: 'medium',
+            severity: context.jsxElementIsHost ? 'info' : 'medium',
             category: 'performance',
-            message: 'Inline function/object in JSX causes new reference on every render',
+            message: context.jsxElementIsHost
+              ? 'Inline function/object on a DOM element allocates on every render'
+              : 'Inline function/object in JSX causes new reference on every render',
             metadata: {
               type: expr.type.includes('Function') ? 'function' : 'object',
-              suggestion: 'Move to useCallback/useMemo or define outside component',
+              onHostElement: context.jsxElementIsHost,
+              suggestion: context.jsxElementIsHost
+                ? 'Harmless on a DOM element. Move to useCallback/useMemo only if this prop reaches a memoized component.'
+                : 'Move to useCallback/useMemo or define outside component',
             },
           })
         }
@@ -148,8 +180,16 @@ export function detectUnnecessaryRenders(ast: ASTNode, filePath: string): Detect
     }
 
     let childContext = context
+    if (node.type === 'JSXOpeningElement') {
+      const name = openingElementName(node)
+      childContext = {
+        ...childContext,
+        jsxElementIsHost: name !== undefined && isHostElementName(name),
+      }
+    }
     if (FUNCTION_NODE_TYPES.has(node.type)) {
       childContext = {
+        ...childContext,
         functionDepth: context.functionDepth + 1,
         inComponentBody: context.functionDepth === 0 ? returnsJsx(node) : context.inComponentBody,
       }
@@ -160,6 +200,6 @@ export function detectUnnecessaryRenders(ast: ASTNode, filePath: string): Detect
     }
   }
 
-  visit(ast, { functionDepth: 0, inComponentBody: false })
+  visit(ast, { functionDepth: 0, inComponentBody: false, jsxElementIsHost: false })
   return detections
 }

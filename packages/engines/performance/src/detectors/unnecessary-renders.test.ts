@@ -179,8 +179,30 @@ describe('Unnecessary Renders Detector', () => {
       const inlineDetections = detections.filter((d) => d.ruleId === 'inline-function-in-jsx')
 
       expect(inlineDetections.length).toBeGreaterThan(0)
-      expect(inlineDetections[0]?.severity).toBe('medium')
+      // A DOM element does not re-render because a listener's identity changed.
+      expect(inlineDetections[0]?.severity).toBe('info')
       expect(inlineDetections[0]?.message).toContain('Inline function')
+    })
+
+    it('should rank an inline prop on a component above one on a DOM element', () => {
+      const code = `
+        function MyComponent() {
+          return <Child onSelect={() => console.log('picked')} />
+        }
+      `
+
+      const { ast } = parseTypeScript({
+        filePath: 'test.tsx',
+        sourceCode: code,
+        extractTypes: false,
+      })
+
+      const detections = detectUnnecessaryRenders(ast, 'test.tsx')
+      const inlineDetections = detections.filter((d) => d.ruleId === 'inline-function-in-jsx')
+
+      expect(inlineDetections).toHaveLength(1)
+      expect(inlineDetections[0]?.severity).toBe('medium')
+      expect(inlineDetections[0]?.metadata?.onHostElement).toBe(false)
     })
 
     it('should detect inline object in style prop', () => {
