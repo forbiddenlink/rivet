@@ -274,6 +274,52 @@ describe('Hardcoded Secrets Detector', () => {
       expect(detections).toEqual([])
     })
 
+    it('should not flag header name/value pairs', () => {
+      const code = `
+        const headers = [
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+        ]
+      `
+
+      const detections = detectHardcodedSecrets(createContext(code))
+
+      expect(detections).toEqual([])
+    })
+
+    it('should not flag AST node type strings', () => {
+      const code = `
+        const isDeclaration = node.type === 'VariableDeclarator'
+        const isProperty = node.type === 'PropertyDefinition'
+      `
+
+      const detections = detectHardcodedSecrets(createContext(code))
+
+      expect(detections).toEqual([])
+    })
+
+    it('should not flag a credential-named binding holding an ordinary word', () => {
+      const code = `
+        const tokenKind = 'refreshToken'
+        const passwordField = 'currentPassword'
+      `
+
+      const detections = detectHardcodedSecrets(createContext(code))
+
+      expect(detections).toEqual([])
+    })
+
+    it('should not treat author or tokenizer as credential names', () => {
+      const code = `
+        const author = 'elizabeth_stein_2026_maintainer'
+        const tokenizer = 'cl100k_base_encoding_v2_stable'
+      `
+
+      const detections = detectHardcodedSecrets(createContext(code))
+
+      expect(detections).toEqual([])
+    })
+
     it('should not flag non-secret strings', () => {
       const code = `
         const greeting = 'Hello, World!'

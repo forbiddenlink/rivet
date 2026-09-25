@@ -224,6 +224,20 @@ describe('Insecure Crypto Detector', () => {
       expect(hardcoded).toEqual([])
     })
 
+    it('should not flag header key/value pairs', () => {
+      const code = `
+        const headers = [
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'Content-Security-Policy', value: policy },
+        ]
+      `
+
+      const detections = detectInsecureCrypto(createAST(code), 'test.ts')
+      const hardcoded = detections.filter((d) => d.ruleId === 'hardcoded-secret')
+
+      expect(hardcoded).toEqual([])
+    })
+
     it('should not flag short values as secrets', () => {
       const code = `
         const key = 'abc'
