@@ -1,0 +1,15 @@
+# Runs on commit through the global hooks path. Biome is the only gate here: a
+# formatting slip in a file nobody thought of as code (a JSON config, a workflow)
+# has failed CI twice, and the check takes about 100ms on the whole repository.
+#
+# Warnings do not block. Only errors do, which is the same bar `pnpm lint` and CI use.
+pre-commit:
+  parallel: true
+  jobs:
+    - name: biome
+      glob: "*.{js,jsx,ts,tsx,json,jsonc,css}"
+      run: ./node_modules/.bin/biome check --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+
+    - name: no-stray-build-output
+      glob: "packages/*/src/**/*"
+      run: node scripts/check-no-stray-build-output.mjs

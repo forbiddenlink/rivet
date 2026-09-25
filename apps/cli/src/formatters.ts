@@ -20,6 +20,33 @@ export interface OutputFormatter {
  * useless in all three, so every report says where a finding is relative to the
  * project. SARIF already did this; JSON and HTML did not.
  */
+/**
+ * SARIF counts lines and columns from 1; this engine counts columns from 0, the way
+ * the AST does. GitHub rejects the whole upload over it, one error per offending
+ * result, so a single 0 column meant no findings reached code scanning at all. The
+ * upload had never actually run before: the scan step exited on its own findings
+ * first, so the SARIF was written, archived as an artifact, and never validated.
+ *
+ * A detection whose detector left no location arrives as line 0, which is also
+ * invalid, so both ends are clamped and the region is kept well ordered.
+ */
+function toSarifRegion(loc: Detection['loc']): {
+  startLine: number
+  startColumn: number
+  endLine: number
+  endColumn: number
+} {
+  const startLine = Math.max(1, loc.start.line)
+  const startColumn = Math.max(1, loc.start.column + 1)
+  const endLine = Math.max(startLine, loc.end.line)
+  const endColumn =
+    endLine === startLine
+      ? Math.max(startColumn, loc.end.column + 1)
+      : Math.max(1, loc.end.column + 1)
+
+  return { startLine, startColumn, endLine, endColumn }
+}
+
 function toProjectRelativePath(filePath: string, baseUri: string): string {
   const relativePath = isAbsolute(filePath) ? relative(baseUri, filePath) : filePath
   return relativePath.split(sep).join('/')
@@ -153,10 +180,7 @@ export class SARIFFormatter implements OutputFormatter {
                     uri: this.toRepositoryUri(d.filePath),
                   },
                   region: {
-                    startLine: d.loc.start.line,
-                    startColumn: d.loc.start.column,
-                    endLine: d.loc.end.line,
-                    endColumn: d.loc.end.column,
+                    ...toSarifRegion(d.loc),
                     ...(d.codeSnippet && {
                       snippet: {
                         text: d.codeSnippet,

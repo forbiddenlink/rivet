@@ -44,13 +44,18 @@ jobs:
       - name: Build RIVET
         run: pnpm build
 
+      # --fail-on none because this job's gate is the error budget below, not the
+      # scan's own exit code. With the default of `high` the scan exited 1 on its own
+      # findings, the job stopped there, and the SARIF upload, the summary and the
+      # budget check never ran.
       - name: Run RIVET analysis
         run: |
           node apps/cli/dist/index.js scan . \
             --format sarif \
             --output rivet-results.sarif \
             --severity medium \
-            --max-issues 1000
+            --max-issues 1000 \
+            --fail-on none
 
       - name: Upload SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
@@ -126,15 +131,16 @@ jobs:
       # from the day it lands is a gate people route around; this one only fires
       # when the error count grows.
       #
-      # 140 comes from running this workflow's exact scan command on a clean build on
-      # 2026-09-24: 121 error-level results, led by high-complexity (40) and
-      # long-method (29). Re-derive it from the first real run of this workflow rather
-      # than trusting this number, because this workflow is disabled and has therefore
-      # never produced one.
+      # 115 comes from running this workflow's exact scan command on a clean build on
+      # 2026-09-25: 99 error-level results, led by high-complexity and long-method.
+      # It excludes examples/test-project, which is deliberately vulnerable fixture
+      # code and would otherwise sit in the Security tab as permanent alerts; the CLI
+      # smoke test in ci.yml still scans that fixture on every run. Re-derive this
+      # number whenever the excludes change.
       - name: Fail if error-level findings exceed the budget
         env:
           ERRORS: ${{ steps.summary.outputs.error }}
-          ERROR_BUDGET: '140'
+          ERROR_BUDGET: '115'
         run: |
           if [ "$ERRORS" -gt "$ERROR_BUDGET" ]; then
             echo "RIVET reported $ERRORS error-level findings, over the budget of $ERROR_BUDGET."
