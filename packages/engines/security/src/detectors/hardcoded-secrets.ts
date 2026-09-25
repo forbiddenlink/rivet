@@ -127,11 +127,7 @@ export function looksLikeCredentialName(varName: string | undefined): boolean {
 }
 
 /** camelCase, kebab-case, snake_case or spaced English. Secrets do not look like this. */
-const WORDLIKE_PATTERNS = [
-  /^[a-z]+(?:[A-Z][a-z]*)*$/,
-  /^[A-Za-z]+(?:[-_][A-Za-z]+)*$/,
-  /\s/,
-]
+const WORDLIKE_PATTERNS = [/^[a-z]+(?:[A-Z][a-z]*)*$/, /^[A-Za-z]+(?:[-_][A-Za-z]+)*$/, /\s/]
 
 export function looksLikeOrdinaryWords(value: string): boolean {
   return WORDLIKE_PATTERNS.some((pattern) => pattern.test(value))

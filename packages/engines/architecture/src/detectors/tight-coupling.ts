@@ -200,10 +200,7 @@ function getObjectName(node: ASTNode): string | undefined {
     return node.raw.name
   }
 
-  if (
-    (node.type === 'MemberExpression' || node.type === 'CallExpression') &&
-    node.children?.[0]
-  ) {
+  if ((node.type === 'MemberExpression' || node.type === 'CallExpression') && node.children?.[0]) {
     return getObjectName(node.children[0])
   }
 
