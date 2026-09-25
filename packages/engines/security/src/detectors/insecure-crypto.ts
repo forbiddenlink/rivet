@@ -42,16 +42,21 @@ export function detectInsecureCrypto(ast: ASTNode, filePath: string): Detection[
                 severity: 'high',
                 category: 'security',
                 message: `Insecure cryptographic algorithm detected: ${algorithm}`,
-                fix: algStart !== undefined && algEnd !== undefined ? {
-                  description: `Replace ${algorithm} with ${secureAlternative}`,
-                  replacements: [{
-                    start: algStart,
-                    end: algEnd,
-                    text: `'${secureAlternative}'`,
-                  }],
-                } : {
-                  description: `Replace ${algorithm} with ${secureAlternative}`,
-                },
+                fix:
+                  algStart !== undefined && algEnd !== undefined
+                    ? {
+                        description: `Replace ${algorithm} with ${secureAlternative}`,
+                        replacements: [
+                          {
+                            start: algStart,
+                            end: algEnd,
+                            text: `'${secureAlternative}'`,
+                          },
+                        ],
+                      }
+                    : {
+                        description: `Replace ${algorithm} with ${secureAlternative}`,
+                      },
                 metadata: {
                   pattern: 'weak-crypto',
                   algorithm,
@@ -68,10 +73,7 @@ export function detectInsecureCrypto(ast: ASTNode, filePath: string): Detection[
     }
 
     // Check for hardcoded secrets in variable declarations
-    if (
-      (node.type === 'VariableDeclarator' || node.type === 'Property') &&
-      node.children
-    ) {
+    if ((node.type === 'VariableDeclarator' || node.type === 'Property') && node.children) {
       const identifierNode = node.children.find((child) => child.type === 'Identifier')
       const literalNode = node.children.find((child) => child.type === 'Literal')
 
@@ -135,16 +137,21 @@ export function detectInsecureCrypto(ast: ASTNode, filePath: string): Detection[
             severity: 'medium',
             category: 'security',
             message: 'Weak random number generator: Math.random() is not cryptographically secure',
-            fix: nodeStart !== undefined && nodeEnd !== undefined ? {
-              description: 'Replace Math.random() with crypto.getRandomValues()',
-              replacements: [{
-                start: nodeStart,
-                end: nodeEnd,
-                text: 'crypto.getRandomValues(new Uint32Array(1))[0] / 0xFFFFFFFF',
-              }],
-            } : {
-              description: 'Replace Math.random() with crypto.getRandomValues()',
-            },
+            fix:
+              nodeStart !== undefined && nodeEnd !== undefined
+                ? {
+                    description: 'Replace Math.random() with crypto.getRandomValues()',
+                    replacements: [
+                      {
+                        start: nodeStart,
+                        end: nodeEnd,
+                        text: 'crypto.getRandomValues(new Uint32Array(1))[0] / 0xFFFFFFFF',
+                      },
+                    ],
+                  }
+                : {
+                    description: 'Replace Math.random() with crypto.getRandomValues()',
+                  },
             metadata: {
               pattern: 'weak-random',
               explanation:

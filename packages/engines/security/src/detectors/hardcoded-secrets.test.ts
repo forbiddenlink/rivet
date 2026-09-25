@@ -41,7 +41,7 @@ describe('Hardcoded Secrets Detector', () => {
       const detections = detectHardcodedSecrets(createContext(code))
 
       expect(detections.length).toBeGreaterThan(0)
-      expect(detections.some(d => d.message.includes('API Key'))).toBe(true)
+      expect(detections.some((d) => d.message.includes('API Key'))).toBe(true)
     })
   })
 
@@ -54,7 +54,7 @@ describe('Hardcoded Secrets Detector', () => {
       const detections = detectHardcodedSecrets(createContext(code))
 
       expect(detections.length).toBeGreaterThan(0)
-      expect(detections.some(d => d.message.includes('AWS'))).toBe(true)
+      expect(detections.some((d) => d.message.includes('AWS'))).toBe(true)
     })
 
     it('should detect ASIA access key', () => {
@@ -77,7 +77,7 @@ describe('Hardcoded Secrets Detector', () => {
       const detections = detectHardcodedSecrets(createContext(code))
 
       expect(detections.length).toBeGreaterThan(0)
-      expect(detections.some(d => d.message.includes('Private Key'))).toBe(true)
+      expect(detections.some((d) => d.message.includes('Private Key'))).toBe(true)
     })
 
     it('should detect EC private key', () => {
@@ -110,7 +110,7 @@ describe('Hardcoded Secrets Detector', () => {
       const detections = detectHardcodedSecrets(createContext(code))
 
       expect(detections.length).toBeGreaterThan(0)
-      expect(detections.some(d => d.message.includes('Secret'))).toBe(true)
+      expect(detections.some((d) => d.message.includes('Secret'))).toBe(true)
     })
 
     it('should detect secret assignment', () => {
@@ -135,7 +135,7 @@ describe('Hardcoded Secrets Detector', () => {
       const detections = detectHardcodedSecrets(createContext(code))
 
       expect(detections.length).toBeGreaterThan(0)
-      expect(detections.some(d => d.message.includes('JWT'))).toBe(true)
+      expect(detections.some((d) => d.message.includes('JWT'))).toBe(true)
     })
   })
 
@@ -170,7 +170,7 @@ describe('Hardcoded Secrets Detector', () => {
       const detections = detectHardcodedSecrets(createContext(code))
 
       expect(detections.length).toBeGreaterThan(0)
-      expect(detections.some(d => d.message.includes('Database Password'))).toBe(true)
+      expect(detections.some((d) => d.message.includes('Database Password'))).toBe(true)
     })
 
     it('should detect PostgreSQL connection string with password', () => {

@@ -1,4 +1,4 @@
-import type { Detection, AnalysisContext } from '@rivet/core'
+import type { AnalysisContext, Detection } from '@rivet/core'
 import type { ASTNode } from '@rivet/parsers'
 
 /**
@@ -44,13 +44,13 @@ const SECRET_PATTERNS = [
   },
   // Secrets that look like passwords (contain mixed case, numbers, and/or special chars, 12+ chars)
   {
-    pattern: /^(?=.*[a-z])(?=.*[A-Z0-9!@#$%^&*])[a-zA-Z0-9!@#$%^&*_\-]{12,}$/,
+    pattern: /^(?=.*[a-z])(?=.*[A-Z0-9!@#$%^&*])[a-zA-Z0-9!@#$%^&*_-]{12,}$/,
     name: 'Hardcoded Secret',
     severity: 'high' as const,
   },
   // OAuth/Google tokens (ya29. prefix or containing dots)
   {
-    pattern: /^ya29\.[a-zA-Z0-9_\-]{20,}$/,
+    pattern: /^ya29\.[a-zA-Z0-9_-]{20,}$/,
     name: 'OAuth Token',
     severity: 'high' as const,
   },
@@ -92,7 +92,12 @@ export function detectHardcodedSecrets(context: AnalysisContext): Detection[] {
     }
 
     // Check string literals
-    if (node.type === 'Literal' && node.raw.type === 'Literal' && typeof node.raw.value === 'string' && node.loc) {
+    if (
+      node.type === 'Literal' &&
+      node.raw.type === 'Literal' &&
+      typeof node.raw.value === 'string' &&
+      node.loc
+    ) {
       const value = node.raw.value
 
       // First check if the value matches any pattern
@@ -128,16 +133,21 @@ export function detectHardcodedSecrets(context: AnalysisContext): Detection[] {
             severity,
             category: 'security',
             message: `Potential ${detectedName} detected in hardcoded string`,
-            fix: nodeStart !== undefined && nodeEnd !== undefined ? {
-              description: `Replace with environment variable process.env.${envVarName}`,
-              replacements: [{
-                start: nodeStart,
-                end: nodeEnd,
-                text: `process.env.${envVarName}`,
-              }],
-            } : {
-              description: `Move to environment variable (e.g., process.env.${envVarName})`,
-            },
+            fix:
+              nodeStart !== undefined && nodeEnd !== undefined
+                ? {
+                    description: `Replace with environment variable process.env.${envVarName}`,
+                    replacements: [
+                      {
+                        start: nodeStart,
+                        end: nodeEnd,
+                        text: `process.env.${envVarName}`,
+                      },
+                    ],
+                  }
+                : {
+                    description: `Move to environment variable (e.g., process.env.${envVarName})`,
+                  },
             metadata: {
               pattern: detectedName.toLowerCase().replace(/\s+/g, '-'),
               explanation: `Hardcoding secrets in source code is a security risk. Secrets should be stored in environment variables or secure key management systems.`,
@@ -164,7 +174,7 @@ export function detectHardcodedSecrets(context: AnalysisContext): Detection[] {
 
       for (const { pattern, name, severity } of SECRET_PATTERNS) {
         pattern.lastIndex = 0
-        
+
         if (pattern.test(templateValue)) {
           detections.push({
             id: `hardcoded-secret-${++detectionCounter}`,

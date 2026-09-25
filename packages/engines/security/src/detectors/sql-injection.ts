@@ -11,18 +11,12 @@ export function detectSQLInjection(ast: ASTNode, filePath: string): Detection[] 
 
   function visit(node: ASTNode): void {
     // Check for potential SQL query patterns in call expressions
-    if (
-      (node.type === 'CallExpression' || node.type === 'MemberExpression') &&
-      node.children
-    ) {
+    if ((node.type === 'CallExpression' || node.type === 'MemberExpression') && node.children) {
       const nodeText = getNodeText(node)
       const lowerText = nodeText.toLowerCase()
 
       // Look for SQL keywords with string concatenation or template literals
-      if (
-        hasSqlKeyword(lowerText) &&
-        (hasConcatenation(node) || hasTemplateLiteral(node))
-      ) {
+      if (hasSqlKeyword(lowerText) && (hasConcatenation(node) || hasTemplateLiteral(node))) {
         addDetection(node)
       }
     }
@@ -71,7 +65,8 @@ export function detectSQLInjection(ast: ASTNode, filePath: string): Detection[] 
         pattern: 'sql-injection',
         explanation:
           'String concatenation or template literals in SQL queries can lead to SQL injection. Use parameterized queries or prepared statements instead.',
-        recommendation: 'Use parameterized queries (e.g., db.query("SELECT * FROM users WHERE id = ?", [userId]))',
+        recommendation:
+          'Use parameterized queries (e.g., db.query("SELECT * FROM users WHERE id = ?", [userId]))',
         owasp: 'A03:2021 – Injection',
       },
     })

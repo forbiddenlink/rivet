@@ -53,7 +53,7 @@ describe('SQL Injection Detector', () => {
       const detections = detectSQLInjection(createAST(code), 'test.ts')
 
       expect(detections.length).toBeGreaterThan(0)
-      expect(detections.some(d => d.ruleId === 'sql-injection')).toBe(true)
+      expect(detections.some((d) => d.ruleId === 'sql-injection')).toBe(true)
     })
 
     it('should detect UPDATE statement with template literal', () => {
