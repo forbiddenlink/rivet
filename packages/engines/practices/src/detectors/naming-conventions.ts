@@ -1,5 +1,5 @@
-import type { ASTNode } from '@rivet/parsers'
 import type { Detection } from '@rivet/core'
+import type { ASTNode } from '@rivet/parsers'
 
 let detectionCounter = 0
 
@@ -24,7 +24,10 @@ export function detectNamingConventions(ast: ASTNode, filePath: string): Detecti
             ruleId: 'class-naming',
             filePath,
             loc: {
-              start: { line: nameNode.loc?.start.line || 0, column: nameNode.loc?.start.column || 0 },
+              start: {
+                line: nameNode.loc?.start.line || 0,
+                column: nameNode.loc?.start.column || 0,
+              },
               end: { line: nameNode.loc?.end.line || 0, column: nameNode.loc?.end.column || 0 },
             },
             severity: 'low',
@@ -48,7 +51,7 @@ export function detectNamingConventions(ast: ASTNode, filePath: string): Detecti
         const name = nameNode.raw.name
         // Check if it looks like a constant (all uppercase or starts with uppercase)
         const looksLikeConstant = name === name.toUpperCase() || name[0] === name[0]?.toUpperCase()
-        
+
         if (looksLikeConstant && node.type === 'VariableDeclarator') {
           // Allow UPPER_CASE constants
           if (name !== name.toUpperCase() && name[0] === name[0]?.toUpperCase()) {
@@ -57,7 +60,10 @@ export function detectNamingConventions(ast: ASTNode, filePath: string): Detecti
               ruleId: 'variable-naming',
               filePath,
               loc: {
-                start: { line: nameNode.loc?.start.line || 0, column: nameNode.loc?.start.column || 0 },
+                start: {
+                  line: nameNode.loc?.start.line || 0,
+                  column: nameNode.loc?.start.column || 0,
+                },
                 end: { line: nameNode.loc?.end.line || 0, column: nameNode.loc?.end.column || 0 },
               },
               severity: 'low',

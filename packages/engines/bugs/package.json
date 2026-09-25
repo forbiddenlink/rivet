@@ -29,7 +29,13 @@
     "tsup": "8.5.1",
     "typescript": "6.0.3"
   },
-  "keywords": ["bugs", "errors", "null-checks", "promises", "analysis"],
+  "keywords": [
+    "bugs",
+    "errors",
+    "null-checks",
+    "promises",
+    "analysis"
+  ],
   "author": "",
   "license": "MIT"
 }

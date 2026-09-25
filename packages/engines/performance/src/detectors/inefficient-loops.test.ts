@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
 import { parseTypeScript } from '@rivet/parsers'
+import { describe, expect, it } from 'vitest'
 import { detectInefficientLoops } from './inefficient-loops'
 
 describe('Inefficient Loops Detector', () => {
@@ -22,7 +22,7 @@ describe('Inefficient Loops Detector', () => {
       })
 
       const detections = detectInefficientLoops(ast, 'test.ts')
-      const pushDetections = detections.filter(d => d.ruleId === 'inefficient-push-in-loop')
+      const pushDetections = detections.filter((d) => d.ruleId === 'inefficient-push-in-loop')
 
       expect(pushDetections.length).toBeGreaterThan(0)
       expect(pushDetections[0]?.category).toBe('performance')
@@ -47,7 +47,7 @@ describe('Inefficient Loops Detector', () => {
       })
 
       const detections = detectInefficientLoops(ast, 'test.ts')
-      const pushDetections = detections.filter(d => d.ruleId === 'inefficient-push-in-loop')
+      const pushDetections = detections.filter((d) => d.ruleId === 'inefficient-push-in-loop')
 
       expect(pushDetections.length).toBeGreaterThan(0)
     })
@@ -72,7 +72,7 @@ describe('Inefficient Loops Detector', () => {
       })
 
       const detections = detectInefficientLoops(ast, 'test.ts')
-      const pushDetections = detections.filter(d => d.ruleId === 'inefficient-push-in-loop')
+      const pushDetections = detections.filter((d) => d.ruleId === 'inefficient-push-in-loop')
 
       expect(pushDetections.length).toBeGreaterThan(0)
     })
@@ -97,7 +97,7 @@ describe('Inefficient Loops Detector', () => {
       })
 
       const detections = detectInefficientLoops(ast, 'test.ts')
-      const pushDetections = detections.filter(d => d.ruleId === 'inefficient-push-in-loop')
+      const pushDetections = detections.filter((d) => d.ruleId === 'inefficient-push-in-loop')
 
       expect(pushDetections.length).toBeGreaterThan(0)
     })
@@ -120,7 +120,7 @@ describe('Inefficient Loops Detector', () => {
       })
 
       const detections = detectInefficientLoops(ast, 'test.ts')
-      const pushDetections = detections.filter(d => d.ruleId === 'inefficient-push-in-loop')
+      const pushDetections = detections.filter((d) => d.ruleId === 'inefficient-push-in-loop')
 
       expect(pushDetections.length).toBeGreaterThan(0)
     })
@@ -140,7 +140,7 @@ describe('Inefficient Loops Detector', () => {
       })
 
       const detections = detectInefficientLoops(ast, 'test.ts')
-      const pushDetections = detections.filter(d => d.ruleId === 'inefficient-push-in-loop')
+      const pushDetections = detections.filter((d) => d.ruleId === 'inefficient-push-in-loop')
 
       expect(pushDetections).toEqual([])
     })
@@ -163,7 +163,7 @@ describe('Inefficient Loops Detector', () => {
       })
 
       const detections = detectInefficientLoops(ast, 'test.ts')
-      const pushDetections = detections.filter(d => d.ruleId === 'inefficient-push-in-loop')
+      const pushDetections = detections.filter((d) => d.ruleId === 'inefficient-push-in-loop')
 
       expect(pushDetections).toEqual([])
     })
@@ -187,7 +187,7 @@ describe('Inefficient Loops Detector', () => {
       })
 
       const detections = detectInefficientLoops(ast, 'test.ts')
-      const domDetections = detections.filter(d => d.ruleId === 'dom-query-in-loop')
+      const domDetections = detections.filter((d) => d.ruleId === 'dom-query-in-loop')
 
       expect(domDetections.length).toBeGreaterThan(0)
       expect(domDetections[0]?.severity).toBe('high')
@@ -213,7 +213,7 @@ describe('Inefficient Loops Detector', () => {
       })
 
       const detections = detectInefficientLoops(ast, 'test.ts')
-      const domDetections = detections.filter(d => d.ruleId === 'dom-query-in-loop')
+      const domDetections = detections.filter((d) => d.ruleId === 'dom-query-in-loop')
 
       expect(domDetections.length).toBeGreaterThan(0)
     })
@@ -235,7 +235,7 @@ describe('Inefficient Loops Detector', () => {
       })
 
       const detections = detectInefficientLoops(ast, 'test.ts')
-      const domDetections = detections.filter(d => d.ruleId === 'dom-query-in-loop')
+      const domDetections = detections.filter((d) => d.ruleId === 'dom-query-in-loop')
 
       expect(domDetections.length).toBeGreaterThan(0)
     })
@@ -257,7 +257,7 @@ describe('Inefficient Loops Detector', () => {
       })
 
       const detections = detectInefficientLoops(ast, 'test.ts')
-      const domDetections = detections.filter(d => d.ruleId === 'dom-query-in-loop')
+      const domDetections = detections.filter((d) => d.ruleId === 'dom-query-in-loop')
 
       expect(domDetections.length).toBeGreaterThan(0)
     })
@@ -280,7 +280,7 @@ describe('Inefficient Loops Detector', () => {
       })
 
       const detections = detectInefficientLoops(ast, 'test.ts')
-      const domDetections = detections.filter(d => d.ruleId === 'dom-query-in-loop')
+      const domDetections = detections.filter((d) => d.ruleId === 'dom-query-in-loop')
 
       expect(domDetections.length).toBeGreaterThan(0)
     })
@@ -303,7 +303,7 @@ describe('Inefficient Loops Detector', () => {
       })
 
       const detections = detectInefficientLoops(ast, 'test.ts')
-      const domDetections = detections.filter(d => d.ruleId === 'dom-query-in-loop')
+      const domDetections = detections.filter((d) => d.ruleId === 'dom-query-in-loop')
 
       expect(domDetections).toEqual([])
     })
@@ -330,8 +330,8 @@ describe('Inefficient Loops Detector', () => {
 
       const detections = detectInefficientLoops(ast, 'test.ts')
 
-      const pushDetections = detections.filter(d => d.ruleId === 'inefficient-push-in-loop')
-      const domDetections = detections.filter(d => d.ruleId === 'dom-query-in-loop')
+      const pushDetections = detections.filter((d) => d.ruleId === 'inefficient-push-in-loop')
+      const domDetections = detections.filter((d) => d.ruleId === 'dom-query-in-loop')
 
       expect(pushDetections.length).toBeGreaterThan(0)
       expect(domDetections.length).toBeGreaterThan(0)
@@ -355,7 +355,7 @@ describe('Inefficient Loops Detector', () => {
       })
 
       const detections = detectInefficientLoops(ast, 'test.ts')
-      const pushDetections = detections.filter(d => d.ruleId === 'inefficient-push-in-loop')
+      const pushDetections = detections.filter((d) => d.ruleId === 'inefficient-push-in-loop')
 
       expect(pushDetections[0]?.metadata?.suggestion).toContain('concat')
     })
@@ -377,7 +377,7 @@ describe('Inefficient Loops Detector', () => {
       })
 
       const detections = detectInefficientLoops(ast, 'test.ts')
-      const domDetections = detections.filter(d => d.ruleId === 'dom-query-in-loop')
+      const domDetections = detections.filter((d) => d.ruleId === 'dom-query-in-loop')
 
       expect(domDetections[0]?.metadata?.suggestion).toContain('outside the loop')
     })
@@ -400,7 +400,7 @@ describe('Inefficient Loops Detector', () => {
       })
 
       const detections = detectInefficientLoops(ast, 'test.ts')
-      const pushDetections = detections.filter(d => d.ruleId === 'inefficient-push-in-loop')
+      const pushDetections = detections.filter((d) => d.ruleId === 'inefficient-push-in-loop')
 
       expect(pushDetections[0]?.severity).toBe('medium')
     })
@@ -425,7 +425,7 @@ describe('Inefficient Loops Detector', () => {
       })
 
       const detections = detectInefficientLoops(ast, 'test.ts')
-      const pushDetections = detections.filter(d => d.ruleId === 'inefficient-push-in-loop')
+      const pushDetections = detections.filter((d) => d.ruleId === 'inefficient-push-in-loop')
 
       // Should detect push in both loops
       expect(pushDetections.length).toBeGreaterThanOrEqual(1)

@@ -92,15 +92,15 @@ function convertESTreeNode(node: TSESTree.Node): ASTNode {
 
   // Recursively convert child nodes
   const children: ASTNode[] = []
-  
+
   // Traverse all properties of the node to find child nodes
   for (const key in node) {
     if (key === 'type' || key === 'loc' || key === 'range' || key === 'parent') {
       continue
     }
-    
+
     const value = (node as any)[key]
-    
+
     if (value && typeof value === 'object') {
       // Single child node
       if (value.type && value.loc) {
@@ -184,12 +184,7 @@ function extractTypeInformation(
 
   try {
     // Create a TypeScript source file
-    const sourceFile = ts.createSourceFile(
-      filePath,
-      sourceCode,
-      ts.ScriptTarget.Latest,
-      true
-    )
+    const sourceFile = ts.createSourceFile(filePath, sourceCode, ts.ScriptTarget.Latest, true)
 
     // Create a compiler host and program
     const host = ts.createCompilerHost(compilerOptions || {})
@@ -226,7 +221,8 @@ function extractTypeInformation(
         typeInfo.set(key, {
           typeString,
           symbol: symbolInfo,
-          isNullable: (type.flags & ts.TypeFlags.Null) !== 0 || (type.flags & ts.TypeFlags.Undefined) !== 0,
+          isNullable:
+            (type.flags & ts.TypeFlags.Null) !== 0 || (type.flags & ts.TypeFlags.Undefined) !== 0,
           isAny: (type.flags & ts.TypeFlags.Any) !== 0,
           isUnknown: (type.flags & ts.TypeFlags.Unknown) !== 0,
         })

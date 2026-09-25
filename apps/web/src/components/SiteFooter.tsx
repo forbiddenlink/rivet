@@ -9,7 +9,7 @@ export function SiteFooter() {
           <Link href="/privacy">Privacy</Link>
           <Link href="/contact">Contact</Link>
           <a
-            href="https://github.com/elizabethstein/rivet"
+            href="https://github.com/forbiddenlink/rivet"
             target="_blank"
             rel="noopener noreferrer"
           >

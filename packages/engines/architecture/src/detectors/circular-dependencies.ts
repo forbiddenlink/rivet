@@ -1,5 +1,5 @@
-import type { ASTNode } from '@rivet/parsers'
 import type { Detection } from '@rivet/core'
+import type { ASTNode } from '@rivet/parsers'
 
 let detectionCounter = 0
 
@@ -24,7 +24,7 @@ export function detectCircularDependencies(
       const importPath = node.children[0]
       if (importPath.raw.type === 'Literal' && typeof importPath.raw.value === 'string') {
         imports.add(importPath.raw.value)
-        
+
         // Simple circular dependency check (same file imports itself indirectly)
         if (importPath.raw.value.includes(filePath.split('/').pop()?.replace('.ts', '') || '')) {
           detections.push({

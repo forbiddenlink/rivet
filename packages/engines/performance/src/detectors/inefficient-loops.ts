@@ -1,5 +1,5 @@
-import type { ASTNode } from '@rivet/parsers'
 import type { Detection } from '@rivet/core'
+import type { ASTNode } from '@rivet/parsers'
 
 let detectionCounter = 0
 
@@ -35,7 +35,8 @@ export function detectInefficientLoops(ast: ASTNode, filePath: string): Detectio
           },
           severity: 'medium',
           category: 'performance',
-          message: 'Avoid Array.push() in loops - use spread operator or Array.from() for better performance',
+          message:
+            'Avoid Array.push() in loops - use spread operator or Array.from() for better performance',
           metadata: {
             suggestion: 'Consider using array.concat(), spread operator, or Array.from()',
           },
@@ -98,12 +99,12 @@ function findPushInBody(node: ASTNode): boolean {
 function findDOMQueryInBody(node: ASTNode): boolean {
   if (node.type === 'CallExpression' && node.children && node.children[0]) {
     const callee = node.children[0]
-    
+
     // Check for document.querySelector, getElementById, etc.
     if (callee.type === 'MemberExpression' && callee.children) {
       const obj = callee.children[0]
       const prop = callee.children[1]
-      
+
       if (
         obj &&
         obj.type === 'Identifier' &&

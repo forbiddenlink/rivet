@@ -1,9 +1,8 @@
 import type { AnalysisContext, AnalysisEngine, Detection } from '@rivet/core'
-
-import { detectNamingConventions } from './detectors/naming-conventions'
+import { detectConsoleStatements } from './detectors/console-statements'
 import { detectDocumentation } from './detectors/documentation'
 import { detectErrorHandling } from './detectors/error-handling'
-import { detectConsoleStatements } from './detectors/console-statements'
+import { detectNamingConventions } from './detectors/naming-conventions'
 import { detectTestPractices } from './detectors/test-practices'
 
 export class PracticesEngine implements AnalysisEngine {
@@ -26,8 +25,8 @@ export class PracticesEngine implements AnalysisEngine {
   }
 }
 
-export * from './detectors/naming-conventions'
+export * from './detectors/console-statements'
 export * from './detectors/documentation'
 export * from './detectors/error-handling'
-export * from './detectors/console-statements'
+export * from './detectors/naming-conventions'
 export * from './detectors/test-practices'

@@ -10,11 +10,7 @@ export function detectXSS(ast: ASTNode, filePath: string): Detection[] {
   let detectionCounter = 0
 
   // Dangerous properties and methods (exact matches only)
-  const dangerousProperties = new Set([
-    'innerHTML',
-    'outerHTML',
-    'insertAdjacentHTML',
-  ])
+  const dangerousProperties = new Set(['innerHTML', 'outerHTML', 'insertAdjacentHTML'])
 
   function visit(node: ASTNode): void {
     // Check for member expressions (e.g., element.innerHTML)
@@ -43,22 +39,29 @@ export function detectXSS(ast: ASTNode, filePath: string): Detection[] {
             severity: 'high',
             category: 'security',
             message: `Potential XSS vulnerability: unsafe use of ${propName}`,
-            fix: safeAlternative && propStart !== undefined && propEnd !== undefined ? {
-              description: `Replace ${propName} with ${safeAlternative}`,
-              replacements: [{
-                start: propStart,
-                end: propEnd,
-                text: safeAlternative,
-              }],
-            } : {
-              description: 'Use textContent instead of innerHTML, or sanitize input with DOMPurify',
-            },
+            fix:
+              safeAlternative && propStart !== undefined && propEnd !== undefined
+                ? {
+                    description: `Replace ${propName} with ${safeAlternative}`,
+                    replacements: [
+                      {
+                        start: propStart,
+                        end: propEnd,
+                        text: safeAlternative,
+                      },
+                    ],
+                  }
+                : {
+                    description:
+                      'Use textContent instead of innerHTML, or sanitize input with DOMPurify',
+                  },
             metadata: {
               pattern: 'xss-dom-manipulation',
               property: propName,
               explanation:
                 'Direct DOM manipulation with user input can lead to XSS attacks. Malicious scripts can be injected and executed.',
-              recommendation: 'Use textContent instead of innerHTML, or sanitize input with DOMPurify',
+              recommendation:
+                'Use textContent instead of innerHTML, or sanitize input with DOMPurify',
               owasp: 'A03:2021 – Injection',
             },
           })
@@ -96,10 +99,11 @@ export function detectXSS(ast: ASTNode, filePath: string): Detection[] {
     // Check for React's dangerouslySetInnerHTML
     if (
       node.type === 'JSXAttribute' &&
-      node.children?.some((child) => 
-        child.type === 'JSXIdentifier' && 
-        child.raw.type === 'JSXIdentifier' &&
-        child.raw.name === 'dangerouslySetInnerHTML'
+      node.children?.some(
+        (child) =>
+          child.type === 'JSXIdentifier' &&
+          child.raw.type === 'JSXIdentifier' &&
+          child.raw.name === 'dangerouslySetInnerHTML'
       )
     ) {
       detections.push({
@@ -116,7 +120,7 @@ export function detectXSS(ast: ASTNode, filePath: string): Detection[] {
         metadata: {
           pattern: 'xss-react',
           explanation:
-            'React\'s dangerouslySetInnerHTML bypasses XSS protection. Ensure HTML is sanitized.',
+            "React's dangerouslySetInnerHTML bypasses XSS protection. Ensure HTML is sanitized.",
           recommendation: 'Sanitize HTML with DOMPurify before rendering',
           owasp: 'A03:2021 – Injection',
         },

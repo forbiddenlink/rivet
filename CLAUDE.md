@@ -5,7 +5,7 @@ engines (smells, bugs, security, performance, architecture, practices,
 dependencies, flows) with an AI explanation layer. Ships as a CLI (`rivet
 scan`) and a Next.js web dashboard. Phase 1 MVP, ~90% per README.
 
-Repo: github.com/elizabethstein/rivet. Vercel project: `rivet` (team
+Repo: github.com/forbiddenlink/rivet. Vercel project: `rivet` (team
 `team_lpmfVKK0eS53XS6cvuFHK9AN`).
 
 ## Stack

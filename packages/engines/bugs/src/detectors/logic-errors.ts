@@ -11,10 +11,7 @@ export function detectLogicErrors(ast: ASTNode, filePath: string): Detection[] {
 
   function visit(node: ASTNode): void {
     // Check for assignment in conditionals (= instead of ==)
-    if (
-      (node.type === 'IfStatement' || node.type === 'WhileStatement') &&
-      node.children
-    ) {
+    if ((node.type === 'IfStatement' || node.type === 'WhileStatement') && node.children) {
       const testNode = node.children.find((child) => child.type === 'AssignmentExpression')
       if (testNode) {
         detections.push({
@@ -32,7 +29,8 @@ export function detectLogicErrors(ast: ASTNode, filePath: string): Detection[] {
             pattern: 'assignment-in-conditional',
             explanation:
               'Using assignment (=) instead of comparison (== or ===) in conditionals is usually a mistake.',
-            recommendation: 'Change = to == or === for comparison, or wrap in parentheses if intentional',
+            recommendation:
+              'Change = to == or === for comparison, or wrap in parentheses if intentional',
           },
         })
       }
@@ -64,7 +62,8 @@ export function detectLogicErrors(ast: ASTNode, filePath: string): Detection[] {
           metadata: {
             pattern: 'self-comparison',
             variable: left.raw.name,
-            explanation: 'Comparing a variable to itself is always true or false and likely a mistake.',
+            explanation:
+              'Comparing a variable to itself is always true or false and likely a mistake.',
             recommendation: 'Check if you meant to compare to a different variable',
           },
         })
@@ -75,7 +74,7 @@ export function detectLogicErrors(ast: ASTNode, filePath: string): Detection[] {
     if (node.type === 'IfStatement' && node.children) {
       const conditions = collectIfConditions(node)
       const seen = new Set<string>()
-      
+
       for (const condition of conditions) {
         const condStr = serializeNode(condition)
         if (seen.has(condStr)) {
@@ -84,7 +83,10 @@ export function detectLogicErrors(ast: ASTNode, filePath: string): Detection[] {
             ruleId: 'duplicate-condition',
             filePath,
             loc: {
-              start: { line: condition.loc?.start.line || 0, column: condition.loc?.start.column || 0 },
+              start: {
+                line: condition.loc?.start.line || 0,
+                column: condition.loc?.start.column || 0,
+              },
               end: { line: condition.loc?.end.line || 0, column: condition.loc?.end.column || 0 },
             },
             severity: 'medium',
@@ -103,10 +105,7 @@ export function detectLogicErrors(ast: ASTNode, filePath: string): Detection[] {
     }
 
     // Check for constant conditions (always true/false)
-    if (
-      (node.type === 'IfStatement' || node.type === 'WhileStatement') &&
-      node.children
-    ) {
+    if ((node.type === 'IfStatement' || node.type === 'WhileStatement') && node.children) {
       const testNode = node.children.find((child) => child.type === 'Literal')
       if (testNode && testNode.raw.type === 'Literal') {
         const value = testNode.raw.value
@@ -116,7 +115,10 @@ export function detectLogicErrors(ast: ASTNode, filePath: string): Detection[] {
             ruleId: 'constant-condition',
             filePath,
             loc: {
-              start: { line: testNode.loc?.start.line || 0, column: testNode.loc?.start.column || 0 },
+              start: {
+                line: testNode.loc?.start.line || 0,
+                column: testNode.loc?.start.column || 0,
+              },
               end: { line: testNode.loc?.end.line || 0, column: testNode.loc?.end.column || 0 },
             },
             severity: 'low',
@@ -125,7 +127,8 @@ export function detectLogicErrors(ast: ASTNode, filePath: string): Detection[] {
             metadata: {
               pattern: 'constant-condition',
               value: String(value),
-              explanation: 'Conditional statements with constant values are likely mistakes or dead code.',
+              explanation:
+                'Conditional statements with constant values are likely mistakes or dead code.',
               recommendation: 'Remove the condition or check if it should be a variable',
             },
           })
@@ -147,14 +150,14 @@ export function detectLogicErrors(ast: ASTNode, filePath: string): Detection[] {
 
 function collectIfConditions(node: ASTNode): ASTNode[] {
   const conditions: ASTNode[] = []
-  
+
   function collect(n: ASTNode): void {
     if (n.type === 'IfStatement' && n.children) {
       const testNode = n.children[0]
       if (testNode) {
         conditions.push(testNode)
       }
-      
+
       // Check for else-if
       const alternate = n.children.find((child) => child.type === 'IfStatement')
       if (alternate) {
@@ -162,7 +165,7 @@ function collectIfConditions(node: ASTNode): ASTNode[] {
       }
     }
   }
-  
+
   collect(node)
   return conditions
 }

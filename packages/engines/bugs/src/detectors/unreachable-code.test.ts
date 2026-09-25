@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
 import { parseTypeScript } from '@rivet/parsers'
+import { describe, expect, it } from 'vitest'
 import { detectUnreachableCode } from './unreachable-code'
 
 describe('Unreachable Code Detector', () => {

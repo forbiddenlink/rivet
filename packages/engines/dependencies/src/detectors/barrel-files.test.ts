@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
 import { parseTypeScript } from '@rivet/parsers'
+import { describe, expect, it } from 'vitest'
 
 import { detectBarrelFiles } from './barrel-files'
 
@@ -32,10 +32,7 @@ describe('Barrel Files Detector', () => {
     })
 
     it('should include correct metadata', () => {
-      const exports = Array.from(
-        { length: 7 },
-        (_, i) => `export * from './module${i}'`
-      ).join('\n')
+      const exports = Array.from({ length: 7 }, (_, i) => `export * from './module${i}'`).join('\n')
 
       const { ast } = parseTypeScript({
         filePath: 'index.ts',
@@ -47,8 +44,7 @@ describe('Barrel Files Detector', () => {
 
       expect(detections[0]?.metadata).toEqual({
         count: 7,
-        suggestion:
-          'Export specific items instead of using export * to avoid dependency bloat',
+        suggestion: 'Export specific items instead of using export * to avoid dependency bloat',
       })
     })
   })
@@ -153,10 +149,7 @@ describe('Barrel Files Detector', () => {
     })
 
     it('should handle exactly 5 export * (boundary - no detection)', () => {
-      const exports = Array.from(
-        { length: 5 },
-        (_, i) => `export * from './module${i}'`
-      ).join('\n')
+      const exports = Array.from({ length: 5 }, (_, i) => `export * from './module${i}'`).join('\n')
 
       const { ast } = parseTypeScript({
         filePath: 'index.ts',

@@ -1,24 +1,43 @@
-import { describe, it, expect, vi } from 'vitest'
+import type { Detection } from '@rivet/core'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AIEnhancer } from './enhancer'
 import { TechDebtCalculator } from './tech-debt'
-import type { Detection } from '@rivet/core'
 
-// Mock OpenAI - using @langchain/openai path
+// The enhancer builds its chain as `prompt.pipe(llm).pipe(parser)`, so the seam that
+// has to be mocked is ChatPromptTemplate, not ChatOpenAI. Mocking ChatOpenAI left the
+// real LangChain prompt pipeline running against a fake runnable: every call threw
+// inside LangChain, the enhancer swallowed it, and the tests passed while asserting
+// nothing about enhancement.
+const invoke = vi.fn()
+
 vi.mock('@langchain/openai', () => ({
-  ChatOpenAI: vi.fn().mockImplementation(function () {
-    return {
-    pipe: vi.fn().mockReturnValue({
-      pipe: vi.fn().mockReturnValue({
-        invoke: vi.fn().mockResolvedValue(JSON.stringify({
-          explanation: 'This is a test explanation',
-          analogy: 'Like a test analogy',
-          suggestion: 'Fix it this way',
-        })),
+  ChatOpenAI: class {},
+}))
+
+vi.mock('@langchain/core/output_parsers', () => ({
+  StringOutputParser: class {},
+}))
+
+vi.mock('@langchain/core/prompts', () => ({
+  ChatPromptTemplate: {
+    fromMessages: () => ({
+      pipe: () => ({
+        pipe: () => ({ invoke }),
       }),
     }),
-    }
-  }),
+  },
 }))
+
+const AI_RESPONSE = JSON.stringify({
+  explanation: 'This is a test explanation',
+  analogy: 'Like a test analogy',
+  suggestion: 'Fix it this way',
+})
+
+beforeEach(() => {
+  invoke.mockReset()
+  invoke.mockResolvedValue(AI_RESPONSE)
+})
 
 describe('AIEnhancer', () => {
   const mockDetection: Detection = {
@@ -37,7 +56,7 @@ describe('AIEnhancer', () => {
   it('should initialize with config', () => {
     const enhancer = new AIEnhancer({
       apiKey: 'test-key',
-      model: 'gpt-4',
+      model: 'gpt-6-sol',
       enabled: true,
     })
 
@@ -47,7 +66,7 @@ describe('AIEnhancer', () => {
   it('should not enhance when disabled', async () => {
     const enhancer = new AIEnhancer({
       apiKey: 'test-key',
-      model: 'gpt-4',
+      model: 'gpt-6-sol',
       enabled: false,
     })
 
@@ -59,7 +78,7 @@ describe('AIEnhancer', () => {
   it('should handle empty detection array', async () => {
     const enhancer = new AIEnhancer({
       apiKey: 'test-key',
-      model: 'gpt-4',
+      model: 'gpt-6-sol',
       enabled: true,
     })
 
@@ -68,21 +87,61 @@ describe('AIEnhancer', () => {
     expect(result).toEqual([])
   })
 
-  it('should respect maxConcurrent option', async () => {
-    const enhancer = new AIEnhancer({
-      apiKey: 'test-key',
-      model: 'gpt-4',
-      enabled: true,
-    })
+  it('attaches the AI explanation, suggestion, and analogy to a detection', async () => {
+    const enhancer = new AIEnhancer({ apiKey: 'test-key', model: 'gpt-6-sol', enabled: true })
 
-    const detections = Array.from({ length: 10 }, (_, i) => ({
-      ...mockDetection,
-      id: `test-${i}`,
-    }))
+    const [result] = await enhancer.enhanceDetections([mockDetection])
 
+    expect(result?.aiExplanation).toBe('This is a test explanation')
+    expect(result?.aiSuggestion).toBe('Fix it this way')
+    expect(result?.aiAnalogy).toBe('Like a test analogy')
+  })
+
+  it('calls the model once per detection', async () => {
+    const enhancer = new AIEnhancer({ apiKey: 'test-key', model: 'gpt-6-sol', enabled: true })
+
+    const detections = Array.from({ length: 10 }, (_, i) => ({ ...mockDetection, id: `test-${i}` }))
     const result = await enhancer.enhanceDetections(detections, 3)
 
-    expect(result.length).toBe(10)
+    expect(result).toHaveLength(10)
+    expect(invoke).toHaveBeenCalledTimes(10)
+  })
+
+  it('never runs more than maxConcurrent calls at once', async () => {
+    let inFlight = 0
+    let peak = 0
+    invoke.mockImplementation(async () => {
+      inFlight += 1
+      peak = Math.max(peak, inFlight)
+      await new Promise((resolve) => setTimeout(resolve, 1))
+      inFlight -= 1
+      return AI_RESPONSE
+    })
+
+    const enhancer = new AIEnhancer({ apiKey: 'test-key', model: 'gpt-6-sol', enabled: true })
+    const detections = Array.from({ length: 10 }, (_, i) => ({ ...mockDetection, id: `test-${i}` }))
+
+    await enhancer.enhanceDetections(detections, 3)
+
+    expect(peak).toBeLessThanOrEqual(3)
+  })
+
+  it('returns the original detection when the model call fails', async () => {
+    invoke.mockRejectedValue(new Error('rate limited'))
+    const enhancer = new AIEnhancer({ apiKey: 'test-key', model: 'gpt-6-sol', enabled: true })
+
+    const [result] = await enhancer.enhanceDetections([mockDetection])
+
+    expect(result).toEqual(mockDetection)
+  })
+
+  it('returns the original detection when the model returns unparseable output', async () => {
+    invoke.mockResolvedValue('not json at all')
+    const enhancer = new AIEnhancer({ apiKey: 'test-key', model: 'gpt-6-sol', enabled: true })
+
+    const [result] = await enhancer.enhanceDetections([mockDetection])
+
+    expect(result?.id).toBe(mockDetection.id)
   })
 })
 

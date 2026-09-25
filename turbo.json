@@ -19,7 +19,7 @@
     "test": {
       "dependsOn": ["build"],
       "inputs": ["$TURBO_DEFAULT$", "**/*.test.ts", "**/*.spec.ts"],
-      "outputs": ["coverage/**"],
+      "outputs": [],
       "outputLogs": "new-only"
     },
     "test:watch": {
@@ -27,13 +27,17 @@
       "persistent": true
     },
     "typecheck": {
-      "dependsOn": ["^typecheck"],
+      "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", "tsconfig.json"],
-      "outputs": ["*.tsbuildinfo"],
+      "outputs": [],
       "outputLogs": "new-only"
     },
     "clean": {
       "cache": false
+    },
+    "lint": {
+      "dependsOn": [],
+      "outputs": []
     }
   }
 }

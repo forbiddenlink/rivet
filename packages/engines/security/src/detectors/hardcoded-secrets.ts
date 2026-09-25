@@ -1,4 +1,4 @@
-import type { Detection, AnalysisContext } from '@rivet/core'
+import type { AnalysisContext, Detection } from '@rivet/core'
 import type { ASTNode } from '@rivet/parsers'
 
 /**
@@ -44,13 +44,14 @@ const SECRET_PATTERNS = [
   },
   // Secrets that look like passwords (contain mixed case, numbers, and/or special chars, 12+ chars)
   {
-    pattern: /^(?=.*[a-z])(?=.*[A-Z0-9!@#$%^&*])[a-zA-Z0-9!@#$%^&*_\-]{12,}$/,
+    pattern: /^(?=.*[a-z])(?=.*[A-Z0-9!@#$%^&*])[a-zA-Z0-9!@#$%^&*_-]{12,}$/,
     name: 'Hardcoded Secret',
     severity: 'high' as const,
+    generic: true,
   },
   // OAuth/Google tokens (ya29. prefix or containing dots)
   {
-    pattern: /^ya29\.[a-zA-Z0-9_\-]{20,}$/,
+    pattern: /^ya29\.[a-zA-Z0-9_-]{20,}$/,
     name: 'OAuth Token',
     severity: 'high' as const,
   },
@@ -59,8 +60,98 @@ const SECRET_PATTERNS = [
     pattern: /^[a-zA-Z0-9_\-.]{20,}$/,
     name: 'Authentication Token',
     severity: 'high' as const,
+    generic: true,
   },
 ]
+
+/**
+ * The two generic patterns above describe a shape, not a secret. Any identifier-ish
+ * string of the right length satisfies them: 'VariableDeclarator' is twelve characters
+ * with mixed case, and 'strict-origin-when-cross-origin' is thirty characters of the
+ * allowed alphabet. Scanning this repository produced 460 hardcoded-secret findings and
+ * none of them was a secret, including one on { key: 'X-Frame-Options', value: 'DENY' }.
+ *
+ * So a generic match now has to clear three further gates: the name it is bound to has
+ * to read as a credential, the value must not be an ordinary word, and it must not be a
+ * placeholder. The provider-specific patterns (AWS, GitHub, JWT, database URLs) are
+ * precise on their own and stay ungated, which is what keeps recall on real secrets.
+ */
+
+/** Split apiKey / api_key / api-key alike into ['api', 'key']. */
+function nameSegments(varName: string): string[] {
+  return varName
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .split(/[^a-zA-Z0-9]+/)
+    .filter(Boolean)
+    .map((segment) => segment.toLowerCase())
+}
+
+/** Segments that name a credential on their own. */
+const CREDENTIAL_WORDS = new Set([
+  'secret',
+  'secrets',
+  'password',
+  'passwords',
+  'passwd',
+  'pwd',
+  'passphrase',
+  'credential',
+  'credentials',
+  'token',
+  'tokens',
+  'bearer',
+  'apikey',
+])
+
+/**
+ * `key` and `auth` are far too common alone — an object literal of header key/value
+ * pairs is not a credential — so they count only next to a qualifier.
+ */
+const QUALIFIED_WORDS: Record<string, Set<string>> = {
+  key: new Set(['api', 'access', 'private', 'secret', 'signing', 'encryption', 'license']),
+  auth: new Set(['token', 'header', 'key', 'secret', 'basic']),
+}
+
+export function looksLikeCredentialName(varName: string | undefined): boolean {
+  if (!varName) {
+    return false
+  }
+  const segments = nameSegments(varName)
+  if (segments.some((segment) => CREDENTIAL_WORDS.has(segment))) {
+    return true
+  }
+  return segments.some((segment) => {
+    const qualifiers = QUALIFIED_WORDS[segment]
+    return qualifiers !== undefined && segments.some((other) => qualifiers.has(other))
+  })
+}
+
+/** camelCase, kebab-case, snake_case or spaced English. Secrets do not look like this. */
+const WORDLIKE_PATTERNS = [/^[a-z]+(?:[A-Z][a-z]*)*$/, /^[A-Za-z]+(?:[-_][A-Za-z]+)*$/, /\s/]
+
+export function looksLikeOrdinaryWords(value: string): boolean {
+  return WORDLIKE_PATTERNS.some((pattern) => pattern.test(value))
+}
+
+const PLACEHOLDER_PATTERNS = [
+  /^x{3,}$/i,
+  /\b(?:your|my|some|placeholder|changeme|change[-_]?me|example|dummy|sample|fake|redacted|todo)\b/i,
+  /^[<{[].*[>}\]]$/,
+  /\.{3}/,
+]
+
+export function looksLikePlaceholder(value: string): boolean {
+  return PLACEHOLDER_PATTERNS.some((pattern) => pattern.test(value))
+}
+
+/** A generic shape match is only reported when all three gates agree. */
+function genericMatchIsCredible(value: string, varName: string | undefined): boolean {
+  return (
+    looksLikeCredentialName(varName) &&
+    !looksLikeOrdinaryWords(value) &&
+    !looksLikePlaceholder(value)
+  )
+}
 
 // Secret-related variable/property name patterns
 const SECRET_VAR_PATTERNS = [
@@ -92,14 +183,27 @@ export function detectHardcodedSecrets(context: AnalysisContext): Detection[] {
     }
 
     // Check string literals
-    if (node.type === 'Literal' && node.raw.type === 'Literal' && typeof node.raw.value === 'string' && node.loc) {
+    if (
+      node.type === 'Literal' &&
+      node.raw.type === 'Literal' &&
+      typeof node.raw.value === 'string' &&
+      node.loc
+    ) {
       const value = node.raw.value
 
       // First check if the value matches any pattern
-      for (const { pattern, name, severity } of SECRET_PATTERNS) {
+      for (const { pattern, name, severity, generic } of SECRET_PATTERNS) {
         pattern.lastIndex = 0
 
-        if (pattern.test(value)) {
+        if (!pattern.test(value)) {
+          continue
+        }
+
+        if (generic && !genericMatchIsCredible(value, varName)) {
+          continue
+        }
+
+        {
           // Use variable name context only for generic patterns (Authentication Token, Hardcoded Secret)
           // Specific patterns like JWT, AWS, GitHub take priority
           let detectedName = name
@@ -128,16 +232,21 @@ export function detectHardcodedSecrets(context: AnalysisContext): Detection[] {
             severity,
             category: 'security',
             message: `Potential ${detectedName} detected in hardcoded string`,
-            fix: nodeStart !== undefined && nodeEnd !== undefined ? {
-              description: `Replace with environment variable process.env.${envVarName}`,
-              replacements: [{
-                start: nodeStart,
-                end: nodeEnd,
-                text: `process.env.${envVarName}`,
-              }],
-            } : {
-              description: `Move to environment variable (e.g., process.env.${envVarName})`,
-            },
+            fix:
+              nodeStart !== undefined && nodeEnd !== undefined
+                ? {
+                    description: `Replace with environment variable process.env.${envVarName}`,
+                    replacements: [
+                      {
+                        start: nodeStart,
+                        end: nodeEnd,
+                        text: `process.env.${envVarName}`,
+                      },
+                    ],
+                  }
+                : {
+                    description: `Move to environment variable (e.g., process.env.${envVarName})`,
+                  },
             metadata: {
               pattern: detectedName.toLowerCase().replace(/\s+/g, '-'),
               explanation: `Hardcoding secrets in source code is a security risk. Secrets should be stored in environment variables or secure key management systems.`,
@@ -162,10 +271,18 @@ export function detectHardcodedSecrets(context: AnalysisContext): Detection[] {
       }
       const templateValue = templateParts.join('')
 
-      for (const { pattern, name, severity } of SECRET_PATTERNS) {
+      for (const { pattern, name, severity, generic } of SECRET_PATTERNS) {
         pattern.lastIndex = 0
-        
-        if (pattern.test(templateValue)) {
+
+        if (!pattern.test(templateValue)) {
+          continue
+        }
+
+        if (generic && !genericMatchIsCredible(templateValue, varName)) {
+          continue
+        }
+
+        {
           detections.push({
             id: `hardcoded-secret-${++detectionCounter}`,
             ruleId: 'hardcoded-secret',

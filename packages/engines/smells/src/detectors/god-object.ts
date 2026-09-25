@@ -1,5 +1,5 @@
-import type { ASTNode } from '@rivet/parsers'
 import type { Detection } from '@rivet/core'
+import type { ASTNode } from '@rivet/parsers'
 import { countLines, getClassName, isClassNode, isFunctionNode } from './utils'
 
 export interface GodObjectConfig {
@@ -16,11 +16,11 @@ const DEFAULT_CONFIG: Required<GodObjectConfig> = {
 
 /**
  * Detects "God Objects" - classes that try to do too much
- * 
+ *
  * God objects (aka Large Classes) violate the Single Responsibility Principle.
  * They are hard to understand, test, and maintain because they have too many
  * responsibilities.
- * 
+ *
  * Signs of a god object:
  * - Too many methods (> 10)
  * - Too many lines of code (> 500)
@@ -40,18 +40,16 @@ export function detectGodObjects(
       const lines = countLines(node)
 
       // Find ClassBody child - methods and properties are inside it
-      const classBody = node.children?.find(c => c.type === 'ClassBody')
+      const classBody = node.children?.find((c) => c.type === 'ClassBody')
       const bodyChildren = classBody?.children || []
 
       // Count methods (MethodDefinition nodes inside ClassBody)
-      const methods = bodyChildren.filter(
-        c => c.type === 'MethodDefinition' || isFunctionNode(c)
-      )
+      const methods = bodyChildren.filter((c) => c.type === 'MethodDefinition' || isFunctionNode(c))
       const methodCount = methods.length
 
       // Count properties (PropertyDefinition or FieldDefinition)
       const properties = bodyChildren.filter(
-        c => c.type === 'PropertyDefinition' || c.type === 'FieldDefinition'
+        (c) => c.type === 'PropertyDefinition' || c.type === 'FieldDefinition'
       )
       const propertyCount = properties.length
 

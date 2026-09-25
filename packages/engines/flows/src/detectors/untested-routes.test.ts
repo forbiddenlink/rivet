@@ -92,6 +92,22 @@ describe('Untested Routes Detector', () => {
     expect(detections[0]?.message).toContain('/checkout')
   })
 
+  it('should strip App Router route groups from the reported path', () => {
+    const code = `
+      export default function CheckoutPage() {
+        return <div>Checkout</div>
+      }
+    `
+
+    const detections = detectUntestedRoutes(
+      createContext(code, '/project/src/app/(shop)/checkout/(flow)/page.tsx')
+    )
+
+    expect(detections[0]?.message).toContain('/checkout')
+    expect(detections[0]?.message).not.toContain('(shop)')
+    expect(detections[0]?.message).not.toContain('(flow)')
+  })
+
   it('should detect createBrowserRouter path configs', () => {
     const code = `
       const router = createBrowserRouter([

@@ -38,7 +38,7 @@ describe('XSS Detector', () => {
       const detections = detectXSS(createAST(code), 'test.ts')
 
       expect(detections.length).toBeGreaterThan(0)
-      expect(detections.some(d => d.ruleId === 'xss-vulnerability')).toBe(true)
+      expect(detections.some((d) => d.ruleId === 'xss-vulnerability')).toBe(true)
     })
 
     it('should detect insertAdjacentHTML', () => {
@@ -88,7 +88,7 @@ describe('XSS Detector', () => {
       const detections = detectXSS(createAST(code, 'Component.tsx'), 'Component.tsx')
 
       expect(detections.length).toBeGreaterThan(0)
-      expect(detections.some(d => d.ruleId === 'xss-react')).toBe(true)
+      expect(detections.some((d) => d.ruleId === 'xss-react')).toBe(true)
     })
 
     it('should detect dangerouslySetInnerHTML in nested components', () => {
@@ -117,7 +117,7 @@ describe('XSS Detector', () => {
       `
 
       const detections = detectXSS(createAST(code), 'test.ts')
-      const xssDetections = detections.filter(d => d.ruleId.includes('xss'))
+      const xssDetections = detections.filter((d) => d.ruleId.includes('xss'))
 
       expect(xssDetections).toEqual([])
     })
@@ -130,7 +130,7 @@ describe('XSS Detector', () => {
       `
 
       const detections = detectXSS(createAST(code), 'test.ts')
-      const xssDetections = detections.filter(d => d.ruleId.includes('xss'))
+      const xssDetections = detections.filter((d) => d.ruleId.includes('xss'))
 
       expect(xssDetections).toEqual([])
     })
@@ -143,7 +143,7 @@ describe('XSS Detector', () => {
       `
 
       const detections = detectXSS(createAST(code, 'test.tsx'), 'test.tsx')
-      const xssDetections = detections.filter(d => d.ruleId.includes('xss'))
+      const xssDetections = detections.filter((d) => d.ruleId.includes('xss'))
 
       expect(xssDetections).toEqual([])
     })
@@ -158,7 +158,7 @@ describe('XSS Detector', () => {
       `
 
       const detections = detectXSS(createAST(code), 'test.ts')
-      const xssDetections = detections.filter(d => d.ruleId.includes('xss'))
+      const xssDetections = detections.filter((d) => d.ruleId.includes('xss'))
 
       expect(xssDetections).toEqual([])
     })

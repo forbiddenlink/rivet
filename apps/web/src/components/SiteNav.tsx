@@ -27,7 +27,7 @@ export function SiteNav() {
             Dashboard
           </Link>
           <a
-            href="https://github.com/elizabethstein/rivet"
+            href="https://github.com/forbiddenlink/rivet"
             className="site-nav__link"
             target="_blank"
             rel="noopener noreferrer"
@@ -35,7 +35,7 @@ export function SiteNav() {
             GitHub
           </a>
           <a
-            href="https://github.com/elizabethstein/rivet/blob/main/docs/ARCHITECTURE.md"
+            href="https://github.com/forbiddenlink/rivet/blob/main/docs/ARCHITECTURE.md"
             className="site-nav__link"
             target="_blank"
             rel="noopener noreferrer"

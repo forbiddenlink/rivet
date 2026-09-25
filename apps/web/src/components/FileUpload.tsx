@@ -27,7 +27,7 @@ export function FileUpload({ onAnalyze, isAnalyzing }: FileUploadProps) {
     }
   }
 
-  const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrag = (e: React.DragEvent<HTMLElement>) => {
     e.preventDefault()
     e.stopPropagation()
     if (e.type === 'dragenter' || e.type === 'dragover') {
@@ -37,7 +37,7 @@ export function FileUpload({ onAnalyze, isAnalyzing }: FileUploadProps) {
     }
   }
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = (e: React.DragEvent<HTMLElement>) => {
     e.preventDefault()
     e.stopPropagation()
     setDragActive(false)
@@ -55,42 +55,40 @@ export function FileUpload({ onAnalyze, isAnalyzing }: FileUploadProps) {
       <label htmlFor="file-upload" className="sr-only">
         Upload JavaScript or TypeScript files for analysis
       </label>
-      <div
+      {/* The input lives outside the button: a file input nested inside a button is
+          invalid HTML, and the browser swallows the click that should open the picker. */}
+      <input
+        ref={fileInputRef}
+        id="file-upload"
+        name="file-upload"
+        type="file"
+        multiple
+        accept=".ts,.tsx,.js,.jsx"
+        onChange={handleChange}
+        disabled={isAnalyzing}
+        aria-label="Select JavaScript or TypeScript files to analyze"
+        aria-describedby="file-upload-description"
+        className="sr-only"
+      />
+      {/* A real button gives keyboard activation, focus ring, and disabled state for
+          free, so the hand-rolled tabIndex and Enter/Space handling can go. */}
+      <button
+        type="button"
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
-        onClick={() => !isAnalyzing && fileInputRef.current?.click()}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault()
-            fileInputRef.current?.click()
-          }
-        }}
+        onClick={() => fileInputRef.current?.click()}
+        disabled={isAnalyzing}
         aria-label="Drop zone for file upload. Click or drag files here."
+        aria-describedby="file-upload-description"
         className={`dropzone${dragActive ? ' dropzone--active' : ''}`}
-        style={isAnalyzing ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
       >
-        <input
-          ref={fileInputRef}
-          id="file-upload"
-          name="file-upload"
-          type="file"
-          multiple
-          accept=".ts,.tsx,.js,.jsx"
-          onChange={handleChange}
-          disabled={isAnalyzing}
-          aria-label="Select JavaScript or TypeScript files to analyze"
-          aria-describedby="file-upload-description"
-          className="sr-only"
-        />
-        <p className="dropzone__title">Drop files or click to browse</p>
-        <p id="file-upload-description" className="dropzone__hint">
+        <span className="dropzone__title">Drop files or click to browse</span>
+        <span id="file-upload-description" className="dropzone__hint">
           .ts · .tsx · .js · .jsx
-        </p>
-      </div>
+        </span>
+      </button>
     </div>
   )
 }

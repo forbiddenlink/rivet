@@ -1,13 +1,14 @@
 # RIVET Configuration
 
 Target configuration design. **What's implemented today** (`packages/core/src/config.ts`):
-config is loaded from `rivet.config.js`, `rivet.config.mjs`, `rivet.config.cjs`, or
-`.rivetrc.js` (JS, not JSON), merged with defaults. The real `RivetConfig` shape
-(`packages/core/src/types.ts`) is `{ engines, include, exclude, ignore, severity: { minLevel },
-output: { format, path }, maxIssues, engineConfig }` - flat, not the nested `engines.enabled/
-disabled`, `ai`, `autofix`, or `integrations` shape shown below. `RIVET_CONFIG`/
-`RIVET_CACHE_DIR` env vars and multi-project config inheritance are not implemented. The
-example and options below describe the target design.
+config is loaded from `rivet.config.js`, `rivet.config.mjs`, `rivet.config.cjs`, `.rivetrc`,
+`.rivetrc.json` or `.rivetrc.js`, merged with defaults. The nested shape below for `engines`,
+`severity`, `ignore` and `output` is translated into the internal `RivetConfig`
+(`packages/core/src/types.ts`), which is flat: `{ engines, include, exclude, ignore,
+ignoreRules, severity: { minLevel }, output: { format, path }, maxIssues, engineConfig }`.
+The `ai`, `autofix` and `integrations` sections are read but not acted on.
+`RIVET_CONFIG`/`RIVET_CACHE_DIR` env vars and multi-project config inheritance are not
+implemented.
 
 ## Example Configuration
 
@@ -58,8 +59,9 @@ Filter and control severity levels:
 
 ### `ignore`
 Exclude files or rules from analysis:
-- `paths`: Glob patterns for files/directories to ignore
-- `rules`: Specific rule IDs to disable
+- `paths`: Glob patterns for files/directories to ignore. Added to the built-in excludes
+  rather than replacing them, so `node_modules` and build output stay excluded
+- `rules`: Rule ids to suppress, for example `["law-of-demeter", "magic-number"]`
 
 ### `ai`
 Configure AI-powered enhancements:

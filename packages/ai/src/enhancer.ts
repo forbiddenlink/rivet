@@ -1,7 +1,9 @@
-import type { Detection } from '@rivet/core'
-import { ChatOpenAI } from '@langchain/openai'
-import { ChatPromptTemplate } from '@langchain/core/prompts'
 import { StringOutputParser } from '@langchain/core/output_parsers'
+import { ChatPromptTemplate } from '@langchain/core/prompts'
+import { ChatOpenAI } from '@langchain/openai'
+import type { Detection } from '@rivet/core'
+
+import { DEFAULT_OPENAI_MODEL, resolveModel } from './models'
 
 export interface AIConfig {
   apiKey?: string
@@ -24,7 +26,7 @@ export class AIEnhancer {
   constructor(config: AIConfig = {}) {
     this.config = {
       apiKey: config.apiKey || process.env.OPENAI_API_KEY || '',
-      model: config.model || 'gpt-4',
+      model: resolveModel(config.model, DEFAULT_OPENAI_MODEL),
       temperature: config.temperature ?? 0.7,
       maxTokens: config.maxTokens || 500,
       enabled: config.enabled ?? true,
@@ -32,8 +34,8 @@ export class AIEnhancer {
 
     if (this.config.enabled && this.config.apiKey) {
       this.llm = new ChatOpenAI({
-        openAIApiKey: this.config.apiKey,
-        modelName: this.config.model,
+        apiKey: this.config.apiKey,
+        model: this.config.model,
         temperature: this.config.temperature,
         maxTokens: this.config.maxTokens,
       })

@@ -82,9 +82,7 @@ describe('Missing Error Boundaries Detector', () => {
 
     // The DataComponent inside ErrorBoundary should not be flagged
     // But DataComponent definition itself might be flagged if it has async ops
-    const boundaryErrors = detections.filter((d) =>
-      d.message.includes('Error Boundary')
-    )
+    const boundaryErrors = detections.filter((d) => d.message.includes('Error Boundary'))
 
     // This tests the boundary detection logic
     expect(boundaryErrors.length).toBeLessThanOrEqual(1)

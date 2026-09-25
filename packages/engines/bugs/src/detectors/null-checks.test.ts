@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
 import { parseTypeScript } from '@rivet/parsers'
+import { describe, expect, it } from 'vitest'
 import { detectNullChecks } from './null-checks'
 
 describe('Null Check Detector', () => {
@@ -44,6 +44,157 @@ describe('Null Check Detector', () => {
       const detections = detectNullChecks(ast, 'test.ts')
 
       expect(detections).toEqual([])
+    })
+
+    it('should not flag globals and namespaces', () => {
+      const code = `
+        function report(rows: any) {
+          console.log(Object.keys(process.env).length)
+          return JSON.stringify(Math.max(1, 2))
+        }
+      `
+
+      const { ast } = parseTypeScript({
+        filePath: 'test.ts',
+        sourceCode: code,
+        extractTypes: false,
+      })
+
+      const detections = detectNullChecks(ast, 'test.ts')
+      const missingChecks = detections.filter((d) => d.ruleId === 'missing-null-check')
+
+      expect(missingChecks).toEqual([])
+    })
+
+    it('should not flag a local binding with a definite initializer', () => {
+      const code = `
+        function collect() {
+          const rows: string[] = []
+          rows.push('a')
+          return rows.length
+        }
+      `
+
+      const { ast } = parseTypeScript({
+        filePath: 'test.ts',
+        sourceCode: code,
+        extractTypes: false,
+      })
+
+      const detections = detectNullChecks(ast, 'test.ts')
+      const missingChecks = detections.filter((d) => d.ruleId === 'missing-null-check')
+
+      expect(missingChecks).toEqual([])
+    })
+
+    it('should report a long chain once rather than per link', () => {
+      const code = `
+        function read(input: any) {
+          return input.a.b.c.d
+        }
+      `
+
+      const { ast } = parseTypeScript({
+        filePath: 'test.ts',
+        sourceCode: code,
+        extractTypes: false,
+      })
+
+      const detections = detectNullChecks(ast, 'test.ts')
+      const missingChecks = detections.filter((d) => d.ruleId === 'missing-null-check')
+
+      expect(missingChecks).toHaveLength(1)
+    })
+
+    it('should not flag an access guarded earlier in the chain', () => {
+      const code = `
+        function read(input: any) {
+          return input?.a.b
+        }
+      `
+
+      const { ast } = parseTypeScript({
+        filePath: 'test.ts',
+        sourceCode: code,
+        extractTypes: false,
+      })
+
+      const detections = detectNullChecks(ast, 'test.ts')
+      const missingChecks = detections.filter((d) => d.ruleId === 'missing-null-check')
+
+      expect(missingChecks).toEqual([])
+    })
+
+    it('should not flag a parameter TypeScript guarantees', () => {
+      const code = `
+        function shout(name: string) {
+          return name.length
+        }
+      `
+
+      const { ast } = parseTypeScript({
+        filePath: 'test.ts',
+        sourceCode: code,
+        extractTypes: false,
+      })
+
+      const detections = detectNullChecks(ast, 'test.ts')
+
+      expect(detections.filter((d) => d.ruleId === 'missing-null-check')).toEqual([])
+    })
+
+    it('should still flag an optional parameter', () => {
+      const code = `
+        function shout(name?: string) {
+          return name.length
+        }
+      `
+
+      const { ast } = parseTypeScript({
+        filePath: 'test.ts',
+        sourceCode: code,
+        extractTypes: false,
+      })
+
+      const detections = detectNullChecks(ast, 'test.ts')
+
+      expect(detections.filter((d) => d.ruleId === 'missing-null-check').length).toBeGreaterThan(0)
+    })
+
+    it('should still flag a parameter whose type includes null', () => {
+      const code = `
+        function shout(name: string | null) {
+          return name.length
+        }
+      `
+
+      const { ast } = parseTypeScript({
+        filePath: 'test.ts',
+        sourceCode: code,
+        extractTypes: false,
+      })
+
+      const detections = detectNullChecks(ast, 'test.ts')
+
+      expect(detections.filter((d) => d.ruleId === 'missing-null-check').length).toBeGreaterThan(0)
+    })
+
+    it('should still flag an unannotated parameter in a JavaScript file', () => {
+      const code = `
+        function shout(name) {
+          return name.length
+        }
+      `
+
+      const { ast } = parseTypeScript({
+        filePath: 'test.js',
+        sourceCode: code,
+        extractTypes: false,
+      })
+
+      const detections = detectNullChecks(ast, 'test.js')
+
+      expect(detections.filter((d) => d.ruleId === 'missing-null-check').length).toBeGreaterThan(0)
     })
 
     it('should detect accessing array methods without null check', () => {

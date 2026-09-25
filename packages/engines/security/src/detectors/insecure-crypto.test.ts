@@ -25,8 +25,8 @@ describe('Insecure Crypto Detector', () => {
       const detections = detectInsecureCrypto(createAST(code), 'test.ts')
 
       expect(detections.length).toBeGreaterThan(0)
-      expect(detections.some(d => d.ruleId === 'weak-crypto-algorithm')).toBe(true)
-      expect(detections.some(d => d.metadata?.algorithm === 'md5')).toBe(true)
+      expect(detections.some((d) => d.ruleId === 'weak-crypto-algorithm')).toBe(true)
+      expect(detections.some((d) => d.metadata?.algorithm === 'md5')).toBe(true)
     })
 
     it('should detect SHA1 hash usage', () => {
@@ -40,7 +40,7 @@ describe('Insecure Crypto Detector', () => {
       const detections = detectInsecureCrypto(createAST(code), 'test.ts')
 
       expect(detections.length).toBeGreaterThan(0)
-      expect(detections.some(d => d.ruleId === 'weak-crypto-algorithm')).toBe(true)
+      expect(detections.some((d) => d.ruleId === 'weak-crypto-algorithm')).toBe(true)
     })
 
     it('should detect DES cipher usage', () => {
@@ -54,7 +54,7 @@ describe('Insecure Crypto Detector', () => {
       const detections = detectInsecureCrypto(createAST(code), 'test.ts')
 
       expect(detections.length).toBeGreaterThan(0)
-      expect(detections.some(d => d.ruleId === 'weak-crypto-algorithm')).toBe(true)
+      expect(detections.some((d) => d.ruleId === 'weak-crypto-algorithm')).toBe(true)
     })
 
     it('should detect RC4 cipher usage', () => {
@@ -66,7 +66,7 @@ describe('Insecure Crypto Detector', () => {
       const detections = detectInsecureCrypto(createAST(code), 'test.ts')
 
       expect(detections.length).toBeGreaterThan(0)
-      expect(detections.some(d => d.ruleId === 'weak-crypto-algorithm')).toBe(true)
+      expect(detections.some((d) => d.ruleId === 'weak-crypto-algorithm')).toBe(true)
     })
 
     it('should include OWASP reference for weak algorithms', () => {
@@ -75,7 +75,7 @@ describe('Insecure Crypto Detector', () => {
       `
 
       const detections = detectInsecureCrypto(createAST(code), 'test.ts')
-      const weakAlgoDetection = detections.find(d => d.ruleId === 'weak-crypto-algorithm')
+      const weakAlgoDetection = detections.find((d) => d.ruleId === 'weak-crypto-algorithm')
 
       expect(weakAlgoDetection?.metadata?.owasp).toContain('Cryptographic')
     })
@@ -91,8 +91,8 @@ describe('Insecure Crypto Detector', () => {
       const detections = detectInsecureCrypto(createAST(code), 'test.ts')
 
       expect(detections.length).toBeGreaterThan(0)
-      expect(detections.some(d => d.ruleId === 'hardcoded-secret')).toBe(true)
-      expect(detections.some(d => d.severity === 'critical')).toBe(true)
+      expect(detections.some((d) => d.ruleId === 'hardcoded-secret')).toBe(true)
+      expect(detections.some((d) => d.severity === 'critical')).toBe(true)
     })
 
     it('should detect hardcoded API key', () => {
@@ -104,7 +104,7 @@ describe('Insecure Crypto Detector', () => {
       const detections = detectInsecureCrypto(createAST(code), 'test.ts')
 
       expect(detections.length).toBeGreaterThan(0)
-      expect(detections.some(d => d.ruleId === 'hardcoded-secret')).toBe(true)
+      expect(detections.some((d) => d.ruleId === 'hardcoded-secret')).toBe(true)
     })
 
     it('should detect hardcoded secret', () => {
@@ -116,7 +116,7 @@ describe('Insecure Crypto Detector', () => {
       const detections = detectInsecureCrypto(createAST(code), 'test.ts')
 
       expect(detections.length).toBeGreaterThan(0)
-      expect(detections.some(d => d.ruleId === 'hardcoded-secret')).toBe(true)
+      expect(detections.some((d) => d.ruleId === 'hardcoded-secret')).toBe(true)
     })
 
     it('should detect hardcoded token', () => {
@@ -128,7 +128,7 @@ describe('Insecure Crypto Detector', () => {
       const detections = detectInsecureCrypto(createAST(code), 'test.ts')
 
       expect(detections.length).toBeGreaterThan(0)
-      expect(detections.some(d => d.ruleId === 'hardcoded-secret')).toBe(true)
+      expect(detections.some((d) => d.ruleId === 'hardcoded-secret')).toBe(true)
     })
   })
 
@@ -143,8 +143,8 @@ describe('Insecure Crypto Detector', () => {
       const detections = detectInsecureCrypto(createAST(code), 'test.ts')
 
       expect(detections.length).toBeGreaterThan(0)
-      expect(detections.some(d => d.ruleId === 'weak-random')).toBe(true)
-      expect(detections.some(d => d.severity === 'medium')).toBe(true)
+      expect(detections.some((d) => d.ruleId === 'weak-random')).toBe(true)
+      expect(detections.some((d) => d.severity === 'medium')).toBe(true)
     })
 
     it('should include recommendation for secure random', () => {
@@ -153,7 +153,7 @@ describe('Insecure Crypto Detector', () => {
       `
 
       const detections = detectInsecureCrypto(createAST(code), 'test.ts')
-      const weakRandom = detections.find(d => d.ruleId === 'weak-random')
+      const weakRandom = detections.find((d) => d.ruleId === 'weak-random')
 
       expect(weakRandom?.metadata?.recommendation).toContain('crypto')
     })
@@ -169,7 +169,7 @@ describe('Insecure Crypto Detector', () => {
       `
 
       const detections = detectInsecureCrypto(createAST(code), 'test.ts')
-      const weakAlgo = detections.filter(d => d.ruleId === 'weak-crypto-algorithm')
+      const weakAlgo = detections.filter((d) => d.ruleId === 'weak-crypto-algorithm')
 
       expect(weakAlgo).toEqual([])
     })
@@ -181,7 +181,7 @@ describe('Insecure Crypto Detector', () => {
       `
 
       const detections = detectInsecureCrypto(createAST(code), 'test.ts')
-      const weakAlgo = detections.filter(d => d.ruleId === 'weak-crypto-algorithm')
+      const weakAlgo = detections.filter((d) => d.ruleId === 'weak-crypto-algorithm')
 
       expect(weakAlgo).toEqual([])
     })
@@ -193,7 +193,7 @@ describe('Insecure Crypto Detector', () => {
       `
 
       const detections = detectInsecureCrypto(createAST(code), 'test.ts')
-      const weakAlgo = detections.filter(d => d.ruleId === 'weak-crypto-algorithm')
+      const weakAlgo = detections.filter((d) => d.ruleId === 'weak-crypto-algorithm')
 
       expect(weakAlgo).toEqual([])
     })
@@ -207,7 +207,7 @@ describe('Insecure Crypto Detector', () => {
       `
 
       const detections = detectInsecureCrypto(createAST(code), 'test.ts')
-      const weakRandom = detections.filter(d => d.ruleId === 'weak-random')
+      const weakRandom = detections.filter((d) => d.ruleId === 'weak-random')
 
       expect(weakRandom).toEqual([])
     })
@@ -219,7 +219,21 @@ describe('Insecure Crypto Detector', () => {
       `
 
       const detections = detectInsecureCrypto(createAST(code), 'test.ts')
-      const hardcoded = detections.filter(d => d.ruleId === 'hardcoded-secret')
+      const hardcoded = detections.filter((d) => d.ruleId === 'hardcoded-secret')
+
+      expect(hardcoded).toEqual([])
+    })
+
+    it('should not flag header key/value pairs', () => {
+      const code = `
+        const headers = [
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'Content-Security-Policy', value: policy },
+        ]
+      `
+
+      const detections = detectInsecureCrypto(createAST(code), 'test.ts')
+      const hardcoded = detections.filter((d) => d.ruleId === 'hardcoded-secret')
 
       expect(hardcoded).toEqual([])
     })
@@ -231,7 +245,7 @@ describe('Insecure Crypto Detector', () => {
       `
 
       const detections = detectInsecureCrypto(createAST(code), 'test.ts')
-      const hardcoded = detections.filter(d => d.ruleId === 'hardcoded-secret')
+      const hardcoded = detections.filter((d) => d.ruleId === 'hardcoded-secret')
 
       expect(hardcoded).toEqual([])
     })
@@ -277,7 +291,7 @@ describe('Insecure Crypto Detector', () => {
       const detections = detectInsecureCrypto(createAST(code), 'test.ts')
 
       expect(detections.length).toBeGreaterThan(0)
-      expect(detections.some(d => d.ruleId === 'weak-crypto-algorithm')).toBe(true)
+      expect(detections.some((d) => d.ruleId === 'weak-crypto-algorithm')).toBe(true)
     })
   })
 })

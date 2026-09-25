@@ -1,6 +1,11 @@
+import { readFile } from 'node:fs/promises'
+import { cpus } from 'node:os'
+import { relative, sep } from 'node:path'
 import { parseTypeScript } from '@rivet/parsers'
 import { glob } from 'glob'
-import { readFile } from 'node:fs/promises'
+import ignore from 'ignore'
+
+import { assignStableIds } from './detection-id'
 
 import type {
   AnalysisContext,
@@ -13,6 +18,32 @@ import type {
 } from './types'
 
 /**
+ * Paths a scan should never report on: dependencies, build output, generated
+ * declarations, and tool caches. Scanning these inflates the finding count with
+ * issues nobody in the repository can fix, and generated `.js` next to its `.ts`
+ * source makes every finding appear twice.
+ */
+export const DEFAULT_EXCLUDE = [
+  '**/node_modules/**',
+  '**/dist/**',
+  '**/build/**',
+  '**/out/**',
+  '**/.next/**',
+  '**/.turbo/**',
+  '**/.vercel/**',
+  '**/coverage/**',
+  '**/*.d.ts',
+  '**/*.min.js',
+]
+
+/**
+ * How many files are read and analyzed at once. Parsing is CPU-bound, so the
+ * pool is sized to the machine rather than left unbounded — an unbounded pool on
+ * a large repository opens every file at once and exhausts file descriptors.
+ */
+const DEFAULT_CONCURRENCY = Math.max(2, Math.min(8, cpus().length))
+
+/**
  * Main orchestration engine for RIVET analysis
  */
 export class RivetEngine {
@@ -22,7 +53,7 @@ export class RivetEngine {
   constructor(config: RivetConfig = {}) {
     this.config = {
       include: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
-      exclude: ['**/node_modules/**', '**/dist/**', '**/build/**', '**/.next/**'],
+      exclude: DEFAULT_EXCLUDE,
       severity: { minLevel: 'info' },
       maxIssues: Infinity,
       ...config,
@@ -49,71 +80,47 @@ export class RivetEngine {
     // Find files to analyze
     const files = await this.findFiles(projectRoot)
 
-    // Process each file
-    for (const filePath of files) {
-      try {
-        const sourceCode = await readFile(filePath, 'utf-8')
-        const parseResult = parseTypeScript({
-          filePath,
-          sourceCode,
-          extractTypes: true,
-        })
+    // Analyze files through a bounded pool. Reading and parsing one file at a
+    // time made scan duration scale with file count on an otherwise idle machine.
+    let nextFileIndex = 0
+    const workerCount = Math.min(DEFAULT_CONCURRENCY, files.length)
 
-        // Run all registered engines in parallel
-        const detectionPromises: Promise<Detection[]>[] = []
-
-        for (const [category, engines] of this.engines.entries()) {
-          // Skip if category not in config (if engines is specified as array)
-          const configEngines = this.config.engines
-          if (configEngines && Array.isArray(configEngines) && !configEngines.includes(category)) {
-            continue
-          }
-
-          for (const engine of engines) {
-            const context: AnalysisContext = {
-              parseResult,
-              config: this.config,
-              projectRoot,
-            }
-
-            detectionPromises.push(
-              engine.analyze(context).catch((error) => {
-                errors.push({
-                  engine: engine.name,
-                  error: error instanceof Error ? error.message : String(error),
-                })
-                return []
-              })
-            )
-          }
+    const runWorker = async (): Promise<void> => {
+      while (true) {
+        const index = nextFileIndex++
+        const filePath = files[index]
+        if (filePath === undefined) {
+          return
         }
 
-        // Wait for all engines to complete
-        const results = await Promise.all(detectionPromises)
-        const fileDetections = results.flat()
-
+        const fileDetections = await this.analyzeFile(filePath, projectRoot, errors)
         allDetections.push(...fileDetections)
-      } catch (error) {
-        errors.push({
-          engine: 'parser',
-          error: `Failed to parse ${filePath}: ${error instanceof Error ? error.message : String(error)}`,
-        })
       }
     }
 
+    await Promise.all(Array.from({ length: workerCount }, runWorker))
+
     // Deduplicate and sort detections
     const uniqueDetections = this.deduplicateDetections(allDetections)
-    const filteredDetections = this.filterBySeverity(uniqueDetections)
+    const keptDetections = this.filterByRule(uniqueDetections)
+    const filteredDetections = this.filterBySeverity(keptDetections)
     const sortedDetections = this.sortDetections(filteredDetections)
 
     // Limit to maxIssues
-    const limitedDetections = sortedDetections.slice(0, this.config.maxIssues)
+    const cappedDetections = sortedDetections.slice(0, this.config.maxIssues)
+
+    // Give every detection a stable, collision-free id. Detectors number their own
+    // findings with a counter that restarts on each file, so `null-check-1` would
+    // otherwise repeat once per scanned file. Assigning after the sort also keeps
+    // ids reproducible even though files are now analyzed concurrently.
+    const limitedDetections = assignStableIds(cappedDetections, projectRoot)
 
     // Generate summary
     const summary = this.generateSummary(limitedDetections)
 
     return {
       detections: limitedDetections,
+      totalDetections: sortedDetections.length,
       filesAnalyzed: files.length,
       duration: Date.now() - startTime,
       summary,
@@ -122,22 +129,170 @@ export class RivetEngine {
   }
 
   /**
+   * Read, parse, and run every enabled engine against a single file.
+   *
+   * Engine failures are collected rather than thrown: one detector crashing on one
+   * file should not lose the findings from the other seven engines.
+   */
+  private async analyzeFile(
+    filePath: string,
+    projectRoot: string,
+    errors: Array<{ engine: string; error: string }>
+  ): Promise<Detection[]> {
+    let parseResult: AnalysisContext['parseResult']
+
+    try {
+      const sourceCode = await readFile(filePath, 'utf-8')
+      parseResult = parseTypeScript({
+        filePath,
+        sourceCode,
+        extractTypes: true,
+      })
+    } catch (error) {
+      errors.push({
+        engine: 'parser',
+        error: `Failed to parse ${filePath}: ${error instanceof Error ? error.message : String(error)}`,
+      })
+      return []
+    }
+
+    // parseTypeScript reports a syntax error rather than throwing, and returns an empty
+    // Program. Every detector then runs against nothing and finds nothing, so a file
+    // the parser choked on used to be reported as clean. examples/test-project held a
+    // .ts file containing JSX, which meant its hardcoded key, its SQL injection and its
+    // XSS were all invisible while the scan claimed success.
+    const syntaxErrors = parseResult.errors.filter((e) => e.severity === 'error')
+    if (syntaxErrors.length > 0) {
+      const detail = syntaxErrors[0]?.message ?? 'unknown syntax error'
+      errors.push({
+        engine: 'parser',
+        error: `Skipped ${filePath}: ${detail}${syntaxErrors.length > 1 ? ` (+${syntaxErrors.length - 1} more)` : ''}`,
+      })
+    }
+
+    const detectionPromises: Promise<Detection[]>[] = []
+
+    for (const [category, engines] of this.engines.entries()) {
+      // Skip if category not in config (if engines is specified as array)
+      const configEngines = this.config.engines
+      if (configEngines && Array.isArray(configEngines) && !configEngines.includes(category)) {
+        continue
+      }
+
+      for (const engine of engines) {
+        const context: AnalysisContext = {
+          parseResult,
+          config: this.config,
+          projectRoot,
+        }
+
+        detectionPromises.push(
+          engine.analyze(context).catch((error) => {
+            errors.push({
+              engine: engine.name,
+              error: error instanceof Error ? error.message : String(error),
+            })
+            return []
+          })
+        )
+      }
+    }
+
+    const results = await Promise.all(detectionPromises)
+    return results.flat()
+  }
+
+  /**
+   * Drop the rules a project has switched off.
+   *
+   * `ignore.rules` is documented, is in the config type, and was never read by anything.
+   * A scanner without a per-rule escape hatch leaves a project no answer to a rule that
+   * does not suit it except turning off the whole engine.
+   */
+  private filterByRule(detections: Detection[]): Detection[] {
+    const ignored = this.config.ignoreRules
+    if (!ignored || ignored.length === 0) {
+      return detections
+    }
+    const ignoredSet = new Set(ignored)
+    return detections.filter((detection) => !ignoredSet.has(detection.ruleId))
+  }
+
+  /**
+   * Every pattern the scan must skip.
+   *
+   * `ignore` is the name the config file and the documentation use; `exclude` is the
+   * name the engine was written against. Only `exclude` was ever read, so a
+   * `.rivetrc.json` asking to skip test files was parsed, stored and then dropped.
+   * This repository's own config asks for exactly that and still reported 265 findings
+   * in test files. Both names now apply.
+   *
+   * The built-in excludes are always included rather than defaulted, so a config that
+   * sets its own list cannot accidentally re-admit node_modules.
+   */
+  private excludePatterns(): string[] {
+    return [
+      ...new Set([
+        ...DEFAULT_EXCLUDE,
+        ...(this.config.exclude ?? []),
+        ...(this.config.ignore ?? []),
+      ]),
+    ]
+  }
+
+  /**
    * Find files to analyze based on include/exclude patterns
    */
   private async findFiles(projectRoot: string): Promise<string[]> {
     const files: string[] = []
+    const ignorePatterns = this.excludePatterns()
 
     for (const pattern of this.config.include || []) {
       const matches = await glob(pattern, {
         cwd: projectRoot,
         absolute: true,
-        ignore: this.config.exclude,
+        ignore: ignorePatterns,
         nodir: true,
       })
       files.push(...matches)
     }
 
-    return [...new Set(files)] // Deduplicate
+    const unique = [...new Set(files)]
+    const gitignore = await this.loadGitignore(projectRoot)
+
+    if (!gitignore) {
+      return unique
+    }
+
+    return unique.filter((filePath) => {
+      const relativePath = relative(projectRoot, filePath).split(sep).join('/')
+      // A path outside the project root cannot be matched against its .gitignore.
+      if (!relativePath || relativePath.startsWith('..')) {
+        return true
+      }
+      return !gitignore.ignores(relativePath)
+    })
+  }
+
+  /**
+   * Load the project's `.gitignore` so the scan skips generated output.
+   *
+   * Without this, compiled `.js` emitted next to its `.ts` source is scanned as if
+   * it were hand-written, and every finding is reported twice. Nothing git ignores
+   * is code anyone is going to fix.
+   */
+  private async loadGitignore(projectRoot: string): Promise<ReturnType<typeof ignore> | null> {
+    if (this.config.respectGitignore === false) {
+      return null
+    }
+
+    try {
+      const contents = await readFile(`${projectRoot}/.gitignore`, 'utf-8')
+      return ignore().add(contents)
+    } catch {
+      // No .gitignore is the normal case for a subdirectory scan, not an error.
+      return null
+    }
   }
 
   /**
@@ -163,9 +318,10 @@ export class RivetEngine {
    */
   private filterBySeverity(detections: Detection[]): Detection[] {
     const severityOrder: Severity[] = ['critical', 'high', 'medium', 'low', 'info']
-    const minLevel = typeof this.config.severity === 'object' 
-      ? this.config.severity?.minLevel ?? 'info'
-      : this.config.severity ?? 'info'
+    const minLevel =
+      typeof this.config.severity === 'object'
+        ? (this.config.severity?.minLevel ?? 'info')
+        : (this.config.severity ?? 'info')
     const threshold = severityOrder.indexOf(minLevel)
 
     return detections.filter((d) => {

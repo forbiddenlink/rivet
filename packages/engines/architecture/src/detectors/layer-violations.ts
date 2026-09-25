@@ -1,5 +1,5 @@
-import type { ASTNode } from '@rivet/parsers'
 import type { Detection } from '@rivet/core'
+import type { ASTNode } from '@rivet/parsers'
 
 let detectionCounter = 0
 
@@ -24,7 +24,7 @@ export function detectLayerViolations(ast: ASTNode, filePath: string): Detection
       const importPath = node.children[0]
       if (importPath.raw.type === 'Literal' && typeof importPath.raw.value === 'string') {
         const importedLayer = determineLayer(importPath.raw.value)
-        
+
         // Check for violations
         if (violatesLayerRules(layer, importedLayer)) {
           detections.push({
@@ -58,7 +58,7 @@ export function detectLayerViolations(ast: ASTNode, filePath: string): Detection
 
 function determineLayer(path: string): string {
   const lower = path.toLowerCase()
-  
+
   if (
     lower.includes('/components/') ||
     lower.includes('/ui/') ||
@@ -67,7 +67,7 @@ function determineLayer(path: string): string {
   ) {
     return 'presentation'
   }
-  
+
   if (
     lower.includes('/services/') ||
     lower.includes('/business/') ||
@@ -76,7 +76,7 @@ function determineLayer(path: string): string {
   ) {
     return 'domain'
   }
-  
+
   if (
     lower.includes('/repositories/') ||
     lower.includes('/data/') ||
@@ -85,7 +85,7 @@ function determineLayer(path: string): string {
   ) {
     return 'data'
   }
-  
+
   return 'unknown'
 }
 
@@ -94,11 +94,11 @@ function violatesLayerRules(currentLayer: string, importedLayer: string): boolea
   if (currentLayer === 'presentation' && importedLayer === 'data') {
     return true
   }
-  
+
   // Data layer should not import from presentation or domain
   if (currentLayer === 'data' && (importedLayer === 'presentation' || importedLayer === 'domain')) {
     return true
   }
-  
+
   return false
 }

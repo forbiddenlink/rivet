@@ -1,5 +1,5 @@
-import type { ASTNode } from '@rivet/parsers'
 import type { Detection } from '@rivet/core'
+import type { ASTNode } from '@rivet/parsers'
 
 let detectionCounter = 0
 
@@ -16,11 +16,7 @@ export function detectUnusedCode(ast: ASTNode, filePath: string): Detection[] {
       node.children.forEach((child) => {
         if (child.type === 'ImportSpecifier' && child.children) {
           const imported = child.children.find((c) => c.type === 'Identifier')
-          if (
-            imported &&
-            imported.raw.type === 'Identifier' &&
-            imported.raw.name
-          ) {
+          if (imported && imported.raw.type === 'Identifier' && imported.raw.name) {
             declaredIdentifiers.add(imported.raw.name)
           }
         }

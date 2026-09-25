@@ -74,6 +74,9 @@ importers:
       '@rivet/engine-dependencies':
         specifier: workspace:*
         version: link:../../packages/engines/dependencies
+      '@rivet/engine-flows':
+        specifier: workspace:*
+        version: link:../../packages/engines/flows
       '@rivet/engine-performance':
         specifier: workspace:*
         version: link:../../packages/engines/performance
@@ -166,6 +169,9 @@ importers:
       typescript:
         specifier: 6.0.3
         version: 6.0.3
+      vitest:
+        specifier: ^4.1.10
+        version: 4.1.11(@types/node@22.20.3)(vite@8.3.0(@types/node@22.20.3)(esbuild@0.27.2)(yaml@2.8.2))
 
   packages/ai:
     dependencies:
@@ -200,6 +206,9 @@ importers:
       glob:
         specifier: ^11.0.0
         version: 11.1.0
+      ignore:
+        specifier: ^7.0.10
+        version: 7.0.10
     devDependencies:
       '@types/node':
         specifier: 20.19.43
@@ -1837,6 +1846,10 @@ packages:
 
   ignore@5.3.2:
     resolution: {integrity: sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==}
+    engines: {node: '>= 4'}
+
+  ignore@7.0.10:
+    resolution: {integrity: sha512-HpbUakT7xp5miBUywCHf36ZEuAJNklBJDDsGpUIjMzOSmM8ELSfA9Sa/QDPeNeqeoN31u+UTCkL4klCOVvRm4Q==}
     engines: {node: '>= 4'}
 
   import-fresh@3.3.1:
@@ -3965,6 +3978,8 @@ snapshots:
   human-id@4.2.0: {}
 
   ignore@5.3.2: {}
+
+  ignore@7.0.10: {}
 
   import-fresh@3.3.1:
     dependencies:

@@ -1,4 +1,4 @@
-import type { Detection, AnalysisContext } from '@rivet/core'
+import type { AnalysisContext, Detection } from '@rivet/core'
 import type { ASTNode } from '@rivet/parsers'
 
 /**
@@ -16,8 +16,8 @@ export function detectMissingErrorBoundaries(context: AnalysisContext): Detectio
     // Look for function components with async hooks
     const isFunctionComponent =
       (node.type === 'FunctionDeclaration' ||
-       node.type === 'FunctionExpression' ||
-       node.type === 'ArrowFunctionExpression') &&
+        node.type === 'FunctionExpression' ||
+        node.type === 'ArrowFunctionExpression') &&
       returnsJSX(node)
 
     if (isFunctionComponent) {
@@ -41,7 +41,8 @@ export function detectMissingErrorBoundaries(context: AnalysisContext): Detectio
           },
           metadata: {
             pattern: 'missing-error-boundary',
-            explanation: 'Components that perform async operations should be wrapped in Error Boundaries to handle runtime errors gracefully',
+            explanation:
+              'Components that perform async operations should be wrapped in Error Boundaries to handle runtime errors gracefully',
             recommendation: 'Wrap this component in an Error Boundary or add error handling logic',
           },
         })
@@ -93,7 +94,7 @@ export function detectMissingErrorBoundaries(context: AnalysisContext): Detectio
   function containsAsyncOperation(node: ASTNode): boolean {
     // Check for useEffect, fetch, axios, etc.
     if (!node.children) return false
-    
+
     for (const child of node.children) {
       if (child.type === 'CallExpression' && child.raw.type === 'CallExpression') {
         const callee = child.raw.callee
@@ -128,8 +129,8 @@ export function detectMissingErrorBoundaries(context: AnalysisContext): Detectio
       if (current.type === 'JSXElement' && current.children) {
         const openingElement = current.children.find((c) => c.type === 'JSXOpeningElement')
         if (openingElement?.children) {
-          const nameNode = openingElement.children.find((c) =>
-            c.type === 'JSXIdentifier' || c.type === 'JSXMemberExpression'
+          const nameNode = openingElement.children.find(
+            (c) => c.type === 'JSXIdentifier' || c.type === 'JSXMemberExpression'
           )
           if (nameNode) {
             const name = getJSXName(nameNode)

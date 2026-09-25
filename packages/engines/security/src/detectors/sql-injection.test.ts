@@ -53,7 +53,7 @@ describe('SQL Injection Detector', () => {
       const detections = detectSQLInjection(createAST(code), 'test.ts')
 
       expect(detections.length).toBeGreaterThan(0)
-      expect(detections.some(d => d.ruleId === 'sql-injection')).toBe(true)
+      expect(detections.some((d) => d.ruleId === 'sql-injection')).toBe(true)
     })
 
     it('should detect UPDATE statement with template literal', () => {
@@ -148,6 +148,55 @@ describe('SQL Injection Detector', () => {
   })
 
   describe('edge cases', () => {
+    // Every one of these produced a finding before the detector stopped matching
+    // SQL keywords as substrings of an entire subtree's text. Scanning this
+    // repository, which contains no SQL, reported 63 vulnerabilities.
+    it('should not flag a Commander call because "update" appears below it', () => {
+      const code = `
+        export const fixCommand = new Command('fix')
+          .description('Auto-fix detected issues where possible')
+          .option('--update', 'update in place')
+      `
+
+      expect(detectSQLInjection(createAST(code), 'test.ts')).toHaveLength(0)
+    })
+
+    it('should not flag a test file because a describe block mentions a keyword', () => {
+      const code = `
+        describe('Unhandled Promise Detector', () => {
+          it('updates state where needed', () => {
+            expect(run(\`value \${x}\`)).toBe(true)
+          })
+        })
+      `
+
+      expect(detectSQLInjection(createAST(code), 'test.ts')).toHaveLength(0)
+    })
+
+    it('should not flag identifiers that merely contain a keyword', () => {
+      const code = `
+        const updated = updateConfig(\`prefix-\${name}\`)
+        const somewhere = deleted.filter((x) => x.selected)
+      `
+
+      expect(detectSQLInjection(createAST(code), 'test.ts')).toHaveLength(0)
+    })
+
+    it('should not flag a template literal whose SQL words are unrelated prose', () => {
+      const code = 'const msg = `Please select a file from the list where prompted: ${name}`'
+
+      expect(detectSQLInjection(createAST(code), 'test.ts')).toHaveLength(0)
+    })
+
+    it('should report a concatenated query once, not once per plus', () => {
+      const code = `
+        const query = "SELECT * FROM users WHERE id = " + id + " AND org = " + org
+        db.query(query)
+      `
+
+      expect(detectSQLInjection(createAST(code), 'test.ts')).toHaveLength(1)
+    })
+
     it('should handle empty code', () => {
       const code = ``
 

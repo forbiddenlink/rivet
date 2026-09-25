@@ -37,7 +37,7 @@ Be respectful, inclusive, and professional. We're all here to build something gr
 
 ```bash
 # Clone the repository
-git clone https://github.com/elizabethstein/rivet.git
+git clone https://github.com/forbiddenlink/rivet.git
 cd rivet
 
 # Install dependencies

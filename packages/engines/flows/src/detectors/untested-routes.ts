@@ -1,4 +1,4 @@
-import type { Detection, AnalysisContext } from '@rivet/core'
+import type { AnalysisContext, Detection } from '@rivet/core'
 import type { ASTNode } from '@rivet/parsers'
 
 /**
@@ -54,7 +54,9 @@ export function detectUntestedRoutes(context: AnalysisContext): Detection[] {
       if (openingElement && openingElement.children) {
         const name = openingElement.children.find((child) => child.type === 'JSXIdentifier')
         if (name && name.raw.type === 'JSXIdentifier' && name.raw.name === 'Route') {
-          const attributes = openingElement.children.filter((child) => child.type === 'JSXAttribute')
+          const attributes = openingElement.children.filter(
+            (child) => child.type === 'JSXAttribute'
+          )
           const pathAttr = attributes.find((attr) => {
             const attrName = attr.children?.find((child) => child.type === 'JSXIdentifier')
             return attrName && attrName.raw.type === 'JSXIdentifier' && attrName.raw.name === 'path'
@@ -156,7 +158,14 @@ function extractAppRoutePath(filePath: string): string | null {
   const rest = filePath.slice(idx + marker.length)
   const withoutFile = rest.replace(/\/(page|route)\.(tsx?|jsx?)$/, '')
   if (!withoutFile || withoutFile === rest) return '/'
-  return '/' + withoutFile.replace(/\/\([^)]+\)/g, '') // strip route groups
+  // A route group is a whole path segment, so split on the separator rather than
+  // scanning for '/(...)'. The regex was flagged by CodeQL as polynomial on a path
+  // made of many '/(' repetitions, and a segment filter cannot backtrack at all.
+  const withoutRouteGroups = withoutFile
+    .split('/')
+    .filter((segment) => !(segment.startsWith('(') && segment.endsWith(')')))
+    .join('/')
+  return `/${withoutRouteGroups}`
 }
 
 function extractJsxStringValue(attr: ASTNode): string | null {

@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
 import { parseTypeScript } from '@rivet/parsers'
+import { describe, expect, it } from 'vitest'
 
 import { detectDocumentation } from './documentation'
 
@@ -40,9 +40,7 @@ describe('Documentation Detector', () => {
 
       const detections = detectDocumentation(ast, 'test.ts')
 
-      const classDetections = detections.filter((d) =>
-        d.message.includes('Class')
-      )
+      const classDetections = detections.filter((d) => d.message.includes('Class'))
       expect(classDetections.length).toBeGreaterThan(0)
       expect(classDetections[0]?.message).toContain('UserService')
     })

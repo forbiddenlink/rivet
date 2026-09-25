@@ -1,9 +1,9 @@
 import type { AnalysisContext, AnalysisEngine, Detection } from '@rivet/core'
 
 import { detectCircularDependencies } from './detectors/circular-dependencies'
-import { detectSOLIDViolations } from './detectors/solid-violations'
-import { detectModuleCoupling } from './detectors/module-coupling'
 import { detectLayerViolations } from './detectors/layer-violations'
+import { detectModuleCoupling } from './detectors/module-coupling'
+import { detectSOLIDViolations } from './detectors/solid-violations'
 import { detectTightCoupling } from './detectors/tight-coupling'
 
 export class ArchitectureEngine implements AnalysisEngine {
@@ -27,7 +27,7 @@ export class ArchitectureEngine implements AnalysisEngine {
 }
 
 export * from './detectors/circular-dependencies'
-export * from './detectors/solid-violations'
-export * from './detectors/module-coupling'
 export * from './detectors/layer-violations'
+export * from './detectors/module-coupling'
+export * from './detectors/solid-violations'
 export * from './detectors/tight-coupling'

@@ -35,4 +35,52 @@ jobs:
       - name: Check workspace types
         run: pnpm exec turbo run typecheck --cache=local:rw
       - name: Run all unit tests
-        run: pnpm exec vitest run
+        run: pnpm exec turbo run test --cache=local:rw
+
+      # Until this step existed, biome.json could sit broken for weeks without
+      # anyone noticing, because nothing here ever invoked the linter.
+      - name: Lint and format check
+        run: pnpm lint
+
+  # Proves the built CLI actually runs. A scan that throws on startup passes every
+  # other job in this file.
+  cli-smoke:
+    name: CLI smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TURBO_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec turbo run build --cache=local:rw
+
+      # The fixture project is deliberately broken, so the CLI exits 1 by design
+      # via --fail-on. The assertion below is what decides whether this job passes.
+      - name: Scan the example project
+        run: |
+          node apps/cli/dist/index.js scan examples/test-project \
+            --format json --output /tmp/rivet-smoke.json || true
+          test -f /tmp/rivet-smoke.json
+
+      - name: Assert the scan found issues and gave them unique ids
+        run: |
+          node -e '
+            const fs = require("node:fs");
+            const report = JSON.parse(fs.readFileSync("/tmp/rivet-smoke.json", "utf8"));
+            const detections = report.detections ?? [];
+            if (detections.length === 0) {
+              throw new Error("Scan of the deliberately-broken example project found nothing.");
+            }
+            const ids = detections.map((d) => d.id);
+            const unique = new Set(ids);
+            if (unique.size !== ids.length) {
+              throw new Error(`Detection ids collide: ${ids.length} findings, ${unique.size} unique ids.`);
+            }
+            console.log(`OK: ${detections.length} findings, all ids unique.`);
+          '

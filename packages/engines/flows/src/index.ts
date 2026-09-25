@@ -1,4 +1,4 @@
-import type { AnalysisEngine, Detection, AnalysisContext } from '@rivet/core'
+import type { AnalysisContext, AnalysisEngine, Detection } from '@rivet/core'
 
 import { detectCriticalPathGaps } from './detectors/critical-path-gaps'
 import { detectMissingErrorBoundaries } from './detectors/missing-error-boundaries'
@@ -33,7 +33,7 @@ export class FlowsEngine implements AnalysisEngine {
   }
 }
 
-export { detectUntestedRoutes } from './detectors/untested-routes'
 export { detectCriticalPathGaps } from './detectors/critical-path-gaps'
 export { detectMissingErrorBoundaries } from './detectors/missing-error-boundaries'
+export { detectUntestedRoutes } from './detectors/untested-routes'
 export { detectUntestedStateTransitions } from './detectors/untested-state-transitions'

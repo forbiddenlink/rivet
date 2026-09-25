@@ -1,5 +1,5 @@
-import type { ASTNode } from '@rivet/parsers'
 import type { Detection } from '@rivet/core'
+import type { ASTNode } from '@rivet/parsers'
 import { calculateComplexity, countLines, getFunctionName, isFunctionNode } from './utils'
 
 export interface LongMethodConfig {
@@ -14,10 +14,10 @@ const DEFAULT_CONFIG: Required<LongMethodConfig> = {
 
 /**
  * Detects methods/functions that are too long or too complex
- * 
+ *
  * Long methods are hard to understand, test, and maintain.
  * They often indicate that a method is doing too much and should be split.
- * 
+ *
  * Thresholds:
  * - Lines: > 50 lines (configurable)
  * - Cyclomatic Complexity: > 10 (configurable)
@@ -54,7 +54,8 @@ export function detectLongMethods(
             lineCount: lines,
             threshold: cfg.maxLines,
             complexity,
-            explanation: 'Long methods are difficult to understand and maintain. They often violate the Single Responsibility Principle. Breaking them down improves readability and testability.',
+            explanation:
+              'Long methods are difficult to understand and maintain. They often violate the Single Responsibility Principle. Breaking them down improves readability and testability.',
           },
         })
       }

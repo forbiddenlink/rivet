@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
 import { parseTypeScript } from '@rivet/parsers'
+import { describe, expect, it } from 'vitest'
 import { detectBigOViolations } from './big-o-violations'
 
 describe('Big-O Violation Detector', () => {
@@ -210,7 +210,7 @@ describe('Big-O Violation Detector', () => {
       })
 
       const detections = detectBigOViolations(ast, 'test.ts')
-      const stringConcatDetections = detections.filter(d => d.ruleId === 'string-concat-in-loop')
+      const stringConcatDetections = detections.filter((d) => d.ruleId === 'string-concat-in-loop')
 
       expect(stringConcatDetections.length).toBeGreaterThan(0)
       expect(stringConcatDetections[0]?.message).toContain('String concatenation')
@@ -230,7 +230,7 @@ describe('Big-O Violation Detector', () => {
       })
 
       const detections = detectBigOViolations(ast, 'test.ts')
-      const stringConcatDetections = detections.filter(d => d.ruleId === 'string-concat-in-loop')
+      const stringConcatDetections = detections.filter((d) => d.ruleId === 'string-concat-in-loop')
 
       expect(stringConcatDetections).toEqual([])
     })
@@ -253,7 +253,7 @@ describe('Big-O Violation Detector', () => {
       })
 
       const detections = detectBigOViolations(ast, 'test.ts')
-      const stringConcatDetections = detections.filter(d => d.ruleId === 'string-concat-in-loop')
+      const stringConcatDetections = detections.filter((d) => d.ruleId === 'string-concat-in-loop')
 
       expect(stringConcatDetections).toEqual([])
     })

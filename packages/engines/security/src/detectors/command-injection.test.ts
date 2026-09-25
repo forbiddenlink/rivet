@@ -193,7 +193,10 @@ describe('Command Injection Detector', () => {
         exec(cmd)
       `
 
-      const detections = detectCommandInjection(createAST(code, 'src/commands.ts'), 'src/commands.ts')
+      const detections = detectCommandInjection(
+        createAST(code, 'src/commands.ts'),
+        'src/commands.ts'
+      )
 
       expect(detections.length).toBeGreaterThan(0)
       expect(detections[0]?.filePath).toBe('src/commands.ts')

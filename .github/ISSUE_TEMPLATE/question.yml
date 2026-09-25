@@ -8,7 +8,7 @@ body:
       value: |
         Have a question? We're here to help!
         
-        **Note**: For general discussions, consider using [GitHub Discussions](https://github.com/elizabethstein/rivet/discussions) instead.
+        **Note**: For general discussions, consider using [GitHub Discussions](https://github.com/forbiddenlink/rivet/discussions) instead.
 
   - type: textarea
     id: question
@@ -57,7 +57,7 @@ body:
     attributes:
       label: Pre-submission Checklist
       options:
-        - label: I have checked the [documentation](https://github.com/elizabethstein/rivet/tree/main/docs)
+        - label: I have checked the [documentation](https://github.com/forbiddenlink/rivet/tree/main/docs)
           required: true
         - label: I have searched existing issues/discussions
           required: true

@@ -1,5 +1,5 @@
-import type { ASTNode } from '@rivet/parsers'
 import type { Detection } from '@rivet/core'
+import type { ASTNode } from '@rivet/parsers'
 
 export interface DuplicateCodeOptions {
   minLines: number
@@ -32,7 +32,7 @@ export function detectDuplicateCode(
   for (let i = 0; i < blocks.length; i++) {
     const block1 = blocks[i]
     if (!block1) continue
-    
+
     const hash1 = hashBlock(block1)
 
     if (seen.has(hash1)) {
@@ -43,7 +43,7 @@ export function detectDuplicateCode(
     for (let j = i + 1; j < blocks.length; j++) {
       const block2 = blocks[j]
       if (!block2) continue
-      
+
       const hash2 = hashBlock(block2)
 
       if (hash1 === hash2 && areSimilar(block1, block2, config)) {

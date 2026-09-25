@@ -37,7 +37,7 @@ Contributors are recognized in multiple ways:
 
 ### Core Team
 
-- **Elizabeth Stein** ([@elizabethstein](https://github.com/elizabethstein)) - Creator & Lead Developer
+- **Elizabeth Stein** ([@forbiddenlink](https://github.com/forbiddenlink)) - Creator & Lead Developer
 
 ### Top Contributors
 

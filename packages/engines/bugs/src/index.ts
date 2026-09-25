@@ -1,13 +1,14 @@
 import type { AnalysisContext, AnalysisEngine, Detection } from '@rivet/core'
-import { detectNullChecks } from './detectors/null-checks.js'
-import { detectUnhandledPromises } from './detectors/unhandled-promises.js'
 import { detectLogicErrors } from './detectors/logic-errors.js'
+import { detectNullChecks } from './detectors/null-checks.js'
 import { detectTypeCoercion } from './detectors/type-coercion.js'
+import { detectUnhandledPromises } from './detectors/unhandled-promises.js'
 import { detectUnreachableCode } from './detectors/unreachable-code.js'
 
 export class BugEngine implements AnalysisEngine {
   name = 'BugEngine'
-  description = 'Detects common bugs including null checks, unhandled promises, logic errors, type coercion issues, and unreachable code'
+  description =
+    'Detects common bugs including null checks, unhandled promises, logic errors, type coercion issues, and unreachable code'
   category = 'bugs' as const
 
   async analyze(context: AnalysisContext): Promise<Detection[]> {
@@ -34,8 +35,8 @@ export class BugEngine implements AnalysisEngine {
   }
 }
 
-export * from './detectors/null-checks.js'
-export * from './detectors/unhandled-promises.js'
 export * from './detectors/logic-errors.js'
+export * from './detectors/null-checks.js'
 export * from './detectors/type-coercion.js'
+export * from './detectors/unhandled-promises.js'
 export * from './detectors/unreachable-code.js'

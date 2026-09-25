@@ -106,7 +106,8 @@ export function detectUnreachableCode(ast: ASTNode, filePath: string): Detection
                   pattern: 'multiple-returns',
                   explanation:
                     'Having multiple return statements at the same level makes code harder to follow.',
-                  recommendation: 'Use single return pattern or ensure returns are in separate branches',
+                  recommendation:
+                    'Use single return pattern or ensure returns are in separate branches',
                 },
               })
             }

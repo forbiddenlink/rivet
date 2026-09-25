@@ -11,6 +11,7 @@
   "references": [
     { "path": "../../packages/core" },
     { "path": "../../packages/parsers" },
+    { "path": "../../packages/engines/flows" },
     { "path": "../../packages/ai" }
   ]
 }

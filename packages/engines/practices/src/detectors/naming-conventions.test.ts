@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
 import { parseTypeScript } from '@rivet/parsers'
+import { describe, expect, it } from 'vitest'
 
 import { detectNamingConventions } from './naming-conventions'
 
@@ -32,9 +32,7 @@ describe('Naming Conventions Detector', () => {
 
       const detections = detectNamingConventions(ast, 'test.ts')
 
-      const classDetections = detections.filter(
-        (d) => d.ruleId === 'class-naming'
-      )
+      const classDetections = detections.filter((d) => d.ruleId === 'class-naming')
       expect(classDetections).toEqual([])
     })
 
@@ -49,9 +47,7 @@ describe('Naming Conventions Detector', () => {
 
       const detections = detectNamingConventions(ast, 'test.ts')
 
-      const classDetections = detections.filter(
-        (d) => d.ruleId === 'class-naming'
-      )
+      const classDetections = detections.filter((d) => d.ruleId === 'class-naming')
       expect(classDetections[0]?.metadata?.suggestion).toContain('UserService')
     })
   })
@@ -68,9 +64,7 @@ describe('Naming Conventions Detector', () => {
 
       const detections = detectNamingConventions(ast, 'test.ts')
 
-      const varDetections = detections.filter(
-        (d) => d.ruleId === 'variable-naming'
-      )
+      const varDetections = detections.filter((d) => d.ruleId === 'variable-naming')
       expect(varDetections.length).toBe(1)
       expect(varDetections[0]?.message).toContain('MyVariable')
     })
@@ -86,9 +80,7 @@ describe('Naming Conventions Detector', () => {
 
       const detections = detectNamingConventions(ast, 'test.ts')
 
-      const varDetections = detections.filter(
-        (d) => d.ruleId === 'variable-naming'
-      )
+      const varDetections = detections.filter((d) => d.ruleId === 'variable-naming')
       expect(varDetections).toEqual([])
     })
 
@@ -103,9 +95,7 @@ describe('Naming Conventions Detector', () => {
 
       const detections = detectNamingConventions(ast, 'test.ts')
 
-      const varDetections = detections.filter(
-        (d) => d.ruleId === 'variable-naming'
-      )
+      const varDetections = detections.filter((d) => d.ruleId === 'variable-naming')
       expect(varDetections).toEqual([])
     })
   })

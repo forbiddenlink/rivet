@@ -1,5 +1,5 @@
-import type { AnalysisResult, Detection, Severity } from '@rivet/core'
 import type { EnhancedDetection, TechDebtMetrics } from '@rivet/ai'
+import type { AnalysisResult, Detection, Severity } from '@rivet/core'
 import chalk from 'chalk'
 
 const amber = chalk.hex('#f59e0b')
@@ -26,13 +26,17 @@ export function formatResults(result: AnalysisResult, aiEnabled = false): string
       '         ' +
       chalk.bold('│')
   )
-  output.push(chalk.bold('│') + chalk.dim('────────────────────────────────────────────') + chalk.bold('│'))
+  output.push(
+    chalk.bold('│') + chalk.dim('────────────────────────────────────────────') + chalk.bold('│')
+  )
   output.push(formatSummaryRow('Critical', bySeverity.critical, chalk.red.bold('⚠')))
   output.push(formatSummaryRow('High    ', bySeverity.high, chalk.redBright('⚠')))
   output.push(formatSummaryRow('Medium  ', bySeverity.medium, chalk.yellow('●')))
   output.push(formatSummaryRow('Low     ', bySeverity.low, chalk.blue('○')))
   output.push(formatSummaryRow('Info    ', bySeverity.info, chalk.gray('ℹ')))
-  output.push(chalk.bold('│') + chalk.dim('────────────────────────────────────────────') + chalk.bold('│'))
+  output.push(
+    chalk.bold('│') + chalk.dim('────────────────────────────────────────────') + chalk.bold('│')
+  )
   output.push(
     chalk.bold('│') +
       `  Total ${amber(String(total).padStart(4))} issues` +
@@ -61,7 +65,7 @@ export function formatResults(result: AnalysisResult, aiEnabled = false): string
       output.push('')
     }
   } else {
-    output.push(amber('✓') + ' No issues detected')
+    output.push(`${amber('✓')} No issues detected`)
     output.push('')
   }
 
@@ -182,11 +186,7 @@ export function formatTechDebt(metrics: TechDebtMetrics): string {
       : `${metrics.totalDebt.toFixed(1)} hours`
 
   output.push(chalk.bold('╭─ Tech Debt ────────────────────────────────╮'))
-  output.push(
-    chalk.bold('│') +
-      `  Total  ${amber.bold(totalDisplay.padEnd(34))}` +
-      chalk.bold('│')
-  )
+  output.push(`${chalk.bold('│')}  Total  ${amber.bold(totalDisplay.padEnd(34))}${chalk.bold('│')}`)
   output.push(chalk.bold('╰────────────────────────────────────────────╯'))
   output.push('')
 
@@ -224,9 +224,7 @@ export function formatTechDebt(metrics: TechDebtMetrics): string {
     for (const [category, hours] of sortedCategories) {
       if (hours && hours > 0) {
         const percentage = ((hours / metrics.totalDebt) * 100).toFixed(0)
-        output.push(
-          `  ${amber('◆')} ${category.padEnd(14)} ${hours.toFixed(1)}h (${percentage}%)`
-        )
+        output.push(`  ${amber('◆')} ${category.padEnd(14)} ${hours.toFixed(1)}h (${percentage}%)`)
       }
     }
     output.push('')

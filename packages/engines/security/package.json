@@ -30,7 +30,12 @@
     "typescript": "6.0.3",
     "vitest": "4.1.11"
   },
-  "keywords": ["security", "vulnerability", "owasp", "analysis"],
+  "keywords": [
+    "security",
+    "vulnerability",
+    "owasp",
+    "analysis"
+  ],
   "author": "",
   "license": "MIT"
 }
