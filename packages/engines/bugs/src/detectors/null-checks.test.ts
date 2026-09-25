@@ -46,6 +46,85 @@ describe('Null Check Detector', () => {
       expect(detections).toEqual([])
     })
 
+    it('should not flag globals and namespaces', () => {
+      const code = `
+        function report(rows: any) {
+          console.log(Object.keys(process.env).length)
+          return JSON.stringify(Math.max(1, 2))
+        }
+      `
+
+      const { ast } = parseTypeScript({
+        filePath: 'test.ts',
+        sourceCode: code,
+        extractTypes: false,
+      })
+
+      const detections = detectNullChecks(ast, 'test.ts')
+      const missingChecks = detections.filter((d) => d.ruleId === 'missing-null-check')
+
+      expect(missingChecks).toEqual([])
+    })
+
+    it('should not flag a local binding with a definite initializer', () => {
+      const code = `
+        function collect() {
+          const rows: string[] = []
+          rows.push('a')
+          return rows.length
+        }
+      `
+
+      const { ast } = parseTypeScript({
+        filePath: 'test.ts',
+        sourceCode: code,
+        extractTypes: false,
+      })
+
+      const detections = detectNullChecks(ast, 'test.ts')
+      const missingChecks = detections.filter((d) => d.ruleId === 'missing-null-check')
+
+      expect(missingChecks).toEqual([])
+    })
+
+    it('should report a long chain once rather than per link', () => {
+      const code = `
+        function read(input: any) {
+          return input.a.b.c.d
+        }
+      `
+
+      const { ast } = parseTypeScript({
+        filePath: 'test.ts',
+        sourceCode: code,
+        extractTypes: false,
+      })
+
+      const detections = detectNullChecks(ast, 'test.ts')
+      const missingChecks = detections.filter((d) => d.ruleId === 'missing-null-check')
+
+      expect(missingChecks).toHaveLength(1)
+    })
+
+    it('should not flag an access guarded earlier in the chain', () => {
+      const code = `
+        function read(input: any) {
+          return input?.a.b
+        }
+      `
+
+      const { ast } = parseTypeScript({
+        filePath: 'test.ts',
+        sourceCode: code,
+        extractTypes: false,
+      })
+
+      const detections = detectNullChecks(ast, 'test.ts')
+      const missingChecks = detections.filter((d) => d.ruleId === 'missing-null-check')
+
+      expect(missingChecks).toEqual([])
+    })
+
     it('should detect accessing array methods without null check', () => {
       const code = `
         function getItems(data: any) {
