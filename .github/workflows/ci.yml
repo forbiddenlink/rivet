@@ -60,8 +60,13 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec turbo run build --cache=local:rw
 
+      # The fixture project is deliberately broken, so the CLI exits 1 by design
+      # via --fail-on. The assertion below is what decides whether this job passes.
       - name: Scan the example project
-        run: node apps/cli/dist/index.js scan examples/test-project --format json --output /tmp/rivet-smoke.json
+        run: |
+          node apps/cli/dist/index.js scan examples/test-project \
+            --format json --output /tmp/rivet-smoke.json || true
+          test -f /tmp/rivet-smoke.json
 
       - name: Assert the scan found issues and gave them unique ids
         run: |
