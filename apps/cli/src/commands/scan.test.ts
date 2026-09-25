@@ -87,4 +87,20 @@ describe('rivet scan', () => {
     expect(shouldFailForSeverity(detections, 'high')).toBe(true)
     expect(shouldFailForSeverity(detections, 'critical')).toBe(false)
   })
+
+  it('never fails when the level is none', () => {
+    const detections = [
+      {
+        id: 'critical-1',
+        ruleId: 'test-rule',
+        category: 'security' as const,
+        severity: 'critical' as const,
+        message: 'Critical severity issue',
+        filePath: 'page.tsx',
+        loc: { start: { line: 1, column: 0 }, end: { line: 1, column: 1 } },
+      },
+    ]
+
+    expect(shouldFailForSeverity(detections, 'none')).toBe(false)
+  })
 })

@@ -44,9 +44,26 @@ export function createAnalysisEngine(config: RivetConfig): RivetEngine {
   return engine
 }
 
-export function shouldFailForSeverity(detections: Detection[], failOn: Severity): boolean {
+/**
+ * `none` reports findings without deciding the exit code.
+ *
+ * A pipeline that wants to publish results and gate on its own rule had no way to say
+ * so: the default `high` made the scan itself the gate, so a reporting workflow died
+ * on the scan step and never reached its own budget check. `|| true` in the workflow
+ * would hide a real crash as well, which is the failure this option avoids.
+ */
+export type FailOnLevel = Severity | 'none'
+
+export function shouldFailForSeverity(detections: Detection[], failOn: FailOnLevel): boolean {
+  if (failOn === 'none') {
+    return false
+  }
+
   const severityOrder: Severity[] = ['critical', 'high', 'medium', 'low', 'info']
   const threshold = severityOrder.indexOf(failOn)
+  if (threshold === -1) {
+    return false
+  }
 
   return detections.some((detection) => severityOrder.indexOf(detection.severity) <= threshold)
 }
@@ -165,7 +182,11 @@ export const scanCommand = new Command('scan')
   .option('--output <path>', 'Output file path (for json/sarif/html formats)')
   .option('--severity <level>', 'Minimum severity level (critical, high, medium, low, info)')
   .option('--max-issues <number>', 'Maximum number of issues to report', '100')
-  .option('--fail-on <level>', 'Exit non-zero for issues at or above this severity', 'high')
+  .option(
+    '--fail-on <level>',
+    'Exit non-zero for issues at or above this severity, or `none` to never fail',
+    'high'
+  )
   .option('--ai', 'Enable AI-powered explanations and suggestions (requires OPENAI_API_KEY)')
   .option(
     '--ai-model <model>',
@@ -249,7 +270,7 @@ export const scanCommand = new Command('scan')
         await new Promise(() => {})
       }
 
-      if (shouldFailForSeverity(result.detections, options.failOn as Severity)) {
+      if (shouldFailForSeverity(result.detections, options.failOn as FailOnLevel)) {
         process.exit(1)
       }
     } catch (error) {

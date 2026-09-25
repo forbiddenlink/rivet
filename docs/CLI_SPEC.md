@@ -68,7 +68,7 @@ rivet scan [path] [options]
 
 --watch                  Watch mode - continuous analysis
 
---fail-on <severity>     Exit with error on severity level
+--fail-on <severity>     Exit with error on severity level, or `none` to never fail
                          Values: critical, high, medium, low
                          Default: critical
 

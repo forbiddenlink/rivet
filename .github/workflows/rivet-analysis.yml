@@ -44,13 +44,18 @@ jobs:
       - name: Build RIVET
         run: pnpm build
 
+      # --fail-on none because this job's gate is the error budget below, not the
+      # scan's own exit code. With the default of `high` the scan exited 1 on its own
+      # findings, the job stopped there, and the SARIF upload, the summary and the
+      # budget check never ran.
       - name: Run RIVET analysis
         run: |
           node apps/cli/dist/index.js scan . \
             --format sarif \
             --output rivet-results.sarif \
             --severity medium \
-            --max-issues 1000
+            --max-issues 1000 \
+            --fail-on none
 
       - name: Upload SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4.37.9
