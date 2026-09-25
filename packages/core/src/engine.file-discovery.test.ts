@@ -26,6 +26,12 @@ class FileCountingEngine implements AnalysisEngine {
   }
 }
 
+/**
+ * Each run builds a TypeScript program per file, which takes seconds on a cold CI
+ * runner. Vitest's 5s default is not enough and the failure reads as a hang.
+ */
+const FILE_SCAN_TIMEOUT_MS = 60_000
+
 describe('RivetEngine file discovery', () => {
   let projectRoot: string
 
@@ -48,38 +54,67 @@ describe('RivetEngine file discovery', () => {
     return result.detections.map((d) => d.filePath.replace(`${projectRoot}/`, '')).sort()
   }
 
-  it('reports a file the parser could not read instead of calling it clean', async () => {
-    await writeFile(join(projectRoot, 'src', 'broken.ts'), 'export const x = <div>hi</div>\n')
+  it(
+    'reports a file the parser could not read instead of calling it clean',
+    async () => {
+      await writeFile(join(projectRoot, 'src', 'broken.ts'), 'export const x = <div>hi</div>\n')
 
-    const engine = new RivetEngine({ ignore: ['**/*.test.ts'] })
-    engine.registerEngine(new FileCountingEngine())
-    const result = await engine.analyze(projectRoot)
+      const engine = new RivetEngine({ ignore: ['**/*.test.ts'] })
+      engine.registerEngine(new FileCountingEngine())
+      const result = await engine.analyze(projectRoot)
 
-    const parserErrors = result.errors.filter((e) => e.engine === 'parser')
+      const parserErrors = result.errors.filter((e) => e.engine === 'parser')
 
-    expect(parserErrors).toHaveLength(1)
-    expect(parserErrors[0]?.error).toContain('broken.ts')
-  })
+      expect(parserErrors).toHaveLength(1)
+      expect(parserErrors[0]?.error).toContain('broken.ts')
+    },
+    FILE_SCAN_TIMEOUT_MS
+  )
 
-  it('honours the documented ignore list, not only exclude', async () => {
-    const files = await scannedFiles({ ignore: ['**/*.test.ts'] })
+  it(
+    'honours the documented ignore list, not only exclude',
+    async () => {
+      const files = await scannedFiles({ ignore: ['**/*.test.ts'] })
 
-    expect(files).toEqual(['src/index.ts'])
-  })
+      expect(files).toEqual(['src/index.ts'])
+    },
+    FILE_SCAN_TIMEOUT_MS
+  )
 
-  it('keeps the built-in excludes when a config supplies its own', async () => {
-    const files = await scannedFiles({ exclude: ['**/nothing-here/**'] })
+  it(
+    'keeps the built-in excludes when a config supplies its own',
+    async () => {
+      const files = await scannedFiles({ exclude: ['**/nothing-here/**'] })
 
-    // generated.d.ts is excluded by default, and stays excluded.
-    expect(files).toEqual(['src/index.test.ts', 'src/index.ts'])
-  })
+      // generated.d.ts is excluded by default, and stays excluded.
+      expect(files).toEqual(['src/index.test.ts', 'src/index.ts'])
+    },
+    FILE_SCAN_TIMEOUT_MS
+  )
 
-  it('applies exclude and ignore together', async () => {
-    const files = await scannedFiles({
-      exclude: ['**/index.ts'],
-      ignore: ['**/*.test.ts'],
-    })
+  it(
+    'applies exclude and ignore together',
+    async () => {
+      const files = await scannedFiles({
+        exclude: ['**/index.ts'],
+        ignore: ['**/*.test.ts'],
+      })
 
-    expect(files).toEqual([])
-  })
+      expect(files).toEqual([])
+    },
+    FILE_SCAN_TIMEOUT_MS
+  )
+
+  it(
+    'suppresses a rule the config switched off',
+    async () => {
+      const engine = new RivetEngine({ ignoreRules: ['seen'] })
+      engine.registerEngine(new FileCountingEngine())
+
+      const result = await engine.analyze(projectRoot)
+
+      expect(result.detections).toEqual([])
+    },
+    FILE_SCAN_TIMEOUT_MS
+  )
 })

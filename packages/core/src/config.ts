@@ -94,6 +94,14 @@ function normalizeIgnore(ignore: DocumentedConfigFile['ignore']): string[] | und
   return ignore.paths
 }
 
+/** `ignore.rules` was documented and typed, and nothing ever read it. */
+function normalizeIgnoreRules(ignore: DocumentedConfigFile['ignore']): string[] | undefined {
+  if (!ignore || Array.isArray(ignore) || typeof ignore !== 'object') {
+    return undefined
+  }
+  return ignore.rules
+}
+
 type OutputFormat = NonNullable<NonNullable<RivetConfig['output']>['format']>
 
 function normalizeFormat(format: string | undefined): OutputFormat | undefined {
@@ -131,6 +139,9 @@ export function normalizeConfig(raw: unknown): RivetConfig {
 
   const ignore = normalizeIgnore(file.ignore)
   if (ignore) normalized.ignore = ignore
+
+  const ignoreRules = normalizeIgnoreRules(file.ignore)
+  if (ignoreRules) normalized.ignoreRules = ignoreRules
 
   if (file.include) normalized.include = file.include
   if (file.exclude) normalized.exclude = file.exclude

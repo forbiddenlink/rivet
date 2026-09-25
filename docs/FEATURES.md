@@ -23,7 +23,10 @@ Each analysis engine is a workspace package (`@rivet/engine-<name>`) with its ow
 
 ### 2. Bug & Error Detector (`@rivet/engine-bugs`)
 
-- **Null/undefined access** - property access without a null check
+- **Null/undefined access** - property access on a value that could be nullish. Globals,
+  imports, declarations with an initializer and parameters TypeScript already guarantees are
+  left alone; an optional parameter, one typed `any`, and an unannotated parameter in a
+  JavaScript file are not. No type checker runs here, so this is a heuristic and says so
 - **Loose equality** - `==`/`!=` where strict equality is safer, including `NaN` comparisons
 - **Logic errors** - assignment inside a condition (`if (x = 5)`), self-comparison, duplicate
   if/else conditions, always-true/false constant conditions, implicit string+number coercion,
@@ -35,10 +38,16 @@ Each analysis engine is a workspace package (`@rivet/engine-<name>`) with its ow
 
 ### 3. Security Scanner (`@rivet/engine-security`)
 
-- **SQL injection** and **command injection**
+- **SQL injection** - a query string that starts with a SQL verb and has a value spliced
+  into it, checked one literal at a time rather than across a whole expression
+- **Command injection**
+- **Dynamic code execution** - `eval`, the `Function` constructor, and the string forms of
+  `setTimeout`/`setInterval` (CWE-95)
 - **XSS**
 - **Path traversal**
-- **Hardcoded secrets** (API keys, passwords, tokens in source)
+- **Hardcoded secrets** - provider-specific patterns for AWS, GitHub, JWT, Stripe-shaped keys
+  and database URLs, plus generic high-entropy shapes, which are reported only when the name
+  they are bound to reads as a credential
 - **Insecure crypto** (weak hashing/cipher usage)
 
 This is not a full OWASP Top 10 scanner: there's no access-control, authentication/session,
@@ -53,6 +62,10 @@ below, and it doesn't do vulnerability scanning either).
   inside a loop
 - **Blocking operations** - synchronous file I/O, deprecated `XMLHttpRequest`, loops large enough
   to block the event loop
+- **React re-renders** - a state update in the component body rather than in an effect or a
+  handler, and an inline function or object in JSX. An inline prop on a component is `medium`
+  because it defeats memoization; the same thing on a DOM element is `info`, because React DOM
+  does not re-render over a listener's identity
 - **Unnecessary re-renders** (React) - missing dependency arrays, inline functions/objects in
   JSX, state updates during render
 
@@ -62,10 +75,12 @@ There's no N+1 query detection, bundle-size analysis, or regex-backtracking dete
 
 - **Circular dependencies** and **layer violations** (imports crossing a declared layer boundary)
 - **Module coupling** - high relative-import depth, or a file with an unusually high import count
-- **SOLID violations** - Law of Demeter chain-depth, feature envy (excessive use of another
-  object), Single Responsibility (too many methods on a class), Dependency Inversion (direct
-  `new` of a concrete class), Liskov Substitution (`instanceof` checks), Interface Segregation
-  (interfaces with too many members)
+- **SOLID violations** - Law of Demeter chain depth (three hops when the chain calls
+  through other objects, four for a plain data read; namespaces, imported modules and array
+  indexing do not count), feature envy (a method that reads one other object more often than
+  its own state), Single Responsibility (too many methods on a class), Dependency Inversion
+  (direct `new` of a concrete class), Liskov Substitution (`instanceof` checks), Interface
+  Segregation (interfaces with too many members)
 - **Tight coupling**
 
 ### 6. Best Practices Advisor (`@rivet/engine-practices`)

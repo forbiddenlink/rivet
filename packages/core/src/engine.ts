@@ -102,7 +102,8 @@ export class RivetEngine {
 
     // Deduplicate and sort detections
     const uniqueDetections = this.deduplicateDetections(allDetections)
-    const filteredDetections = this.filterBySeverity(uniqueDetections)
+    const keptDetections = this.filterByRule(uniqueDetections)
+    const filteredDetections = this.filterBySeverity(keptDetections)
     const sortedDetections = this.sortDetections(filteredDetections)
 
     // Limit to maxIssues
@@ -199,6 +200,22 @@ export class RivetEngine {
 
     const results = await Promise.all(detectionPromises)
     return results.flat()
+  }
+
+  /**
+   * Drop the rules a project has switched off.
+   *
+   * `ignore.rules` is documented, is in the config type, and was never read by anything.
+   * A scanner without a per-rule escape hatch leaves a project no answer to a rule that
+   * does not suit it except turning off the whole engine.
+   */
+  private filterByRule(detections: Detection[]): Detection[] {
+    const ignored = this.config.ignoreRules
+    if (!ignored || ignored.length === 0) {
+      return detections
+    }
+    const ignoredSet = new Set(ignored)
+    return detections.filter((detection) => !ignoredSet.has(detection.ruleId))
   }
 
   /**

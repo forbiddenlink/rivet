@@ -96,6 +96,8 @@ export interface RivetConfig {
   exclude?: string[]
   /** Files to ignore (glob patterns) */
   ignore?: string[]
+  /** Rule ids to suppress, the escape hatch for a rule that does not suit a project */
+  ignoreRules?: string[]
   /** Severity configuration */
   severity?: {
     minLevel?: Severity
