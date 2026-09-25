@@ -2,7 +2,15 @@
   "$schema": "https://json.schemastore.org/rivetrc.json",
   "version": "0.1.0",
   "engines": {
-    "enabled": ["smells", "security", "bugs", "performance", "architecture", "practices", "dependencies"],
+    "enabled": [
+      "smells",
+      "security",
+      "bugs",
+      "performance",
+      "architecture",
+      "practices",
+      "dependencies"
+    ],
     "disabled": ["flows"]
   },
   "severity": {
@@ -22,7 +30,7 @@
   },
   "ai": {
     "enabled": true,
-    "model": "gpt-4",
+    "model": "gpt-6-sol",
     "maxConcurrent": 5,
     "features": {
       "explanations": true,

@@ -8,7 +8,7 @@ within the repo via the pnpm workspace filter.
 ## 📦 Setup
 
 ```bash
-git clone https://github.com/elizabethstein/rivet.git
+git clone https://github.com/forbiddenlink/rivet.git
 cd rivet
 pnpm install
 pnpm build

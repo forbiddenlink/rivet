@@ -53,7 +53,7 @@ It also applies when an individual is officially representing the community in p
 If you experience or witness unacceptable behavior, please report it:
 
 - **Email**: conduct@rivet.dev (or elizabeth@example.com)
-- **GitHub**: Direct message to [@elizabethstein](https://github.com/elizabethstein)
+- **GitHub**: Direct message to [@forbiddenlink](https://github.com/forbiddenlink)
 
 ### What to Include
 
@@ -106,7 +106,7 @@ Community Impact Guidelines were inspired by [Mozilla's code of conduct enforcem
 If you have questions about this Code of Conduct, please reach out:
 
 - **Email**: conduct@rivet.dev
-- **GitHub Discussions**: https://github.com/elizabethstein/rivet/discussions
+- **GitHub Discussions**: https://github.com/forbiddenlink/rivet/discussions
 
 ---
 

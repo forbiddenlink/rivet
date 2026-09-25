@@ -1,7 +1,8 @@
 # RIVET 🔩
 
+[![CI](https://github.com/forbiddenlink/rivet/actions/workflows/ci.yml/badge.svg)](https://github.com/forbiddenlink/rivet/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-f59e0b.svg)](./LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-100%25-f59e0b?logo=typescript)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.0-f59e0b?logo=typescript)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-f59e0b?logo=node.js)](https://nodejs.org/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-f59e0b.svg)](./CONTRIBUTING.md)
 [![Code of Conduct](https://img.shields.io/badge/Code%20of-Conduct-f59e0b.svg)](./CODE_OF_CONDUCT.md)
@@ -365,7 +366,7 @@ RIVET is open source and welcomes contributions!
 
 ```bash
 # Clone and install
-git clone https://github.com/elizabethstein/rivet
+git clone https://github.com/forbiddenlink/rivet
 cd rivet
 pnpm install
 
@@ -402,9 +403,9 @@ pnpm test
 
 We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md) for details.
 
-- 🐛 [Report a bug](https://github.com/elizabethstein/rivet/issues/new?template=bug_report.yml)
-- 💡 [Request a feature](https://github.com/elizabethstein/rivet/issues/new?template=feature_request.yml)
-- ❓ [Ask a question](https://github.com/elizabethstein/rivet/discussions)
+- 🐛 [Report a bug](https://github.com/forbiddenlink/rivet/issues/new?template=bug_report.yml)
+- 💡 [Request a feature](https://github.com/forbiddenlink/rivet/issues/new?template=feature_request.yml)
+- ❓ [Ask a question](https://github.com/forbiddenlink/rivet/discussions)
 
 ---
 
@@ -416,9 +417,9 @@ MIT License - see [LICENSE](./LICENSE) for details
 
 ## 🔗 Links
 
-- **GitHub**: https://github.com/elizabethstein/rivet
-- **Discussions**: https://github.com/elizabethstein/rivet/discussions
-- **Issues**: https://github.com/elizabethstein/rivet/issues
+- **GitHub**: https://github.com/forbiddenlink/rivet
+- **Discussions**: https://github.com/forbiddenlink/rivet/discussions
+- **Issues**: https://github.com/forbiddenlink/rivet/issues
 - **Website**: https://rivet.dev (coming soon)
 - **Twitter**: [@rivetdev](https://twitter.com/rivetdev) (coming soon)
 
