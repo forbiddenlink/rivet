@@ -11,11 +11,16 @@
       "practices",
       "dependencies"
     ],
-    "disabled": ["flows"]
+    "disabled": [
+      "flows"
+    ]
   },
   "severity": {
     "minimum": "medium",
-    "failOn": ["critical", "high"]
+    "failOn": [
+      "critical",
+      "high"
+    ]
   },
   "ignore": {
     "paths": [
@@ -24,7 +29,10 @@
       "**/build/**",
       "**/*.test.ts",
       "**/*.spec.ts",
-      "**/__tests__/**"
+      "**/__tests__/**",
+      "**/*.test.tsx",
+      "**/*.spec.tsx",
+      "examples/**"
     ],
     "rules": []
   },
