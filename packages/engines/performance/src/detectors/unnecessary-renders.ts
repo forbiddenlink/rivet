@@ -1,7 +1,35 @@
 import type { Detection } from '@rivet/core'
 import type { ASTNode } from '@rivet/parsers'
 
-let detectionCounter = 0
+const FUNCTION_NODE_TYPES = new Set([
+  'FunctionDeclaration',
+  'FunctionExpression',
+  'ArrowFunctionExpression',
+])
+
+/** A function that produces JSX somewhere inside it is a component. */
+function returnsJsx(node: ASTNode): boolean {
+  if (node.type.startsWith('JSX')) {
+    return true
+  }
+  return (node.children ?? []).some(returnsJsx)
+}
+
+/**
+ * Only a call in the component body itself runs during render. A call inside a
+ * nested function is a callback: an event handler, an effect body, a map callback.
+ *
+ * The previous implementation said as much in a comment and then returned `false`
+ * unconditionally, so every setter call anywhere in a file was reported as
+ * "State update during render causes infinite loop", at critical severity. That was
+ * 51 findings on this repository and every one of them was inside a handler.
+ */
+type RenderContext = {
+  /** How many function boundaries are between this node and the module. */
+  functionDepth: number
+  /** Whether the outermost function we are inside produces JSX. */
+  inComponentBody: boolean
+}
 
 /**
  * Detect unnecessary re-renders in React components
@@ -11,8 +39,10 @@ let detectionCounter = 0
  */
 export function detectUnnecessaryRenders(ast: ASTNode, filePath: string): Detection[] {
   const detections: Detection[] = []
+  // Was module scope, so ids depended on how many files had already been scanned.
+  let detectionCounter = 0
 
-  function visit(node: ASTNode): void {
+  function visit(node: ASTNode, context: RenderContext): void {
     // Detect useEffect/useMemo/useCallback without dependency array
     if (node.type === 'CallExpression' && node.children) {
       const callee = node.children[0]
@@ -96,9 +126,8 @@ export function detectUnnecessaryRenders(ast: ASTNode, filePath: string): Detect
         callee.raw.name.length > 3 &&
         callee.raw.name[3] === callee.raw.name[3]?.toUpperCase()
       ) {
-        // Check if we're inside a useEffect or event handler
-        const isInSafeContext = isInUseEffectOrHandler(node)
-        if (!isInSafeContext) {
+        const isRenderPhase = context.inComponentBody && context.functionDepth === 1
+        if (isRenderPhase) {
           detections.push({
             id: `performance-${++detectionCounter}`,
             ruleId: 'state-update-in-render',
@@ -118,16 +147,19 @@ export function detectUnnecessaryRenders(ast: ASTNode, filePath: string): Detect
       }
     }
 
-    node.children?.forEach(visit)
+    let childContext = context
+    if (FUNCTION_NODE_TYPES.has(node.type)) {
+      childContext = {
+        functionDepth: context.functionDepth + 1,
+        inComponentBody: context.functionDepth === 0 ? returnsJsx(node) : context.inComponentBody,
+      }
+    }
+
+    for (const child of node.children ?? []) {
+      visit(child, childContext)
+    }
   }
 
-  visit(ast)
+  visit(ast, { functionDepth: 0, inComponentBody: false })
   return detections
-}
-
-function isInUseEffectOrHandler(node: ASTNode): boolean {
-  // This is a simplified check - in a real implementation,
-  // you'd traverse up the AST to check parent nodes
-  // For now, we'll be conservative and assume it's safe if we can't determine
-  return false
 }

@@ -287,6 +287,109 @@ describe('Unnecessary Renders Detector', () => {
       expect(stateUpdateDetections[0]?.message).toContain('infinite loop')
     })
 
+    it('should not flag a setter inside an event handler', () => {
+      const code = `
+        function MyComponent() {
+          const [count, setCount] = useState(0)
+          return <button onClick={() => setCount(count + 1)}>{count}</button>
+        }
+      `
+
+      const { ast } = parseTypeScript({
+        filePath: 'test.tsx',
+        sourceCode: code,
+        extractTypes: false,
+      })
+
+      const detections = detectUnnecessaryRenders(ast, 'test.tsx')
+
+      expect(detections.filter((d) => d.ruleId === 'state-update-in-render')).toEqual([])
+    })
+
+    it('should not flag a setter inside useEffect', () => {
+      const code = `
+        function MyComponent() {
+          const [count, setCount] = useState(0)
+          useEffect(() => {
+            setCount(1)
+          }, [])
+          return <div>{count}</div>
+        }
+      `
+
+      const { ast } = parseTypeScript({
+        filePath: 'test.tsx',
+        sourceCode: code,
+        extractTypes: false,
+      })
+
+      const detections = detectUnnecessaryRenders(ast, 'test.tsx')
+
+      expect(detections.filter((d) => d.ruleId === 'state-update-in-render')).toEqual([])
+    })
+
+    it('should not flag a setter inside a named handler', () => {
+      const code = `
+        function MyComponent() {
+          const [count, setCount] = useState(0)
+          const handleClick = () => {
+            setCount(count + 1)
+          }
+          return <button onClick={handleClick}>{count}</button>
+        }
+      `
+
+      const { ast } = parseTypeScript({
+        filePath: 'test.tsx',
+        sourceCode: code,
+        extractTypes: false,
+      })
+
+      const detections = detectUnnecessaryRenders(ast, 'test.tsx')
+
+      expect(detections.filter((d) => d.ruleId === 'state-update-in-render')).toEqual([])
+    })
+
+    it('should not flag a setter in a plain function that renders nothing', () => {
+      const code = `
+        function configure(setOptions: any) {
+          setOptions({ verbose: true })
+        }
+      `
+
+      const { ast } = parseTypeScript({
+        filePath: 'test.ts',
+        sourceCode: code,
+        extractTypes: false,
+      })
+
+      const detections = detectUnnecessaryRenders(ast, 'test.ts')
+
+      expect(detections.filter((d) => d.ruleId === 'state-update-in-render')).toEqual([])
+    })
+
+    it('should detect a setter in an arrow component body', () => {
+      const code = `
+        const MyComponent = () => {
+          const [count, setCount] = useState(0)
+          setCount(1)
+          return <div>{count}</div>
+        }
+      `
+
+      const { ast } = parseTypeScript({
+        filePath: 'test.tsx',
+        sourceCode: code,
+        extractTypes: false,
+      })
+
+      const detections = detectUnnecessaryRenders(ast, 'test.tsx')
+
+      expect(
+        detections.filter((d) => d.ruleId === 'state-update-in-render').length
+      ).toBeGreaterThan(0)
+    })
+
     it('should detect custom setter in render', () => {
       const code = `
         function MyComponent() {
