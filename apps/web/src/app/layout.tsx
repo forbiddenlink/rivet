@@ -24,17 +24,17 @@ const jetbrains = JetBrains_Mono({
 const siteUrl = getSiteUrl()
 
 export const metadata: Metadata = {
-  title: 'RIVET — Code quality that holds',
+  title: 'RIVET: Code quality that holds',
   description:
-    'Professional code analysis across security, bugs, performance, and architecture — with AI explanations that teach you why issues matter.',
+    'Professional code analysis across security, bugs, performance, and architecture, with AI explanations that teach you why issues matter.',
   metadataBase: new URL(siteUrl),
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: 'RIVET — Code quality that holds',
+    title: 'RIVET: Code quality that holds',
     description:
-      'Professional code analysis across security, bugs, performance, and architecture — with AI explanations that teach you why issues matter.',
+      'Professional code analysis across security, bugs, performance, and architecture, with AI explanations that teach you why issues matter.',
     url: siteUrl,
     siteName: 'RIVET',
     type: 'website',
@@ -43,15 +43,15 @@ export const metadata: Metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'RIVET — Code quality that holds',
+        alt: 'RIVET: Code quality that holds',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'RIVET — Code quality that holds',
+    title: 'RIVET: Code quality that holds',
     description:
-      'Analyze your codebase for security, bugs, performance, and architecture — with actionable AI explanations.',
+      'Analyze your codebase for security, bugs, performance, and architecture, with actionable AI explanations.',
     images: ['/og-image.png'],
   },
   icons: {

@@ -5,7 +5,7 @@ import { CliQuickstart } from '../components/CliQuickstart'
 const ENGINES = [
   {
     title: 'Security',
-    description: 'OWASP coverage — injection, secrets, weak crypto, path traversal.',
+    description: 'OWASP coverage: injection, secrets, weak crypto, path traversal.',
   },
   {
     title: 'Bugs',
@@ -39,7 +39,7 @@ const ENGINES = [
 
 export default function Home() {
   return (
-    <div className="landing">
+    <main className="landing">
       <section className="hero">
         <div className="hero__glow" aria-hidden="true" />
 
@@ -85,7 +85,7 @@ export default function Home() {
               <span className="terminal__dot terminal__dot--accent" />
               <span className="terminal__dot" />
               <span className="terminal__dot" />
-              <span className="terminal__title">rivet — scan</span>
+              <span className="terminal__title">rivet: scan</span>
             </div>
             <pre className="terminal__body">
               {`$ `}
@@ -133,7 +133,7 @@ $ `}
           <p className="section__eyebrow">Engines</p>
           <h2 className="section__title">Eight specialists. One riveted report.</h2>
           <p className="section__lede">
-            Parallel analysis across security, correctness, performance, and structure — then an AI
+            Parallel analysis across security, correctness, performance, and structure, then an AI
             layer that turns findings into teachable fixes.
           </p>
         </header>
@@ -154,7 +154,7 @@ $ `}
           <p className="section__eyebrow">Dashboard</p>
           <h2 className="section__title">See debt before it compounds.</h2>
           <p className="section__lede">
-            Severity, categories, and tech-debt hours in one dense view — built for scanning, not
+            Severity, categories, and tech-debt hours in one dense view, built for scanning, not
             scrolling past cards.
           </p>
         </header>
@@ -259,12 +259,12 @@ $ `}
       <div className="cta-band" style={{ marginLeft: '1.5rem', marginRight: '1.5rem' }}>
         <h2 className="cta-band__title">Rivet your codebase.</h2>
         <p className="cta-band__lede">
-          Paste a file, run a scan, see what holds — and what doesn’t.
+          Paste a file, run a scan, see what holds, and what doesn’t.
         </p>
         <Link href="/dashboard" className="btn btn--primary btn--lg">
           Try the dashboard
         </Link>
       </div>
-    </div>
+    </main>
   )
 }

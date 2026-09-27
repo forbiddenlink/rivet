@@ -22,7 +22,7 @@
   /* Text */
   --text-primary: oklch(0.96 0.01 80);
   --text-secondary: oklch(0.72 0.015 70);
-  --text-muted: oklch(0.55 0.012 65);
+  --text-muted: oklch(0.64 0.014 65);
   --text-inverse: oklch(0.14 0.01 60);
 
   /* Borders */
@@ -1026,6 +1026,7 @@ svg {
 }
 
 .dropzone__title {
+  display: block;
   margin: 0 0 var(--space-1);
   font-size: var(--text-sm);
   font-weight: 500;
@@ -1033,6 +1034,7 @@ svg {
 }
 
 .dropzone__hint {
+  display: block;
   margin: 0;
   font-size: var(--text-xs);
   font-family: var(--font-mono);

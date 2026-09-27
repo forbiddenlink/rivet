@@ -267,7 +267,7 @@ export default function Dashboard() {
         <div className="dash__header-inner">
           <div>
             <h1 className="dash__title">Dashboard</h1>
-            <p className="dash__subtitle">Paste code or upload a file — get a riveted report.</p>
+            <p className="dash__subtitle">Paste code or upload a file, get a riveted report.</p>
           </div>
           <button
             type="button"

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Privacy — RIVET',
+  title: 'Privacy: RIVET',
   description: 'Privacy policy for RIVET. How we handle your data.',
 }
 

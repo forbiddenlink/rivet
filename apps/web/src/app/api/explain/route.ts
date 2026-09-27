@@ -46,7 +46,7 @@ function localExplanation(detection: ExplanationRequest['detection']): Explanati
       refs: ['https://owasp.org/www-project-top-ten/', 'https://cwe.mitre.org/', REPO],
     },
     bugs: {
-      why: 'Bug detectors catch patterns that fail under real edge cases — nulls, races, rejected promises — which surface as flaky prod incidents.',
+      why: 'Bug detectors catch patterns that fail under real edge cases: nulls, races, rejected promises, which surface as flaky prod incidents.',
       fix: '1. Reproduce with the smallest failing input\n2. Add explicit guards or types at the boundary\n3. Prefer early returns over deep nesting\n4. Cover the edge case with a unit test',
       refs: ['https://typescript-eslint.io/', REPO],
     },
@@ -66,7 +66,7 @@ function localExplanation(detection: ExplanationRequest['detection']): Explanati
       refs: [REPO],
     },
     practices: {
-      why: 'Practice findings keep the codebase readable for the next engineer — including future you.',
+      why: 'Practice findings keep the codebase readable for the next engineer, including future you.',
       fix: '1. Match project naming and structure conventions\n2. Prefer explicit error handling over silent failures\n3. Document non-obvious intent, not noise\n4. Align with the framework’s recommended patterns',
       refs: [REPO],
     },
@@ -76,7 +76,7 @@ function localExplanation(detection: ExplanationRequest['detection']): Explanati
       refs: ['https://github.com/webpro-nl/knip', REPO],
     },
     flows: {
-      why: 'Untested flows are where users feel breakage — routes, auth, checkout, and error paths that unit tests miss.',
+      why: 'Untested flows are where users feel breakage: routes, auth, checkout, and error paths that unit tests miss.',
       fix: '1. Map the critical user journey\n2. Add an integration or e2e test for happy + failure paths\n3. Cover error boundaries and empty states\n4. Keep the test close to the route it protects',
       refs: ['https://playwright.dev/', REPO],
     },
