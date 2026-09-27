@@ -22,8 +22,14 @@ export function detectInefficientLoops(ast: ASTNode, filePath: string): Detectio
         node.type === 'ForInStatement') &&
       node.children
     ) {
-      // Look for .push() calls in loop body
-      const hasPushCall = findPushInBody(node)
+      // Look for .push() calls in loop body. A loop that breaks right after
+      // its first match (a pattern-table lookup, for example) pushes at
+      // most once - it isn't the "accumulate N items via push" shape that
+      // spread or Array.from would actually improve, and that advice
+      // doesn't even apply to it. RIVET's own self-scan caught this on
+      // packages/engines/security/src/detectors/hardcoded-secrets.ts's
+      // `for (const pattern of SECRET_PATTERNS) { ...; break }` loops.
+      const hasPushCall = findPushInBody(node) && !hasOwnBreak(node)
       if (hasPushCall) {
         detections.push({
           id: `performance-${++detectionCounter}`,
@@ -69,6 +75,31 @@ export function detectInefficientLoops(ast: ASTNode, filePath: string): Detectio
 
   visit(ast)
   return detections
+}
+
+/**
+ * Whether this loop's own body contains a `break` - not one that belongs to
+ * a nested loop or switch. `isOwnBody` is false only once traversal enters
+ * a nested loop/switch, so a `break` there is excluded from this loop's own
+ * count.
+ */
+function hasOwnBreak(node: ASTNode, isOwnBody = true): boolean {
+  if (node.type === 'BreakStatement') {
+    return true
+  }
+  if (!isOwnBody) {
+    const entersNestedLoopOrSwitch =
+      node.type === 'ForStatement' ||
+      node.type === 'WhileStatement' ||
+      node.type === 'DoWhileStatement' ||
+      node.type === 'ForOfStatement' ||
+      node.type === 'ForInStatement' ||
+      node.type === 'SwitchStatement'
+    if (entersNestedLoopOrSwitch) {
+      return false
+    }
+  }
+  return node.children?.some((child) => hasOwnBreak(child, false)) ?? false
 }
 
 function findPushInBody(node: ASTNode): boolean {

@@ -145,6 +145,68 @@ describe('Inefficient Loops Detector', () => {
       expect(pushDetections).toEqual([])
     })
 
+    // Regression test: RIVET's own self-scan flagged
+    // packages/engines/security/src/detectors/hardcoded-secrets.ts's
+    // `for (const pattern of PATTERNS) { ...; break }` loops. A loop that
+    // breaks right after its first match pushes at most once - not the
+    // "accumulate N items via push" shape spread/Array.from would improve.
+    it('should not flag a push-then-break pattern-table lookup', () => {
+      const code = `
+        function findMatch(patterns: Pattern[], value: string) {
+          const matches: Match[] = []
+          for (const pattern of patterns) {
+            if (!pattern.test(value)) {
+              continue
+            }
+            matches.push({ pattern, value })
+            break
+          }
+          return matches
+        }
+      `
+
+      const { ast } = parseTypeScript({
+        filePath: 'test.ts',
+        sourceCode: code,
+        extractTypes: false,
+      })
+
+      const detections = detectInefficientLoops(ast, 'test.ts')
+      const pushDetections = detections.filter((d) => d.ruleId === 'inefficient-push-in-loop')
+
+      expect(pushDetections).toEqual([])
+    })
+
+    // True-positive guard: a break belonging to a NESTED loop must not
+    // exempt the outer loop's own unconditional accumulation.
+    it('should still flag an outer accumulating loop when the break belongs to a nested loop', () => {
+      const code = `
+        function collect(rows: Row[][]) {
+          const results: Row[] = []
+          for (const row of rows) {
+            for (const cell of row) {
+              if (cell.skip) {
+                break
+              }
+            }
+            results.push(row)
+          }
+          return results
+        }
+      `
+
+      const { ast } = parseTypeScript({
+        filePath: 'test.ts',
+        sourceCode: code,
+        extractTypes: false,
+      })
+
+      const detections = detectInefficientLoops(ast, 'test.ts')
+      const pushDetections = detections.filter((d) => d.ruleId === 'inefficient-push-in-loop')
+
+      expect(pushDetections.length).toBeGreaterThan(0)
+    })
+
     it('should not flag loops without push', () => {
       const code = `
         function sum(numbers: number[]) {

@@ -13,13 +13,13 @@ export class BugEngine implements AnalysisEngine {
 
   async analyze(context: AnalysisContext): Promise<Detection[]> {
     const { parseResult } = context
-    const { ast, filePath } = parseResult
+    const { ast, filePath, typeInfo } = parseResult
 
     // Run all bug detectors in parallel
     const [nullChecks, unhandledPromises, logicErrors, typeCoercion, unreachableCode] =
       await Promise.all([
         Promise.resolve(detectNullChecks(ast, filePath)),
-        Promise.resolve(detectUnhandledPromises(ast, filePath)),
+        Promise.resolve(detectUnhandledPromises(ast, filePath, typeInfo)),
         Promise.resolve(detectLogicErrors(ast, filePath)),
         Promise.resolve(detectTypeCoercion(ast, filePath)),
         Promise.resolve(detectUnreachableCode(ast, filePath)),

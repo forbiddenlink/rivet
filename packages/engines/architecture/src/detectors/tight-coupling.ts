@@ -32,6 +32,102 @@ const NAMESPACE_ROOTS = new Set([
   'React',
 ])
 
+/**
+ * Well-known built-in String/Array methods used to build a functional
+ * transformation pipeline over one value (`name.replace(...).split(...)`).
+ * Chaining these is idiomatic, not the object-graph traversal Law of
+ * Demeter warns about - it flagged the `nameTokens` helper in
+ * packages/engines/bugs/src/detectors/unhandled-promises.ts on RIVET's own
+ * self-scan.
+ */
+const BUILTIN_CHAIN_METHODS = new Set([
+  'replace',
+  'replaceAll',
+  'split',
+  'filter',
+  'map',
+  'reduce',
+  'reduceRight',
+  'join',
+  'trim',
+  'trimStart',
+  'trimEnd',
+  'slice',
+  'splice',
+  'concat',
+  'flat',
+  'flatMap',
+  'some',
+  'every',
+  'forEach',
+  'sort',
+  'reverse',
+  'find',
+  'findIndex',
+  'includes',
+  'indexOf',
+  'lastIndexOf',
+  'toLowerCase',
+  'toUpperCase',
+  'toString',
+  'valueOf',
+  'padStart',
+  'padEnd',
+  'repeat',
+  'startsWith',
+  'endsWith',
+  'match',
+  'matchAll',
+  'entries',
+  'keys',
+  'values',
+  'at',
+  'fill',
+  'copyWithin',
+])
+
+/**
+ * The last Identifier child's name, found with a plain reverse loop instead
+ * of `.filter().at(-1)` - a `.filter()` inside the chain-walking `while`
+ * loop below tripped RIVET's own "Array method in a loop" perf check.
+ */
+function lastIdentifierName(children: ASTNode[] | undefined): string | undefined {
+  if (!children) {
+    return undefined
+  }
+  for (let i = children.length - 1; i >= 0; i--) {
+    const child = children[i]
+    if (child?.type === 'Identifier' && child.raw.type === 'Identifier') {
+      return child.raw.name
+    }
+  }
+  return undefined
+}
+
+/** Whether every method name in a member-access chain is a built-in functional method. */
+function isBuiltinFunctionalChain(node: ASTNode): boolean {
+  let current: ASTNode | undefined = node
+  let sawMethod = false
+
+  while (current) {
+    if (current.type === 'CallExpression') {
+      current = current.children?.[0]
+      continue
+    }
+    if (current.type !== 'MemberExpression') {
+      break
+    }
+    const methodName = lastIdentifierName(current.children)
+    if (!methodName || !BUILTIN_CHAIN_METHODS.has(methodName)) {
+      return false
+    }
+    sawMethod = true
+    current = current.children?.[0]
+  }
+
+  return sawMethod
+}
+
 function collectImportedNames(ast: ASTNode, names: Set<string>): void {
   function walk(node: ASTNode): void {
     if (
@@ -92,7 +188,12 @@ export function detectTightCoupling(ast: ASTNode, filePath: string): Detection[]
       // findings on this repository were that exact shape.
       const threshold = chainCallsThrough(node) ? 3 : 4
 
-      if (depth >= threshold && !innerLinks.has(node) && !isExempt) {
+      if (
+        depth >= threshold &&
+        !innerLinks.has(node) &&
+        !isExempt &&
+        !isBuiltinFunctionalChain(node)
+      ) {
         // Law of Demeter violation
         detections.push({
           id: `architecture-${++detectionCounter}`,
