@@ -26,6 +26,10 @@ describe('POST /api/analyze', () => {
   // back with zero detections for the whole file - see the demo snippet on
   // the dashboard, which used to report "0 issues" despite containing an
   // XSS sink, missing error handling, and O(n^2) loops.
+  //
+  // Generous timeout: this spins up all 8 engines and the TS/ESLint parser
+  // cold, which the default 5s vitest timeout can miss on a loaded CI runner
+  // even though it finishes in well under a second locally.
   it('still detects issues in a snippet that contains JSX', async () => {
     const code = `
 const API_KEY = "sk-live-demo-do-not-use";
@@ -55,7 +59,7 @@ export function AdminPanel({ data }) {
     expect(res.status).toBe(200)
     expect(json.summary.total).toBeGreaterThan(0)
     expect(json.detections.some((d: { ruleId: string }) => /xss/i.test(d.ruleId))).toBe(true)
-  })
+  }, 20_000)
 
   it('rejects an empty payload', async () => {
     const res = await postAnalyze('   ')
