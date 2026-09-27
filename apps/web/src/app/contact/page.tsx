@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Contact — RIVET',
+  title: 'Contact: RIVET',
   description: 'Get in touch with the RIVET team. Report bugs, request features, or ask questions.',
 }
 
@@ -15,16 +15,16 @@ export default function ContactPage(): React.ReactElement {
         <p>The best way to reach us is through the repository:</p>
         <ul>
           <li>
-            <strong>Bug reports</strong> — open an issue with the bug label
+            <strong>Bug reports</strong>: open an issue with the bug label
           </li>
           <li>
-            <strong>Feature requests</strong> — open an issue with the enhancement label
+            <strong>Feature requests</strong>: open an issue with the enhancement label
           </li>
           <li>
-            <strong>Questions</strong> — start a discussion
+            <strong>Questions</strong>: start a discussion
           </li>
           <li>
-            <strong>Contributions</strong> — submit a pull request
+            <strong>Contributions</strong>: submit a pull request
           </li>
         </ul>
       </section>

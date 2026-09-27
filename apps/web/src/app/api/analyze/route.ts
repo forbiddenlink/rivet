@@ -94,7 +94,12 @@ export async function POST(
     const startTime = Date.now()
 
     tmpDir = mkdtempSync(join(tmpdir(), 'rivet-'))
-    const filePath = join(tmpDir, 'input.ts')
+    // .tsx, not .ts: the client never sends an original filename (pasted text has
+    // none, and FileUpload discards it), and @typescript-eslint/parser picks its
+    // JSX grammar from the extension. Under .ts, any JSX in the snippet (a React
+    // component, for example) fails to parse and the whole file silently yields
+    // zero detections. .tsx parses plain TypeScript too, so this is safe for both.
+    const filePath = join(tmpDir, 'input.tsx')
     writeFileSync(filePath, body.code, 'utf-8')
 
     const { RivetEngine } = await import('@rivet/core')

@@ -117,7 +117,7 @@ export default function TechDebtChart({ detections }: TechDebtChartProps) {
               color: 'var(--high)',
             }}
           >
-            High debt — prioritize critical and high severity first.
+            High debt: prioritize critical and high severity first.
           </div>
         )}
       </div>

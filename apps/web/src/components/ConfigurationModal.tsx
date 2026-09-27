@@ -1,6 +1,24 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+
+/** Keep Tab/Shift+Tab cycling within `container` instead of leaving the dialog. */
+function trapTabKey(container: HTMLElement, e: KeyboardEvent): void {
+  const focusable = Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR))
+  if (focusable.length === 0) return
+  const first = focusable[0] as HTMLElement
+  const last = focusable[focusable.length - 1] as HTMLElement
+  if (e.shiftKey && document.activeElement === first) {
+    e.preventDefault()
+    last.focus()
+  } else if (!e.shiftKey && document.activeElement === last) {
+    e.preventDefault()
+    first.focus()
+  }
+}
 
 interface AnalysisConfig {
   engines: {
@@ -42,15 +60,33 @@ export function ConfigurationModal({
   onClose,
 }: ConfigurationModalProps) {
   const [localConfig, setLocalConfig] = useState<AnalysisConfig>(config)
+  const modalRef = useRef<HTMLDivElement>(null)
+  const lastFocusedRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     if (isOpen) setLocalConfig(config)
   }, [isOpen, config])
 
+  // Move focus into the dialog on open, and restore it to the trigger on close.
+  useEffect(() => {
+    if (isOpen) {
+      lastFocusedRef.current = document.activeElement as HTMLElement | null
+      const firstFocusable = modalRef.current?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR)
+      firstFocusable?.focus()
+    } else {
+      lastFocusedRef.current?.focus()
+    }
+  }, [isOpen])
+
   useEffect(() => {
     if (!isOpen) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') {
+        onClose()
+        return
+      }
+      if (e.key !== 'Tab' || !modalRef.current) return
+      trapTabKey(modalRef.current, e)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -101,7 +137,13 @@ export function ConfigurationModal({
   return (
     <>
       <div className="modal-backdrop" onClick={onClose} aria-hidden="true" />
-      <div className="modal" role="dialog" aria-modal="true" aria-labelledby="config-modal-title">
+      <div
+        className="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="config-modal-title"
+        ref={modalRef}
+      >
         <div className="modal__header">
           <h2 id="config-modal-title" className="modal__title">
             Configuration

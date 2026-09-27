@@ -8,8 +8,10 @@ export default defineConfig({
     },
   },
   test: {
-    // Only the framework-free modules. Component tests would need a DOM
-    // environment and React Testing Library, which this app does not carry yet.
-    include: ['src/lib/**/*.test.ts'],
+    // Framework-free modules, plus API route handlers: both run as plain
+    // functions over the standard Request/Response objects, no DOM involved.
+    // Component tests would need a DOM environment and React Testing
+    // Library, which this app does not carry yet, so those stay excluded.
+    include: ['src/lib/**/*.test.ts', 'src/app/api/**/*.test.ts'],
   },
 })
