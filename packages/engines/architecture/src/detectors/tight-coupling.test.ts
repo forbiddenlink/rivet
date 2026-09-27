@@ -63,6 +63,38 @@ describe('Tight Coupling Detector', () => {
       expect(detections.filter((d) => d.ruleId === 'law-of-demeter').length).toBeGreaterThan(0)
     })
 
+    // Regression test: RIVET's own self-scan flagged
+    // packages/engines/bugs/src/detectors/unhandled-promises.ts's own
+    // `nameTokens` helper here. Chaining built-in String/Array methods is a
+    // functional pipeline over one value, not the object-graph traversal Law
+    // of Demeter warns about.
+    it('should not flag a built-in String method chain', () => {
+      const detections = analyze(`
+        function nameTokens(name: string): string[] {
+          return name
+            .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+            .split(/[^a-zA-Z0-9]+/)
+            .filter(Boolean)
+            .map((token) => token.toLowerCase())
+        }
+      `)
+
+      expect(detections.filter((d) => d.ruleId === 'law-of-demeter')).toEqual([])
+    })
+
+    // True-positive guard: a chain that calls through OTHER OBJECTS' methods
+    // (not built-in String/Array methods) must still be flagged, even when
+    // it is exactly as long as the exempted chain above.
+    it('should still flag a same-length chain of non-built-in method calls', () => {
+      const detections = analyze(`
+        function ship(order: any) {
+          return order.getCustomer().getAddress().getCity().getName()
+        }
+      `)
+
+      expect(detections.filter((d) => d.ruleId === 'law-of-demeter').length).toBeGreaterThan(0)
+    })
+
     it('should not flag a plain three-link data read', () => {
       const detections = analyze(`
         function line(node: any) {

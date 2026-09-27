@@ -228,6 +228,59 @@ describe('Unhandled Promise Detector', () => {
         expect(unhandledPromises[0]?.metadata?.recommendation).toContain('await')
       }
     })
+
+    // Regression test: RIVET's own self-scan on
+    // packages/engines/bugs/src/index.ts caught this false positive once
+    // type-based detection started correctly resolving Promise.resolve()'s
+    // return type. Each element of a Promise.all([...]) array is handled by
+    // the combinator even though nothing awaits it directly.
+    it('should not flag calls inside an awaited Promise.all([...]) array', () => {
+      const code = `
+        async function run() {
+          const [a, b] = await Promise.all([
+            Promise.resolve(getOne()),
+            Promise.resolve(getTwo()),
+          ])
+          return [a, b]
+        }
+      `
+
+      const { ast } = parseTypeScript({
+        filePath: 'test.ts',
+        sourceCode: code,
+        extractTypes: false,
+      })
+
+      const detections = detectUnhandledPromises(ast, 'test.ts')
+      const unhandledPromises = detections.filter((d) => d.ruleId === 'unhandled-promise')
+
+      expect(unhandledPromises).toEqual([])
+    })
+
+    // True-positive guard: a genuinely unhandled call sitting next to a
+    // Promise.all([...]) - not inside its array argument - must still be
+    // flagged. The combinator handling must not blind the detector more
+    // broadly than the array it actually collects.
+    it('should still flag an unhandled call outside the Promise.all array', () => {
+      const code = `
+        async function run() {
+          await Promise.all([Promise.resolve(getOne())])
+          db.query('insert into log values (1)')
+        }
+      `
+
+      const { ast } = parseTypeScript({
+        filePath: 'test.ts',
+        sourceCode: code,
+        extractTypes: false,
+      })
+
+      const detections = detectUnhandledPromises(ast, 'test.ts')
+      const unhandledPromises = detections.filter((d) => d.ruleId === 'unhandled-promise')
+
+      expect(unhandledPromises.length).toBe(1)
+      expect(unhandledPromises[0]?.metadata?.method).toBe('query')
+    })
   })
 
   describe('async-no-catch rule', () => {

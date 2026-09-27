@@ -68,6 +68,45 @@ function nextDetectionId(counter: IdCounter): string {
   return `unhandled-promise-${++counter.n}`
 }
 
+/**
+ * Whether a call is `Promise.all(...)`/`allSettled`/`race`/`any` - the
+ * standard way to hand several promises to one collector that awaits (or
+ * otherwise handles) all of them. Each individual promise inside the array
+ * argument is handled by that collector, even though nothing awaits it
+ * directly; RIVET's own self-scan on packages/engines/bugs/src/index.ts
+ * caught this false positive on `Promise.all([Promise.resolve(...), ...])`
+ * once type-based detection started resolving `Promise.resolve()`'s return
+ * type correctly.
+ */
+function isPromiseCombinatorCall(node: ASTNode): boolean {
+  const calleeNode = node.children?.find((child) => child.type === 'MemberExpression')
+  if (!calleeNode?.children) {
+    return false
+  }
+  const identifiers = calleeNode.children.filter((child) => child.type === 'Identifier')
+  const objectNode = identifiers[0]
+  const methodNode = identifiers[identifiers.length - 1]
+  const objectName = objectNode?.raw.type === 'Identifier' ? objectNode.raw.name : undefined
+  const methodName = methodNode?.raw.type === 'Identifier' ? methodNode.raw.name : undefined
+  return (
+    objectName === 'Promise' &&
+    (methodName === 'all' ||
+      methodName === 'allSettled' ||
+      methodName === 'race' ||
+      methodName === 'any')
+  )
+}
+
+/** Marks each CallExpression in a Promise combinator's array argument as handled by it. */
+function markCombinatorElementsHandled(node: ASTNode, handledCalls: WeakSet<ASTNode>): void {
+  const arrayArg = node.children?.find((child) => child.type === 'ArrayExpression')
+  for (const element of arrayArg?.children ?? []) {
+    if (element.type === 'CallExpression') {
+      handledCalls.add(element)
+    }
+  }
+}
+
 function isAsyncFunctionNode(node: ASTNode): boolean {
   return (
     (node.type === 'FunctionDeclaration' ||
@@ -89,7 +128,7 @@ export function detectUnhandledPromises(
   typeInfo?: Map<string, TypeInfo>
 ): Detection[] {
   const detections: Detection[] = []
-  visitForUnhandledPromises(ast, false, filePath, typeInfo, detections, { n: 0 })
+  visitForUnhandledPromises(ast, false, filePath, typeInfo, detections, { n: 0 }, new WeakSet())
   return detections
 }
 
@@ -107,10 +146,15 @@ function visitForUnhandledPromises(
   typeInfo: Map<string, TypeInfo> | undefined,
   detections: Detection[],
   counter: IdCounter,
+  handledCalls: WeakSet<ASTNode>,
   isAwaited = false
 ): void {
   const isAsyncFunction = isAsyncFunctionNode(node)
   const currentAsyncContext = inAsyncContext || isAsyncFunction
+
+  if (node.type === 'CallExpression' && isPromiseCombinatorCall(node)) {
+    markCombinatorElementsHandled(node, handledCalls)
+  }
 
   if (node.type === 'CallExpression') {
     const detection = checkUnhandledPromiseCall(
@@ -119,7 +163,7 @@ function visitForUnhandledPromises(
       typeInfo,
       currentAsyncContext,
       counter,
-      isAwaited
+      isAwaited || handledCalls.has(node)
     )
     if (detection) {
       detections.push(detection)
@@ -146,6 +190,7 @@ function visitForUnhandledPromises(
       typeInfo,
       detections,
       counter,
+      handledCalls,
       childIsAwaited
     )
   }
