@@ -86,6 +86,24 @@ const BUILTIN_CHAIN_METHODS = new Set([
   'copyWithin',
 ])
 
+/**
+ * The last Identifier child's name, found with a plain reverse loop instead
+ * of `.filter().at(-1)` - a `.filter()` inside the chain-walking `while`
+ * loop below tripped RIVET's own "Array method in a loop" perf check.
+ */
+function lastIdentifierName(children: ASTNode[] | undefined): string | undefined {
+  if (!children) {
+    return undefined
+  }
+  for (let i = children.length - 1; i >= 0; i--) {
+    const child = children[i]
+    if (child?.type === 'Identifier' && child.raw.type === 'Identifier') {
+      return child.raw.name
+    }
+  }
+  return undefined
+}
+
 /** Whether every method name in a member-access chain is a built-in functional method. */
 function isBuiltinFunctionalChain(node: ASTNode): boolean {
   let current: ASTNode | undefined = node
@@ -99,9 +117,7 @@ function isBuiltinFunctionalChain(node: ASTNode): boolean {
     if (current.type !== 'MemberExpression') {
       break
     }
-    const identifiers = current.children?.filter((child) => child.type === 'Identifier') ?? []
-    const methodNode = identifiers[identifiers.length - 1]
-    const methodName = methodNode?.raw.type === 'Identifier' ? methodNode.raw.name : undefined
+    const methodName = lastIdentifierName(current.children)
     if (!methodName || !BUILTIN_CHAIN_METHODS.has(methodName)) {
       return false
     }

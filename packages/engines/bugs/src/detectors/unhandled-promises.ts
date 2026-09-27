@@ -139,18 +139,22 @@ export function detectUnhandledPromises(
  * RIVET's own self-scan flagged the prior version as excessively nested,
  * too long, and too complex.
  */
-function visitForUnhandledPromises(
+/**
+ * Judges a single node in isolation (not its children) and returns whatever
+ * detections it produces on its own - an unhandled-promise call, or an
+ * async function missing a try/catch. Split out of `visitForUnhandledPromises`
+ * so that function stays under RIVET's own long-method threshold.
+ */
+function collectOwnDetections(
   node: ASTNode,
-  inAsyncContext: boolean,
   filePath: string,
   typeInfo: Map<string, TypeInfo> | undefined,
-  detections: Detection[],
+  currentAsyncContext: boolean,
   counter: IdCounter,
   handledCalls: WeakSet<ASTNode>,
-  isAwaited = false
-): void {
-  const isAsyncFunction = isAsyncFunctionNode(node)
-  const currentAsyncContext = inAsyncContext || isAsyncFunction
+  isAwaited: boolean
+): Detection[] {
+  const found: Detection[] = []
 
   if (node.type === 'CallExpression' && isPromiseCombinatorCall(node)) {
     markCombinatorElementsHandled(node, handledCalls)
@@ -166,16 +170,42 @@ function visitForUnhandledPromises(
       isAwaited || handledCalls.has(node)
     )
     if (detection) {
-      detections.push(detection)
+      found.push(detection)
     }
   }
 
-  if (isAsyncFunction) {
+  if (isAsyncFunctionNode(node)) {
     const detection = checkAsyncNoCatch(node, filePath, counter)
     if (detection) {
-      detections.push(detection)
+      found.push(detection)
     }
   }
+
+  return found
+}
+
+function visitForUnhandledPromises(
+  node: ASTNode,
+  inAsyncContext: boolean,
+  filePath: string,
+  typeInfo: Map<string, TypeInfo> | undefined,
+  detections: Detection[],
+  counter: IdCounter,
+  handledCalls: WeakSet<ASTNode>,
+  isAwaited = false
+): void {
+  const currentAsyncContext = inAsyncContext || isAsyncFunctionNode(node)
+  detections.push(
+    ...collectOwnDetections(
+      node,
+      filePath,
+      typeInfo,
+      currentAsyncContext,
+      counter,
+      handledCalls,
+      isAwaited
+    )
+  )
 
   // AwaitExpression has exactly one child (its argument). ASTNode carries no
   // parent pointer, so this is the only place "this call is directly

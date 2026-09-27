@@ -66,34 +66,48 @@ function checkCallExpression(
     return undefined
   }
 
-  // The path is specifically the FIRST call argument - the node immediately
-  // after `calleeNode` in `children` (the converter always emits callee
-  // before arguments; see typescript-parser.ts). The old check instead
-  // `.find()`-ed the first BinaryExpression/TemplateLiteral/Identifier among
-  // ALL children, with no argument position awareness. That over-matched two
-  // ways: a bare imported call's own callee ("writeFileSync") is itself an
-  // Identifier, so it was matched as "the path argument" before any real
-  // argument was inspected; and once excluded, the search fell through to
-  // whichever LATER argument happened to be an Identifier -
-  // `writeFileSync(join(dir, name), data)`'s second argument `data` - which
-  // is the file contents, not the path, and a `join()`/`resolve()` first
-  // argument (the actually-safe, already-validated case) was never the
-  // thing being matched at all. RIVET's own self-scan caught the
-  // callee-match case on apps/web/src/app/api/analyze/route.ts.
-  const calleeIndex = node.children.indexOf(calleeNode)
-  const pathArg = node.children[calleeIndex + 1]
-  const pathArgLooksUnsanitized =
+  if (!hasUnsanitizedPathArg(node, calleeNode)) {
+    return undefined
+  }
+
+  return buildPathTraversalDetection(node, methodName, filePath, nextId())
+}
+
+/**
+ * The path is specifically the FIRST call argument - the node immediately
+ * after `calleeNode` in `children` (the converter always emits callee
+ * before arguments; see typescript-parser.ts). The old check instead
+ * `.find()`-ed the first BinaryExpression/TemplateLiteral/Identifier among
+ * ALL children, with no argument position awareness. That over-matched two
+ * ways: a bare imported call's own callee ("writeFileSync") is itself an
+ * Identifier, so it was matched as "the path argument" before any real
+ * argument was inspected; and once excluded, the search fell through to
+ * whichever LATER argument happened to be an Identifier -
+ * `writeFileSync(join(dir, name), data)`'s second argument `data` - which
+ * is the file contents, not the path, and a `join()`/`resolve()` first
+ * argument (the actually-safe, already-validated case) was never the thing
+ * being matched at all. RIVET's own self-scan caught the callee-match case
+ * on apps/web/src/app/api/analyze/route.ts.
+ */
+function hasUnsanitizedPathArg(node: ASTNode, calleeNode: ASTNode): boolean {
+  const calleeIndex = node.children?.indexOf(calleeNode) ?? -1
+  const pathArg = node.children?.[calleeIndex + 1]
+  return (
     pathArg !== undefined &&
     (pathArg.type === 'BinaryExpression' ||
       pathArg.type === 'TemplateLiteral' ||
       pathArg.type === 'Identifier')
+  )
+}
 
-  if (!pathArgLooksUnsanitized) {
-    return undefined
-  }
-
+function buildPathTraversalDetection(
+  node: ASTNode,
+  methodName: string,
+  filePath: string,
+  id: number
+): Detection {
   return {
-    id: `path-traversal-${nextId()}`,
+    id: `path-traversal-${id}`,
     ruleId: 'path-traversal',
     filePath,
     loc: {

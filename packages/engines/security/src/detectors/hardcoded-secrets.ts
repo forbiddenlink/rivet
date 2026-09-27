@@ -332,6 +332,7 @@ export function detectHardcodedSecrets(context: AnalysisContext): Detection[] {
             owasp: 'A02:2021 - Cryptographic Failures',
           },
         })
+        break // Only report one detection per template literal - matches the Literal check above.
       }
     }
 
