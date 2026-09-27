@@ -1,13 +1,21 @@
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
-
+import { extname, join } from 'node:path'
+import type { AnalysisResult } from '@rivet/core'
 import { type NextRequest, NextResponse } from 'next/server'
 
 import { clientKey, rateLimit, rateLimitHeaders } from '@/lib/rate-limit'
 
+/** The only extensions the parser (and the upload picker) accept. */
+const SUPPORTED_EXTENSIONS = new Set<string>(['.ts', '.tsx', '.js', '.jsx'])
+
 interface AnalysisRequest {
   code: string
+  /**
+   * Original filename, when the code came from a file upload. Absent for
+   * pasted code, which has no filename to go on.
+   */
+  fileName?: string
   config?: {
     engines?: Record<string, boolean>
     minSeverity?: 'info' | 'low' | 'medium' | 'high' | 'critical'
@@ -73,12 +81,10 @@ export async function POST(
     )
   }
 
-  let tmpDir: string | null = null
-
   try {
     const body: AnalysisRequest = await request.json()
 
-    if (!body.code || !body.code.trim()) {
+    if (!(body.code && body.code.trim())) {
       return NextResponse.json({ error: 'No code provided' }, { status: 400 })
     }
 
@@ -92,15 +98,6 @@ export async function POST(
     }
 
     const startTime = Date.now()
-
-    tmpDir = mkdtempSync(join(tmpdir(), 'rivet-'))
-    // .tsx, not .ts: the client never sends an original filename (pasted text has
-    // none, and FileUpload discards it), and @typescript-eslint/parser picks its
-    // JSX grammar from the extension. Under .ts, any JSX in the snippet (a React
-    // component, for example) fails to parse and the whole file silently yields
-    // zero detections. .tsx parses plain TypeScript too, so this is safe for both.
-    const filePath = join(tmpDir, 'input.tsx')
-    writeFileSync(filePath, body.code, 'utf-8')
 
     const { RivetEngine } = await import('@rivet/core')
     const { SmellsEngine } = await import('@rivet/engine-smells')
@@ -125,21 +122,61 @@ export async function POST(
     const minSeverity = body.config?.minSeverity || 'info'
     const minSeverityRank = SEVERITY_RANK[minSeverity as keyof typeof SEVERITY_RANK]
 
-    const engine = new RivetEngine({
-      severity: { minLevel: 'info' as const },
-      maxIssues: 100,
-    })
+    // Runs the engine once against `code` written out under `extension`, in its own
+    // scratch dir so a retry never sees the previous attempt's file. Returns whether
+    // the parser choked on that extension (via the `parser`-tagged entry `analyzeFile`
+    // pushes into `errors` on a syntax error) so the caller can decide whether to retry.
+    async function runScan(
+      code: string,
+      extension: string
+    ): Promise<{ result: AnalysisResult; hadParseError: boolean }> {
+      const dir = mkdtempSync(join(tmpdir(), 'rivet-'))
+      try {
+        writeFileSync(join(dir, `input${extension}`), code, 'utf-8')
 
-    if (enabledEngines.smells) engine.registerEngine(new SmellsEngine())
-    if (enabledEngines.security) engine.registerEngine(new SecurityEngine())
-    if (enabledEngines.bugs) engine.registerEngine(new BugEngine())
-    if (enabledEngines.performance) engine.registerEngine(new PerformanceEngine())
-    if (enabledEngines.architecture) engine.registerEngine(new ArchitectureEngine())
-    if (enabledEngines.practices) engine.registerEngine(new PracticesEngine())
-    if (enabledEngines.dependencies) engine.registerEngine(new DependenciesEngine())
-    if (enabledEngines.flows) engine.registerEngine(new FlowsEngine())
+        const engine = new RivetEngine({
+          severity: { minLevel: 'info' as const },
+          maxIssues: 100,
+        })
 
-    const result = await engine.analyze(tmpDir)
+        if (enabledEngines.smells) engine.registerEngine(new SmellsEngine())
+        if (enabledEngines.security) engine.registerEngine(new SecurityEngine())
+        if (enabledEngines.bugs) engine.registerEngine(new BugEngine())
+        if (enabledEngines.performance) engine.registerEngine(new PerformanceEngine())
+        if (enabledEngines.architecture) engine.registerEngine(new ArchitectureEngine())
+        if (enabledEngines.practices) engine.registerEngine(new PracticesEngine())
+        if (enabledEngines.dependencies) engine.registerEngine(new DependenciesEngine())
+        if (enabledEngines.flows) engine.registerEngine(new FlowsEngine())
+
+        const result = await engine.analyze(dir)
+        const hadParseError = result.errors.some((e) => e.engine === 'parser')
+        return { result, hadParseError }
+      } finally {
+        rmSync(dir, { recursive: true, force: true })
+      }
+    }
+
+    let result: AnalysisResult
+
+    const uploadExt = body.fileName ? extname(body.fileName).toLowerCase() : ''
+    if (body.fileName && SUPPORTED_EXTENSIONS.has(uploadExt)) {
+      // A real filename is unambiguous: it already tells the parser which grammar to
+      // use, so there is nothing to retry.
+      ;({ result } = await runScan(body.code, uploadExt))
+    } else {
+      // Pasted code has no filename. Try .tsx first (the syntactic superset that
+      // also covers JSX). If it fails to parse, retry as .ts, which is the only
+      // grammar under which generic arrow functions (`<T>(x: T) => x`) and
+      // angle-bracket type assertions (`<Foo>value`) are unambiguous rather than
+      // being read as a stray JSX open tag.
+      const tsx = await runScan(body.code, '.tsx')
+      if (tsx.hadParseError) {
+        const ts = await runScan(body.code, '.ts')
+        result = ts.hadParseError ? tsx.result : ts.result
+      } else {
+        result = tsx.result
+      }
+    }
 
     const filteredDetections = result.detections.filter((detection) => {
       const detectionSeverityRank = SEVERITY_RANK[detection.severity]
@@ -186,13 +223,5 @@ export async function POST(
     // should not hand back.
     console.error('Analysis error:', error)
     return NextResponse.json({ error: 'Analysis failed' }, { status: 500 })
-  } finally {
-    if (tmpDir) {
-      try {
-        rmSync(tmpDir, { recursive: true, force: true })
-      } catch (e) {
-        console.warn('Failed to cleanup tmpdir:', e)
-      }
-    }
   }
 }

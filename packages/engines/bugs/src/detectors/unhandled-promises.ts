@@ -2,6 +2,26 @@ import type { Detection } from '@rivet/core'
 import type { ASTNode } from '@rivet/parsers'
 
 /**
+ * Well-known synchronous methods whose name happens to start with one of the
+ * `promiseMethods` words below (most of them lead with "query"), so the
+ * substring heuristic would otherwise flag them as unhandled promises. These
+ * are exact, case-sensitive DOM/API method names, not heuristics themselves:
+ * `document.querySelector(...)`/`el.querySelectorAll<T>(...)` return a node
+ * (or NodeList) synchronously, never a Promise, regardless of any generic
+ * type argument on the call.
+ */
+const KNOWN_SYNC_METHODS = new Set([
+  'querySelector',
+  'querySelectorAll',
+  'getElementById',
+  'getElementsByClassName',
+  'getElementsByTagName',
+  'getElementsByName',
+  'closest',
+  'matches',
+])
+
+/**
  * Detects unhandled promises that could cause silent failures
  * Looks for promises without .catch() or try-catch in async functions
  */
@@ -31,9 +51,12 @@ export function detectUnhandledPromises(ast: ASTNode, filePath: string): Detecti
         const methodName = getMethodName(calleeNode)
         const promiseMethods = ['then', 'fetch', 'query', 'save', 'update', 'delete', 'send']
 
-        if (promiseMethods.some((method) => methodName.toLowerCase().includes(method))) {
+        if (
+          !KNOWN_SYNC_METHODS.has(methodName) &&
+          promiseMethods.some((method) => methodName.toLowerCase().includes(method))
+        ) {
           // Check if this call has .catch() or is awaited
-          if (!hasErrorHandling(node) && !isAwaitedCall(node)) {
+          if (!(hasErrorHandling(node) || isAwaitedCall(node))) {
             detections.push({
               id: `unhandled-promise-${++detectionCounter}`,
               ruleId: 'unhandled-promise',
@@ -125,7 +148,7 @@ function hasErrorHandling(node: ASTNode): boolean {
         child.children?.some(
           (c) => c.type === 'Identifier' && c.raw.type === 'Identifier' && c.raw.name === 'catch'
         )
-    ) || false
+    ) ?? false
   )
 }
 

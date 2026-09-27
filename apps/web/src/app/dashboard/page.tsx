@@ -134,6 +134,10 @@ export default function Dashboard() {
     searchText: '',
   })
   const [codeInput, setCodeInput] = useState('')
+  // Set only by an upload (FileUpload hands back the real filename); cleared
+  // whenever the input no longer came from that upload, so pasted/demo/edited
+  // code never gets analyzed under a stale extension.
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [config, setConfig] = useState<AnalysisConfig>(DEFAULT_CONFIG)
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false)
@@ -194,6 +198,7 @@ export default function Dashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           code: codeInput,
+          fileName: uploadedFileName ?? undefined,
           config,
         }),
       })
@@ -235,13 +240,15 @@ export default function Dashboard() {
     return () => window.removeEventListener('keydown', onKey)
   }, [loading, analysisResult, codeInput])
 
-  const handleFileUpload = (content: string) => {
+  const handleFileUpload = (content: string, fileName: string) => {
     setCodeInput(content)
+    setUploadedFileName(fileName)
     setError(null)
   }
 
   const loadDemo = () => {
     setCodeInput(DEMO_CODE)
+    setUploadedFileName(null)
     setError(null)
   }
 
@@ -399,6 +406,7 @@ export default function Dashboard() {
                   onClick={() => {
                     setAnalysisResult(null)
                     setCodeInput('')
+                    setUploadedFileName(null)
                     setSelectedIssue(null)
                   }}
                   aria-label="Start a new code analysis"
@@ -433,6 +441,7 @@ export default function Dashboard() {
                     onClick={() => {
                       setAnalysisResult(null)
                       setCodeInput('')
+                      setUploadedFileName(null)
                     }}
                   >
                     Analyze another file

@@ -481,5 +481,53 @@ describe('Unhandled Promise Detector', () => {
 
       expect(unhandledPromises[0]?.severity).toBe('high')
     })
+
+    // Regression test: querySelector/querySelectorAll are synchronous DOM
+    // methods, but both start with the exact word "query", which the
+    // substring heuristic below used to match against the "query" promise
+    // pattern. A generic type argument (`querySelector<HTMLElement>`) does
+    // not change this - the false positive is the name match, not the
+    // generic.
+    it('should not flag synchronous querySelector/querySelectorAll calls', () => {
+      const code = `
+        function focusFirst(container: HTMLElement) {
+          const first = container.querySelector<HTMLElement>('[tabindex]')
+          const all = container.querySelectorAll<HTMLElement>('button')
+          return first ?? all[0]
+        }
+      `
+
+      const { ast } = parseTypeScript({
+        filePath: 'test.ts',
+        sourceCode: code,
+        extractTypes: false,
+      })
+
+      const detections = detectUnhandledPromises(ast, 'test.ts')
+      const unhandledPromises = detections.filter((d) => d.ruleId === 'unhandled-promise')
+
+      expect(unhandledPromises).toEqual([])
+    })
+
+    // True-positive guard: a real promise-returning call named `query` (no
+    // DOM semantics) must still be flagged after the querySelector fix.
+    it('should still flag a genuinely unhandled db.query call', () => {
+      const code = `
+        function loadUsers(db: any) {
+          db.query('SELECT * FROM users')
+        }
+      `
+
+      const { ast } = parseTypeScript({
+        filePath: 'test.ts',
+        sourceCode: code,
+        extractTypes: false,
+      })
+
+      const detections = detectUnhandledPromises(ast, 'test.ts')
+      const unhandledPromises = detections.filter((d) => d.ruleId === 'unhandled-promise')
+
+      expect(unhandledPromises.length).toBeGreaterThan(0)
+    })
   })
 })
