@@ -43,6 +43,26 @@ describe('Hardcoded Secrets Detector', () => {
       expect(detections.length).toBeGreaterThan(0)
       expect(detections.some((d) => d.message.includes('API Key'))).toBe(true)
     })
+
+    // Regression test: a hyphen-punctuated key in the sk-live-... shape (the
+    // dashboard's own demo snippet uses an obviously fake one) used to fall
+    // through the API Key pattern, which only allowed a plain alphanumeric
+    // suffix, then get rejected by the generic-token gate because a
+    // hyphen-joined string of readable words looks like ordinary text. This
+    // key is intentionally fake ("demo-do-not-use") - never a real, live-
+    // prefixed secret - per the house rule against gitleaks-triggering
+    // fixtures.
+    it('should detect a hyphen-punctuated sk-live-style key', () => {
+      const code = `
+        const API_KEY = "sk-live-demo-do-not-use";
+      `
+
+      const detections = detectHardcodedSecrets(createContext(code))
+
+      expect(detections.length).toBeGreaterThan(0)
+      expect(detections.some((d) => d.message.includes('API Key'))).toBe(true)
+      expect(detections[0]?.severity).toBe('critical')
+    })
   })
 
   describe('detects AWS keys', () => {

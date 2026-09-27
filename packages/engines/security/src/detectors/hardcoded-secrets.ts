@@ -6,9 +6,16 @@ import type { ASTNode } from '@rivet/parsers'
  * These patterns match the string content directly, not the assignment syntax
  */
 const SECRET_PATTERNS = [
-  // API Keys - patterns like sk_live_..., sk_test_..., pk_live_..., api_...
+  // API Keys - patterns like sk_live_..., sk-live-..., pk_test_..., api_...
+  // The suffix allows hyphens/underscores too (not just alphanumeric): several
+  // real providers punctuate the rest of the key, and a value like
+  // "sk-live-demo-do-not-use" used to fall through to the generic token
+  // pattern below, which then got rejected by the ordinary-words gate
+  // because a hyphen-joined string of readable words is exactly what that
+  // gate exists to wave through. Requiring the sk/pk/api prefix AND a
+  // live/test/prod segment keeps this specific enough to stay ungated.
   {
-    pattern: /^(?:sk|pk|api)[-_](?:live|test|prod)?[-_]?[a-zA-Z0-9]{16,}$/i,
+    pattern: /^(?:sk|pk|api)[-_](?:live|test|prod)?[-_]?[a-zA-Z0-9_-]{8,}$/i,
     name: 'API Key',
     severity: 'critical' as const,
   },
@@ -281,28 +288,25 @@ export function detectHardcodedSecrets(context: AnalysisContext): Detection[] {
         if (generic && !genericMatchIsCredible(templateValue, varName)) {
           continue
         }
-
-        {
-          detections.push({
-            id: `hardcoded-secret-${++detectionCounter}`,
-            ruleId: 'hardcoded-secret',
-            filePath,
-            loc: {
-              start: { line: node.loc.start.line, column: node.loc.start.column },
-              end: { line: node.loc.end.line, column: node.loc.end.column },
-            },
-            severity,
-            category: 'security',
-            message: `Potential ${name} detected in template literal`,
-            metadata: {
-              pattern: name.toLowerCase().replace(/\s+/g, '-'),
-              explanation: `Hardcoding secrets in source code is a security risk. Secrets should be stored in environment variables or secure key management systems.`,
-              recommendation: `Move ${name} to environment variables or use a secrets management service.`,
-              cwe: 'CWE-798',
-              owasp: 'A02:2021 - Cryptographic Failures',
-            },
-          })
-        }
+        detections.push({
+          id: `hardcoded-secret-${++detectionCounter}`,
+          ruleId: 'hardcoded-secret',
+          filePath,
+          loc: {
+            start: { line: node.loc.start.line, column: node.loc.start.column },
+            end: { line: node.loc.end.line, column: node.loc.end.column },
+          },
+          severity,
+          category: 'security',
+          message: `Potential ${name} detected in template literal`,
+          metadata: {
+            pattern: name.toLowerCase().replace(/\s+/g, '-'),
+            explanation: `Hardcoding secrets in source code is a security risk. Secrets should be stored in environment variables or secure key management systems.`,
+            recommendation: `Move ${name} to environment variables or use a secrets management service.`,
+            cwe: 'CWE-798',
+            owasp: 'A02:2021 - Cryptographic Failures',
+          },
+        })
       }
     }
 
