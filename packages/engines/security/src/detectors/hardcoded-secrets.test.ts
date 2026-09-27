@@ -63,6 +63,49 @@ describe('Hardcoded Secrets Detector', () => {
       expect(detections.some((d) => d.message.includes('API Key'))).toBe(true)
       expect(detections[0]?.severity).toBe('critical')
     })
+
+    // Regression test: measuring the floor-8 pattern against portfolio-pro's
+    // real codebase turned up 20 false positives, ~11 of them a bare
+    // "api-"/"api_" prefix with no live/test/prod segment matching an
+    // ordinary, non-secret identifier. The env segment is now mandatory.
+    it('should not flag an ordinary api-prefixed identifier with no env segment', () => {
+      const code = `
+        const eventName = 'api-ai-analysis'
+        const configKey = 'api_key_created'
+      `
+
+      const detections = detectHardcodedSecrets(createContext(code))
+
+      expect(detections.some((d) => d.message.includes('API Key'))).toBe(false)
+    })
+
+    // Regression test: the other ~9 of those 20 false positives were
+    // key-shaped but test/mock/placeholder values, e.g. Stripe-style
+    // sk_test_/pk_test_ fixtures containing the word "mock". The
+    // placeholderGated gate on the API Key pattern now filters these.
+    it('should not flag a key-shaped value containing a placeholder word', () => {
+      const code = `
+        const STRIPE_KEY = "sk_test_mock_key"
+      `
+
+      const detections = detectHardcodedSecrets(createContext(code))
+
+      expect(detections.some((d) => d.message.includes('API Key'))).toBe(false)
+    })
+
+    // True-positive guard: a real-shaped fake key with a mandatory env
+    // segment and no placeholder word must still be flagged - the
+    // mandatory-segment and placeholder-gate changes must not blind the
+    // detector to genuine-looking secrets.
+    it('should still flag a real-shaped key with an env segment and no placeholder word', () => {
+      const code = `
+        const STRIPE_KEY = "sk-test-genuinely-random-suffix-abc123xyz"
+      `
+
+      const detections = detectHardcodedSecrets(createContext(code))
+
+      expect(detections.some((d) => d.message.includes('API Key'))).toBe(true)
+    })
   })
 
   describe('detects AWS keys', () => {

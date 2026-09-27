@@ -6,18 +6,27 @@ import type { ASTNode } from '@rivet/parsers'
  * These patterns match the string content directly, not the assignment syntax
  */
 const SECRET_PATTERNS = [
-  // API Keys - patterns like sk_live_..., sk-live-..., pk_test_..., api_...
+  // API Keys - patterns like sk_live_..., sk-live-..., pk_test_..., api_test_...
   // The suffix allows hyphens/underscores too (not just alphanumeric): several
   // real providers punctuate the rest of the key, and a value like
   // "sk-live-demo-do-not-use" used to fall through to the generic token
   // pattern below, which then got rejected by the ordinary-words gate
   // because a hyphen-joined string of readable words is exactly what that
-  // gate exists to wave through. Requiring the sk/pk/api prefix AND a
-  // live/test/prod segment keeps this specific enough to stay ungated.
+  // gate exists to wave through.
+  //
+  // The live/test/prod segment is REQUIRED, not optional: measured across
+  // portfolio-pro/lib and automadocs/lib (2026-09-27), making it optional
+  // caught 6 ordinary identifiers that merely start with "api-"/"api_" -
+  // "api-ai-analysis", "api_development", "api_key_created/rotated/revoked" -
+  // none of which are secrets. `placeholderGated` additionally drops obvious
+  // test fixtures ("sk_test_mock_key") without reintroducing the
+  // ordinary-words gate, which would wrongly exclude a legitimately
+  // hyphen-worded fake key like the one above.
   {
-    pattern: /^(?:sk|pk|api)[-_](?:live|test|prod)?[-_]?[a-zA-Z0-9_-]{8,}$/i,
+    pattern: /^(?:sk|pk|api)[-_](?:live|test|prod)[-_]?[a-zA-Z0-9_-]{6,}$/i,
     name: 'API Key',
     severity: 'critical' as const,
+    placeholderGated: true,
   },
   // AWS Keys - AKIA, ASIA, etc. followed by 16 chars
   {
@@ -143,6 +152,14 @@ export function looksLikeOrdinaryWords(value: string): boolean {
 const PLACEHOLDER_PATTERNS = [
   /^x{3,}$/i,
   /\b(?:your|my|some|placeholder|changeme|change[-_]?me|example|dummy|sample|fake|redacted|todo)\b/i,
+  // "mock" gets its own pattern with lookarounds instead of `\b`: `_` is a
+  // word character, so `\bmock\b` never matches inside an underscore-
+  // delimited value like "sk_test_mock_key" (no transition between "_" and
+  // "m"/"k"). Not folded into the `\b` list above - doing so also made "my"
+  // match inside "my_secret_value_..." (boundary against "_" now succeeds on
+  // both sides), which broke two existing tests expecting that value to be
+  // treated as a real (if weak) secret, not a placeholder.
+  /(?<![a-zA-Z0-9])mock(?![a-zA-Z0-9])/i,
   /^[<{[].*[>}\]]$/,
   /\.{3}/,
 ]
@@ -199,7 +216,7 @@ export function detectHardcodedSecrets(context: AnalysisContext): Detection[] {
       const value = node.raw.value
 
       // First check if the value matches any pattern
-      for (const { pattern, name, severity, generic } of SECRET_PATTERNS) {
+      for (const { pattern, name, severity, generic, placeholderGated } of SECRET_PATTERNS) {
         pattern.lastIndex = 0
 
         if (!pattern.test(value)) {
@@ -207,6 +224,10 @@ export function detectHardcodedSecrets(context: AnalysisContext): Detection[] {
         }
 
         if (generic && !genericMatchIsCredible(value, varName)) {
+          continue
+        }
+
+        if (placeholderGated && looksLikePlaceholder(value)) {
           continue
         }
 
@@ -278,7 +299,7 @@ export function detectHardcodedSecrets(context: AnalysisContext): Detection[] {
       }
       const templateValue = templateParts.join('')
 
-      for (const { pattern, name, severity, generic } of SECRET_PATTERNS) {
+      for (const { pattern, name, severity, generic, placeholderGated } of SECRET_PATTERNS) {
         pattern.lastIndex = 0
 
         if (!pattern.test(templateValue)) {
@@ -286,6 +307,10 @@ export function detectHardcodedSecrets(context: AnalysisContext): Detection[] {
         }
 
         if (generic && !genericMatchIsCredible(templateValue, varName)) {
+          continue
+        }
+
+        if (placeholderGated && looksLikePlaceholder(templateValue)) {
           continue
         }
         detections.push({

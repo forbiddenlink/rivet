@@ -160,6 +160,46 @@ describe('Path Traversal Detector', () => {
 
       expect(detections).toEqual([])
     })
+
+    // Regression test: a bare imported fs call (no `fs.` member access) has
+    // an Identifier callee, e.g. "writeFileSync". Before this fix, the
+    // search for the path argument didn't exclude the callee node, so that
+    // Identifier itself was matched as the "path argument" and the call was
+    // flagged before the real first argument (here, a `join()` call) was
+    // ever inspected. RIVET's own self-scan caught this on
+    // apps/web/src/app/api/analyze/route.ts's `writeFileSync(join(dir,
+    // \`input${extension}\`), code, 'utf-8')`.
+    it('should not flag a bare imported writeFileSync call whose path is a join() result', () => {
+      const code = `
+        import { writeFileSync } from 'node:fs'
+        import { join } from 'node:path'
+        function write(dir: string, extension: string, code: string) {
+          writeFileSync(join(dir, \`input\${extension}\`), code, 'utf-8')
+        }
+      `
+
+      const detections = detectPathTraversal(createAST(code), 'test.ts')
+
+      expect(detections).toEqual([])
+    })
+
+    // True-positive guard: a bare imported call must still be flagged when
+    // its path argument really is a raw, unvalidated Identifier or template
+    // literal - the callee exclusion above must not blind the detector to
+    // the argument that follows it.
+    it('should still flag a bare imported readFileSync call with a user-controlled path', () => {
+      const code = `
+        import { readFileSync } from 'node:fs'
+        function read(userPath: string) {
+          return readFileSync(userPath)
+        }
+      `
+
+      const detections = detectPathTraversal(createAST(code), 'test.ts')
+
+      expect(detections.length).toBeGreaterThan(0)
+      expect(detections[0]?.ruleId).toBe('path-traversal')
+    })
   })
 
   describe('edge cases', () => {

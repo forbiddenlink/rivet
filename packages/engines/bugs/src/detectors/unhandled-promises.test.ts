@@ -483,12 +483,13 @@ describe('Unhandled Promise Detector', () => {
     })
 
     // Regression test: querySelector/querySelectorAll are synchronous DOM
-    // methods, but both start with the exact word "query", which the
-    // substring heuristic below used to match against the "query" promise
-    // pattern. A generic type argument (`querySelector<HTMLElement>`) does
-    // not change this - the false positive is the name match, not the
-    // generic.
-    it('should not flag synchronous querySelector/querySelectorAll calls', () => {
+    // methods, but both tokenize with a leading "query", which the old
+    // substring heuristic matched against the "query" promise pattern. Token
+    // matching alone does not fix this (the leading token really is
+    // "query"), so this exercises the no-type-info fallback path, where the
+    // exclusion list is what still earns its place. A generic type argument
+    // (`querySelector<HTMLElement>`) does not change any of this.
+    it('should not flag synchronous querySelector/querySelectorAll calls (no type info)', () => {
       const code = `
         function focusFirst(container: HTMLElement) {
           const first = container.querySelector<HTMLElement>('[tabindex]')
@@ -509,12 +510,39 @@ describe('Unhandled Promise Detector', () => {
       expect(unhandledPromises).toEqual([])
     })
 
-    // True-positive guard: a real promise-returning call named `query` (no
-    // DOM semantics) must still be flagged after the querySelector fix.
-    it('should still flag a genuinely unhandled db.query call', () => {
+    // Same call, but now with real type info: the resolved return type
+    // (Element | null, from lib.dom.d.ts) settles it directly, with no need
+    // for the exclusion list at all. This is the actual fix the coordinator
+    // asked for; the test above is the fallback the fix still needs.
+    it('should not flag querySelector/querySelectorAll when the resolved type says so', () => {
+      const code = `
+        function focusFirst(container: HTMLElement) {
+          const first = container.querySelector<HTMLElement>('[tabindex]')
+          const all = container.querySelectorAll<HTMLElement>('button')
+          return first ?? all[0]
+        }
+      `
+
+      const { ast, typeInfo } = parseTypeScript({
+        filePath: 'test.ts',
+        sourceCode: code,
+        extractTypes: true,
+      })
+
+      const detections = detectUnhandledPromises(ast, 'test.ts', typeInfo)
+      const unhandledPromises = detections.filter((d) => d.ruleId === 'unhandled-promise')
+
+      expect(unhandledPromises).toEqual([])
+    })
+
+    // True-positive guard: real promise-returning calls named `query` and
+    // `runQuery` (no DOM semantics) must still be flagged via the name-token
+    // fallback when no type info is available.
+    it('should still flag genuinely unhandled db.query and runQuery calls', () => {
       const code = `
         function loadUsers(db: any) {
           db.query('SELECT * FROM users')
+          runQuery('SELECT 1')
         }
       `
 
@@ -527,7 +555,95 @@ describe('Unhandled Promise Detector', () => {
       const detections = detectUnhandledPromises(ast, 'test.ts')
       const unhandledPromises = detections.filter((d) => d.ruleId === 'unhandled-promise')
 
+      expect(unhandledPromises.length).toBe(2)
+      expect(unhandledPromises.every((d) => d.metadata?.detectionBasis === 'name-heuristic')).toBe(
+        true
+      )
+    })
+
+    // A call whose name doesn't look promise-ish at all (no token matches
+    // "then/fetch/query/save/update/delete/send") must still be flagged when
+    // its resolved return type is a real Promise - this is the
+    // "queryClient.fetchQuery is judged by its return type" case, proven
+    // with a name that can't ride on the heuristic by coincidence.
+    it('flags a call with a non-matching name based on its resolved Promise return type', () => {
+      const code = `
+        interface QueryClient {
+          execute(key: string): Promise<unknown>
+        }
+        function loadUser(queryClient: QueryClient) {
+          queryClient.execute('user')
+        }
+      `
+
+      const { ast, typeInfo } = parseTypeScript({
+        filePath: 'test.ts',
+        sourceCode: code,
+        extractTypes: true,
+      })
+
+      const detections = detectUnhandledPromises(ast, 'test.ts', typeInfo)
+      const unhandledPromises = detections.filter((d) => d.ruleId === 'unhandled-promise')
+
       expect(unhandledPromises.length).toBeGreaterThan(0)
+      expect(unhandledPromises[0]?.metadata?.detectionBasis).toBe('resolved-type')
+    })
+
+    // The inverse: a name that DOES match the heuristic ("query") but is
+    // typed to return a plain string must not be flagged - the resolved
+    // type overrides a coincidental name match, the same mechanism that
+    // clears querySelector.
+    it('does not flag a name-matching call whose resolved type is not a promise', () => {
+      const code = `
+        interface Cache {
+          query(key: string): string
+        }
+        function readCache(cache: Cache) {
+          cache.query('user')
+        }
+      `
+
+      const { ast, typeInfo } = parseTypeScript({
+        filePath: 'test.ts',
+        sourceCode: code,
+        extractTypes: true,
+      })
+
+      const detections = detectUnhandledPromises(ast, 'test.ts', typeInfo)
+      const unhandledPromises = detections.filter((d) => d.ruleId === 'unhandled-promise')
+
+      expect(unhandledPromises).toEqual([])
+    })
+
+    // Regression test: `isAwaitedCall` used to check the CALL's own raw node
+    // type against "AwaitExpression", which a CallExpression node can never
+    // be - so it was always false, a no-op that only stayed hidden because
+    // the old name heuristic rarely matched an actually-awaited call in the
+    // first place. Once the type-based check above can flag a Promise-typed
+    // call regardless of its name, that dead check surfaced as real false
+    // positives on RIVET's own self-scan (genuinely awaited calls like
+    // `await engine.analyze(dir)`, where "analyze" matches no name token).
+    it('does not flag a properly awaited call whose name matches no heuristic token', () => {
+      const code = `
+        interface Engine {
+          analyze(dir: string): Promise<number>
+        }
+        async function run(engine: Engine) {
+          const result = await engine.analyze('.')
+          return result
+        }
+      `
+
+      const { ast, typeInfo } = parseTypeScript({
+        filePath: 'test.ts',
+        sourceCode: code,
+        extractTypes: true,
+      })
+
+      const detections = detectUnhandledPromises(ast, 'test.ts', typeInfo)
+      const unhandledPromises = detections.filter((d) => d.ruleId === 'unhandled-promise')
+
+      expect(unhandledPromises).toEqual([])
     })
   })
 })
