@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { parseTypeScript } from './typescript-parser'
 
+// Tests that build a real TypeScript program (lib files included) are slow on a
+// busy CI runner: this one took 5.6s against vitest's 5s default while turbo ran
+// every package's tests at once. The work is real, so it gets a real budget.
+const TYPED = { timeout: 30_000 }
+
 describe('TypeScript Parser', () => {
   describe('basic parsing', () => {
     it('should parse simple TypeScript code', () => {
@@ -58,7 +63,7 @@ describe('TypeScript Parser', () => {
   })
 
   describe('type extraction', () => {
-    it('should extract type information when enabled', () => {
+    it('should extract type information when enabled', TYPED, () => {
       const code = `
         interface User {
           name: string
@@ -128,7 +133,7 @@ describe('TypeScript Parser', () => {
   })
 
   describe('complex code structures', () => {
-    it('should parse classes', () => {
+    it('should parse classes', TYPED, () => {
       const code = `
         class Calculator {
           add(a: number, b: number): number {
@@ -165,7 +170,7 @@ describe('TypeScript Parser', () => {
       expect(result.errors).toEqual([])
     })
 
-    it('should parse arrow functions', () => {
+    it('should parse arrow functions', TYPED, () => {
       const code = `
         const multiply = (a: number, b: number) => a * b
         const complex = async (x: string): Promise<number> => {
