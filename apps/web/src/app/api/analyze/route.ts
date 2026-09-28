@@ -1,9 +1,10 @@
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { extname, join } from 'node:path'
+import { basename, extname, join } from 'node:path'
 import type { AnalysisResult } from '@rivet/core'
 import { type NextRequest, NextResponse } from 'next/server'
 
+import { MAX_CODE_BYTES, TOO_LARGE_MESSAGE } from '@/lib/analysis'
 import { clientKey, rateLimit, rateLimitHeaders } from '@/lib/rate-limit'
 
 /** The only extensions the parser (and the upload picker) accept. */
@@ -44,6 +45,12 @@ interface Detection {
 
 interface AnalysisResponse {
   detections: Detection[]
+  /**
+   * The parser's message when the code could not be parsed at all. Present only
+   * then: the engines ran against an empty program, so zero detections does not
+   * mean the code is clean.
+   */
+  parseError?: string
   filesAnalyzed: number
   duration: number
   summary: {
@@ -55,7 +62,6 @@ interface AnalysisResponse {
 }
 
 const SEVERITY_RANK = { critical: 4, high: 3, medium: 2, low: 1, info: 0 }
-const MAX_CODE_BYTES = 200_000
 
 // The route writes to a temp directory and loads the engine packages, so it cannot
 // run on the edge runtime. Stating it explicitly stops a future config change from
@@ -73,7 +79,8 @@ const RATE_LIMIT = { limit: 10, windowMs: 60_000 }
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<AnalysisResponse | { error: string }>> {
-  const limit = rateLimit(clientKey(request), RATE_LIMIT)
+  // Namespaced so explanation requests do not spend the scan quota, or the reverse.
+  const limit = rateLimit(`analyze:${clientKey(request)}`, RATE_LIMIT)
   if (!limit.ok) {
     return NextResponse.json(
       { error: `Too many analysis requests. Try again in ${limit.retryAfter}s.` },
@@ -91,7 +98,7 @@ export async function POST(
     if (Buffer.byteLength(body.code, 'utf8') > MAX_CODE_BYTES) {
       return NextResponse.json(
         {
-          error: `Code exceeds ${MAX_CODE_BYTES / 1000}KB limit for web analysis. Use the CLI for larger projects.`,
+          error: TOO_LARGE_MESSAGE,
         },
         { status: 413 }
       )
@@ -129,10 +136,11 @@ export async function POST(
     async function runScan(
       code: string,
       extension: string
-    ): Promise<{ result: AnalysisResult; hadParseError: boolean }> {
+    ): Promise<{ result: AnalysisResult; hadParseError: boolean; parseError?: string }> {
       const dir = mkdtempSync(join(tmpdir(), 'rivet-'))
+      const scannedPath = join(dir, `input${extension}`)
       try {
-        writeFileSync(join(dir, `input${extension}`), code, 'utf-8')
+        writeFileSync(scannedPath, code, 'utf-8')
 
         const engine = new RivetEngine({
           severity: { minLevel: 'info' as const },
@@ -149,20 +157,27 @@ export async function POST(
         if (enabledEngines.flows) engine.registerEngine(new FlowsEngine())
 
         const result = await engine.analyze(dir)
-        const hadParseError = result.errors.some((e) => e.engine === 'parser')
-        return { result, hadParseError }
+        const parserEntry = result.errors.find((e) => e.engine === 'parser')
+        // The entry reads "Skipped <absolute temp path>: <detail>". Only the detail
+        // is meaningful to the caller; the path is this server's scratch dir.
+        const parseError = parserEntry
+          ? parserEntry.error.slice(parserEntry.error.indexOf(scannedPath) + scannedPath.length + 2)
+          : undefined
+        return { result, hadParseError: Boolean(parserEntry), parseError }
       } finally {
         rmSync(dir, { recursive: true, force: true })
       }
     }
 
-    let result: AnalysisResult
+    let scan: Awaited<ReturnType<typeof runScan>>
+    let scannedExt: string
 
     const uploadExt = body.fileName ? extname(body.fileName).toLowerCase() : ''
     if (body.fileName && SUPPORTED_EXTENSIONS.has(uploadExt)) {
       // A real filename is unambiguous: it already tells the parser which grammar to
       // use, so there is nothing to retry.
-      ;({ result } = await runScan(body.code, uploadExt))
+      scan = await runScan(body.code, uploadExt)
+      scannedExt = uploadExt
     } else {
       // Pasted code has no filename. Try .tsx first (the syntactic superset that
       // also covers JSX). If it fails to parse, retry as .ts, which is the only
@@ -172,16 +187,21 @@ export async function POST(
       const tsx = await runScan(body.code, '.tsx')
       if (tsx.hadParseError) {
         const ts = await runScan(body.code, '.ts')
-        result = ts.hadParseError ? tsx.result : ts.result
+        scan = ts.hadParseError ? tsx : ts
+        scannedExt = ts.hadParseError ? '.tsx' : '.ts'
       } else {
-        result = tsx.result
+        scan = tsx
+        scannedExt = '.tsx'
       }
     }
+    const { result } = scan
 
-    const filteredDetections = result.detections.filter((detection) => {
-      const detectionSeverityRank = SEVERITY_RANK[detection.severity]
-      return detectionSeverityRank >= minSeverityRank
-    })
+    // What the user calls this file: the uploaded name, or input.<ext> for a paste.
+    const displayName = body.fileName ? basename(body.fileName) : `input${scannedExt}`
+
+    const filteredDetections = result.detections
+      .filter((detection) => SEVERITY_RANK[detection.severity] >= minSeverityRank)
+      .map((detection) => ({ ...detection, filePath: displayName }))
 
     const bySeverity: Record<string, number> = {
       critical: 0,
@@ -208,6 +228,7 @@ export async function POST(
 
     return NextResponse.json({
       detections: filteredDetections,
+      ...(scan.parseError ? { parseError: scan.parseError } : {}),
       filesAnalyzed: result.filesAnalyzed,
       duration,
       summary: {

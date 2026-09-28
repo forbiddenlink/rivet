@@ -1,0 +1,329 @@
+{
+ "detections": [
+  {
+   "id": "hardcoded-secret-1b7ce227d0fe7d92",
+   "ruleId": "hardcoded-secret",
+   "filePath": "/var/folders/vl/1g4kyx090p34nf40rd5vyydm0000gn/T/rivet-lhC7bv/input.tsx",
+   "loc": {
+    "start": {
+     "line": 2,
+     "column": 16
+    },
+    "end": {
+     "line": 2,
+     "column": 41
+    }
+   },
+   "severity": "critical",
+   "category": "security",
+   "message": "Potential API Key detected in hardcoded string",
+   "fix": {
+    "description": "Replace with environment variable process.env.API_KEY",
+    "replacements": [
+     {
+      "start": 66,
+      "end": 91,
+      "text": "process.env.API_KEY"
+     }
+    ]
+   },
+   "metadata": {
+    "pattern": "api-key",
+    "explanation": "Hardcoding secrets in source code is a security risk. Secrets should be stored in environment variables or secure key management systems.",
+    "recommendation": "Move API Key to environment variables (process.env or import.meta.env) or use a secrets management service like AWS Secrets Manager, HashiCorp Vault, or Azure Key Vault.",
+    "cwe": "CWE-798",
+    "owasp": "A02:2021 - Cryptographic Failures"
+   }
+  },
+  {
+   "id": "async-without-error-handling-b482716725d2bc62",
+   "ruleId": "async-without-error-handling",
+   "filePath": "/var/folders/vl/1g4kyx090p34nf40rd5vyydm0000gn/T/rivet-lhC7bv/input.tsx",
+   "loc": {
+    "start": {
+     "line": 4,
+     "column": 7
+    },
+    "end": {
+     "line": 25,
+     "column": 1
+    }
+   },
+   "severity": "high",
+   "category": "flows",
+   "message": "Async function lacks error handling (try-catch or .catch())",
+   "fix": {
+    "description": "Wrap the function body in a try-catch block:\n\nasync function example() {\n  try {\n    // existing code\n  } catch (error) {\n    console.error(\"Operation failed:\", error);\n    throw error; // or handle appropriately\n  }\n}"
+   },
+   "metadata": {
+    "pattern": "missing-error-handling",
+    "explanation": "Async operations can fail and should have proper error handling to prevent unhandled rejections",
+    "recommendation": "Wrap async code in try-catch blocks or use .catch() on promises"
+   }
+  },
+  {
+   "id": "fetch-without-error-handling-6670f34ed99136cf",
+   "ruleId": "fetch-without-error-handling",
+   "filePath": "/var/folders/vl/1g4kyx090p34nf40rd5vyydm0000gn/T/rivet-lhC7bv/input.tsx",
+   "loc": {
+    "start": {
+     "line": 16,
+     "column": 26
+    },
+    "end": {
+     "line": 19,
+     "column": 10
+    }
+   },
+   "severity": "high",
+   "category": "flows",
+   "message": "fetch() call without error handling",
+   "fix": {
+    "description": "Add error handling to the fetch call:\n\n// Option 1: Using .catch()\nfetch(url)\n  .then(response => response.json())\n  .catch(error => console.error(\"Fetch failed:\", error));\n\n// Option 2: Using try-catch with await\ntry {\n  const response = await fetch(url);\n} catch (error) {\n  console.error(\"Fetch failed:\", error);\n}"
+   },
+   "metadata": {
+    "pattern": "fetch-without-catch",
+    "explanation": "Network requests can fail and should be wrapped in error handling",
+    "recommendation": "Add .catch() handler or wrap in try-catch block"
+   }
+  },
+  {
+   "id": "unhandled-promise-c5a25b8fbeaba53e",
+   "ruleId": "unhandled-promise",
+   "filePath": "/var/folders/vl/1g4kyx090p34nf40rd5vyydm0000gn/T/rivet-lhC7bv/input.tsx",
+   "loc": {
+    "start": {
+     "line": 20,
+     "column": 15
+    },
+    "end": {
+     "line": 20,
+     "column": 25
+    }
+   },
+   "severity": "high",
+   "category": "bugs",
+   "message": "Unhandled promise: promise result not awaited or caught",
+   "metadata": {
+    "pattern": "unhandled-promise",
+    "method": "json",
+    "detectionBasis": "resolved-type",
+    "explanation": "Promises that are not awaited or caught can fail silently, making debugging difficult.",
+    "recommendation": "Use await or add .catch() to handle errors"
+   }
+  },
+  {
+   "id": "xss-react-ff52d3a52a5cf4f7",
+   "ruleId": "xss-react",
+   "filePath": "/var/folders/vl/1g4kyx090p34nf40rd5vyydm0000gn/T/rivet-lhC7bv/input.tsx",
+   "loc": {
+    "start": {
+     "line": 29,
+     "column": 14
+    },
+    "end": {
+     "line": 29,
+     "column": 61
+    }
+   },
+   "severity": "high",
+   "category": "security",
+   "message": "Potential XSS: dangerouslySetInnerHTML used without sanitization",
+   "metadata": {
+    "pattern": "xss-react",
+    "explanation": "React's dangerouslySetInnerHTML bypasses XSS protection. Ensure HTML is sanitized.",
+    "recommendation": "Sanitize HTML with DOMPurify before rendering",
+    "owasp": "A03:2021 – Injection"
+   }
+  },
+  {
+   "id": "async-no-catch-1e720b150296bb33",
+   "ruleId": "async-no-catch",
+   "filePath": "/var/folders/vl/1g4kyx090p34nf40rd5vyydm0000gn/T/rivet-lhC7bv/input.tsx",
+   "loc": {
+    "start": {
+     "line": 4,
+     "column": 7
+    },
+    "end": {
+     "line": 25,
+     "column": 1
+    }
+   },
+   "severity": "medium",
+   "category": "bugs",
+   "message": "Async function with await but no try-catch block",
+   "metadata": {
+    "pattern": "async-no-catch",
+    "explanation": "Async functions with await statements should handle potential errors with try-catch.",
+    "recommendation": "Wrap await calls in try-catch or ensure caller handles errors"
+   }
+  },
+  {
+   "id": "deep-nesting-825b71765973276f",
+   "ruleId": "deep-nesting",
+   "category": "smells",
+   "severity": "medium",
+   "message": "Code is deeply nested (depth: 4). Simplify control flow for better readability.",
+   "filePath": "/var/folders/vl/1g4kyx090p34nf40rd5vyydm0000gn/T/rivet-lhC7bv/input.tsx",
+   "loc": {
+    "start": {
+     "line": 10,
+     "column": 8
+    },
+    "end": {
+     "line": 14,
+     "column": 9
+    }
+   },
+   "metadata": {
+    "nestingDepth": 4,
+    "threshold": 3,
+    "nodeType": "ForStatement",
+    "explanation": "Deep nesting (the \"arrow anti-pattern\") makes code hard to read and understand. Recommended solutions: (1) Extract nested logic into separate functions, (2) Use early returns/guards to reduce nesting, (3) Invert conditions to flatten structure. Aim for nesting depth ≤ 3."
+   }
+  },
+  {
+   "id": "deep-nesting-48e3f74e0bfe9448",
+   "ruleId": "deep-nesting",
+   "category": "smells",
+   "severity": "medium",
+   "message": "Code is deeply nested (depth: 5). Simplify control flow for better readability.",
+   "filePath": "/var/folders/vl/1g4kyx090p34nf40rd5vyydm0000gn/T/rivet-lhC7bv/input.tsx",
+   "loc": {
+    "start": {
+     "line": 11,
+     "column": 10
+    },
+    "end": {
+     "line": 13,
+     "column": 11
+    }
+   },
+   "metadata": {
+    "nestingDepth": 5,
+    "threshold": 3,
+    "nodeType": "ForStatement",
+    "explanation": "Deep nesting (the \"arrow anti-pattern\") makes code hard to read and understand. Recommended solutions: (1) Extract nested logic into separate functions, (2) Use early returns/guards to reduce nesting, (3) Invert conditions to flatten structure. Aim for nesting depth ≤ 3."
+   }
+  },
+  {
+   "id": "nested-loops-e6a752045a3b9dff",
+   "ruleId": "nested-loops",
+   "filePath": "/var/folders/vl/1g4kyx090p34nf40rd5vyydm0000gn/T/rivet-lhC7bv/input.tsx",
+   "loc": {
+    "start": {
+     "line": 11,
+     "column": 10
+    },
+    "end": {
+     "line": 13,
+     "column": 11
+    }
+   },
+   "severity": "medium",
+   "category": "performance",
+   "message": "Loop nested at depth 2 - complexity is O(n^2)",
+   "metadata": {
+    "depth": 2,
+    "suggestion": "Consider using hash maps, Set, or Map for O(1) lookups instead of nested loops"
+   }
+  },
+  {
+   "id": "missing-documentation-c74d738c4e52076c",
+   "ruleId": "missing-documentation",
+   "filePath": "/var/folders/vl/1g4kyx090p34nf40rd5vyydm0000gn/T/rivet-lhC7bv/input.tsx",
+   "loc": {
+    "start": {
+     "line": 4,
+     "column": 7
+    },
+    "end": {
+     "line": 25,
+     "column": 1
+    }
+   },
+   "severity": "low",
+   "category": "practices",
+   "message": "Function 'processOrder' lacks documentation",
+   "metadata": {
+    "suggestion": "Add JSDoc comment describing purpose, parameters, and return value"
+   }
+  },
+  {
+   "id": "missing-documentation-1dca4b3e1371f91d",
+   "ruleId": "missing-documentation",
+   "filePath": "/var/folders/vl/1g4kyx090p34nf40rd5vyydm0000gn/T/rivet-lhC7bv/input.tsx",
+   "loc": {
+    "start": {
+     "line": 27,
+     "column": 7
+    },
+    "end": {
+     "line": 30,
+     "column": 1
+    }
+   },
+   "severity": "low",
+   "category": "practices",
+   "message": "Function 'AdminPanel' lacks documentation",
+   "metadata": {
+    "suggestion": "Add JSDoc comment describing purpose, parameters, and return value"
+   }
+  },
+  {
+   "id": "inline-function-in-jsx-b2ad4e66bcf68245",
+   "ruleId": "inline-function-in-jsx",
+   "filePath": "/var/folders/vl/1g4kyx090p34nf40rd5vyydm0000gn/T/rivet-lhC7bv/input.tsx",
+   "loc": {
+    "start": {
+     "line": 29,
+     "column": 14
+    },
+    "end": {
+     "line": 29,
+     "column": 61
+    }
+   },
+   "severity": "info",
+   "category": "performance",
+   "message": "Inline function/object on a DOM element allocates on every render",
+   "metadata": {
+    "type": "object",
+    "onHostElement": true,
+    "suggestion": "Harmless on a DOM element. Move to useCallback/useMemo only if this prop reaches a memoized component."
+   }
+  }
+ ],
+ "filesAnalyzed": 1,
+ "duration": 174,
+ "summary": {
+  "total": 12,
+  "bySeverity": {
+   "critical": 1,
+   "high": 4,
+   "medium": 4,
+   "low": 2,
+   "info": 1
+  },
+  "byCategory": {
+   "security": 2,
+   "flows": 2,
+   "bugs": 2,
+   "smells": 2,
+   "performance": 2,
+   "practices": 2
+  },
+  "byEngine": {
+   "hardcoded": 1,
+   "async": 2,
+   "fetch": 1,
+   "unhandled": 1,
+   "xss": 1,
+   "deep": 2,
+   "nested": 1,
+   "missing": 2,
+   "inline": 1
+  }
+ }
+}

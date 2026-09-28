@@ -1,270 +1,194 @@
 import Link from 'next/link'
 
-import { CliQuickstart } from '../components/CliQuickstart'
+import { AnnotatedSource, SeverityMark } from '../components/AnnotatedSource'
+import { InstallSteps } from '../components/InstallSteps'
+import { DEMO_CODE, DEMO_FINDINGS } from '../lib/demo'
 
+// Example rule ids are real detector ids from packages/engines/*/src.
 const ENGINES = [
   {
     title: 'Security',
-    description: 'OWASP coverage: injection, secrets, weak crypto, path traversal.',
+    looksFor:
+      'Injection, hardcoded secrets, unsafe HTML, weak crypto and randomness, path traversal',
+    rules: ['sql-injection', 'hardcoded-secret', 'xss-react'],
   },
   {
     title: 'Bugs',
-    description: 'Null refs, promise traps, async mistakes, boundary errors.',
+    looksFor: 'Loose equality, constant or duplicate conditions, empty catches, unawaited promises',
+    rules: ['loose-equality', 'empty-catch'],
   },
   {
     title: 'Performance',
-    description: 'Complexity hotspots, blocking work, React re-render waste.',
+    looksFor: 'Nested and blocking loops, DOM queries in loops, re-render waste in React',
+    rules: ['nested-loops', 'state-update-in-render'],
   },
   {
     title: 'Architecture',
-    description: 'Cycles, coupling, SOLID violations, layer leaks.',
+    looksFor: 'Circular dependencies, layer violations, high coupling, SOLID breaks',
+    rules: ['circular-dependency', 'layer-violation'],
   },
   {
     title: 'Code smells',
-    description: 'Long methods, god objects, duplication, deep nesting.',
+    looksFor: 'Long methods, god objects, deep nesting, duplication, magic numbers',
+    rules: ['deep-nesting', 'god-object'],
+  },
+  {
+    title: 'Practices',
+    looksFor: 'Leftover console and debugger statements, thrown strings, naming, missing docs',
+    rules: ['debugger-statement', 'throw-string'],
   },
   {
     title: 'Dependencies',
-    description: 'Unused packages, dead exports, outdated and vulnerable deps.',
+    looksFor: 'Unused code, duplicate and side-effect imports, barrel-file chains',
+    rules: ['unused-code', 'duplicate-imports'],
   },
   {
     title: 'Flows',
-    description: 'Untested routes, critical paths, missing error boundaries.',
-  },
-  {
-    title: 'AI layer',
-    description: 'Explanations, analogies, and tech-debt time estimates.',
+    looksFor:
+      'Async paths without error handling, untested routes and reducers, missing error boundaries',
+    rules: ['untested-route', 'missing-error-boundary'],
   },
 ]
 
-export default function Home() {
+const HERO_LINES = { from: 1, to: 17 }
+const heroFindings = DEMO_FINDINGS.map((f, i) => ({ ...f, key: String(i) }))
+const heroNotes = ['0', String(DEMO_FINDINGS.findIndex((f) => f.ruleId === 'nested-loops'))]
+const count = (severity: string) => DEMO_FINDINGS.filter((f) => f.severity === severity).length
+
+export default function Home(): React.ReactElement {
   return (
-    <main className="landing">
-      <section className="hero">
-        <div className="hero__glow" aria-hidden="true" />
+    <main className="home">
+      <section className="hero" aria-labelledby="hero-title">
+        <div className="wrap hero__grid">
+          <div className="hero__copy">
+            <h1 id="hero-title" className="hero__title">
+              Code quality that holds.
+            </h1>
+            <p className="hero__lede">
+              Eight static analysis engines read your JavaScript and TypeScript and pin each finding
+              to the line that caused it.
+            </p>
+            <div className="hero__actions">
+              <Link href="/dashboard" className="btn btn--primary btn--lg">
+                Analyze a file
+              </Link>
+              <a href="#install" className="btn btn--lg">
+                Run it locally
+              </a>
+            </div>
+            <p className="hero__req">
+              Runs from source today. The npm package is not published yet.
+            </p>
+          </div>
 
-        <div className="hero__copy">
-          <div className="hero__brand">
-            <svg className="hero__logo" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path
-                d="M4 8.5h6.5V4H4v4.5Zm0 11.5h6.5v-4.5H4V20Zm9.5-11.5H20V4h-6.5v4.5Zm0 11.5H20v-4.5h-6.5V20Z"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinejoin="round"
+          <figure className="hero__figure">
+            <div className="src">
+              <div className="src__bar">
+                <strong>demo.tsx</strong>
+                <span>{DEMO_FINDINGS.length} findings</span>
+                <span className="src__bar-end sev-label sev-critical">
+                  <SeverityMark severity="critical" />
+                  {count('critical')} critical
+                </span>
+                <span className="sev-label sev-high">
+                  <SeverityMark severity="high" />
+                  {count('high')} high
+                </span>
+              </div>
+              <AnnotatedSource
+                code={DEMO_CODE}
+                findings={heroFindings}
+                notes={heroNotes}
+                from={HERO_LINES.from}
+                to={HERO_LINES.to}
+                label="Demo snippet with findings marked on their lines"
               />
-              <path d="M10.5 10.5h3v3h-3v-3Z" fill="currentColor" />
-            </svg>
-            <p className="hero__wordmark">Rivet</p>
-          </div>
-
-          <h1 className="hero__title">Code quality that holds.</h1>
-
-          <p className="hero__lede">
-            Eight analysis engines. AI that explains why it matters. Built for developers who ship
-            serious software.
-          </p>
-
-          <div className="hero__actions">
-            <Link href="/dashboard" className="btn btn--primary btn--lg">
-              Open dashboard
-            </Link>
-            <a
-              href="https://github.com/forbiddenlink/rivet"
-              className="btn btn--ghost btn--lg"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              View on GitHub
-            </a>
-          </div>
-        </div>
-
-        <div className="hero__visual">
-          <div className="terminal" role="img" aria-label="Example RIVET CLI session">
-            <div className="terminal__chrome">
-              <span className="terminal__dot terminal__dot--accent" />
-              <span className="terminal__dot" />
-              <span className="terminal__dot" />
-              <span className="terminal__title">rivet: scan</span>
             </div>
-            <pre className="terminal__body">
-              {`$ `}
-              <span className="terminal__cmd">rivet scan . --ai --tech-debt</span>
-              {`
-
-`}
-              <span className="terminal__comment">╭─ Detection Summary ────────────────╮</span>
-              {`
-`}
-              <span className="terminal__comment">│</span>
-              {`  Critical   2   `}
-              <span className="terminal__prompt">⚠</span>
-              {`
-`}
-              <span className="terminal__comment">│</span>
-              {`  High       8   `}
-              <span className="terminal__prompt">⚠</span>
-              {`
-`}
-              <span className="terminal__comment">│</span>
-              {`  Medium    15
-`}
-              <span className="terminal__comment">│</span>
-              {`  Total     60 issues
-`}
-              <span className="terminal__comment">╰────────────────────────────────────╯</span>
-              {`
-
-`}
-              <span className="terminal__prompt">→</span>
-              {` SQL injection in auth.ts:42
-`}
-              <span className="terminal__comment"> Tech debt: 8.0h security · 24.5h total</span>
-              {`
-$ `}
-              <span className="cursor-blink" aria-hidden="true" />
-            </pre>
-          </div>
+            <figcaption className="caption">
+              The dashboard&apos;s built-in demo snippet, scanned by all eight engines. Findings
+              shown are the real output, trimmed to lines {HERO_LINES.from} to {HERO_LINES.to}.{' '}
+              <Link href="/dashboard?demo=1">Scan it yourself</Link>.
+            </figcaption>
+          </figure>
         </div>
       </section>
 
-      <section className="section">
-        <header className="section__header">
-          <p className="section__eyebrow">Engines</p>
-          <h2 className="section__title">Eight specialists. One riveted report.</h2>
-          <p className="section__lede">
-            Parallel analysis across security, correctness, performance, and structure, then an AI
-            layer that turns findings into teachable fixes.
+      <section className="sect" aria-labelledby="engines-title">
+        <div className="wrap">
+          <div className="sect__head">
+            <h2 id="engines-title">What each engine looks for</h2>
+            <p>
+              Engines run in parallel on the parsed syntax tree. Each finding carries a rule id, a
+              severity, and the exact line and column.
+            </p>
+          </div>
+          <table className="engines">
+            <thead>
+              <tr>
+                <th scope="col">Engine</th>
+                <th scope="col">Looks for</th>
+                <th scope="col">Example rules</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ENGINES.map((engine) => (
+                <tr key={engine.title}>
+                  <th scope="row">{engine.title}</th>
+                  <td>{engine.looksFor}</td>
+                  <td className="engines__rules">
+                    {engine.rules.map((rule) => (
+                      <code key={rule}>{rule}</code>
+                    ))}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="note">
+            <b>Explanations.</b> Every finding comes with guidance. When the server has an OpenAI
+            key, a model writes it and the dashboard labels it as AI. Without one, you get
+            RIVET&apos;s built-in guide for the category, labeled as such.
           </p>
-        </header>
-
-        <div className="engines-grid">
-          {ENGINES.map((engine, i) => (
-            <article key={engine.title} className="engine-cell">
-              <span className="engine-cell__index">{String(i + 1).padStart(2, '0')}</span>
-              <h3 className="engine-cell__title">{engine.title}</h3>
-              <p className="engine-cell__desc">{engine.description}</p>
-            </article>
-          ))}
         </div>
       </section>
 
-      <section className="section" style={{ paddingTop: 0 }}>
-        <header className="section__header">
-          <p className="section__eyebrow">Dashboard</p>
-          <h2 className="section__title">See debt before it compounds.</h2>
-          <p className="section__lede">
-            Severity, categories, and tech-debt hours in one dense view, built for scanning, not
-            scrolling past cards.
-          </p>
-        </header>
-
-        <div className="product-frame" aria-hidden="true">
-          <div className="product-frame__chrome">
-            <span className="terminal__dot terminal__dot--accent" />
-            <span className="terminal__dot" />
-            <span className="terminal__dot" />
-            <span className="product-frame__url">rivet.dev/dashboard</span>
+      <section className="sect" aria-labelledby="surfaces-title">
+        <div className="wrap">
+          <div className="sect__head">
+            <h2 id="surfaces-title">Use it where you already work</h2>
+            <p>Local-first. Your code stays on your machine unless you opt into AI enhancement.</p>
           </div>
-          <div className="product-frame__body">
-            <aside className="product-frame__side">
-              <div className="product-frame__side-item product-frame__side-item--active">
-                Results
-              </div>
-              <div className="product-frame__side-item">Security</div>
-              <div className="product-frame__side-item">Performance</div>
-              <div className="product-frame__side-item">Architecture</div>
-            </aside>
-            <div className="product-frame__main">
-              <div className="product-frame__metrics">
-                <div className="product-frame__metric">
-                  <div className="product-frame__metric-n">2</div>
-                  <div className="product-frame__metric-l">Critical</div>
-                </div>
-                <div className="product-frame__metric">
-                  <div className="product-frame__metric-n">8</div>
-                  <div className="product-frame__metric-l">High</div>
-                </div>
-                <div className="product-frame__metric">
-                  <div className="product-frame__metric-n">15</div>
-                  <div className="product-frame__metric-l">Medium</div>
-                </div>
-                <div className="product-frame__metric">
-                  <div className="product-frame__metric-n">24.5h</div>
-                  <div className="product-frame__metric-l">Debt</div>
-                </div>
-              </div>
-              <div className="product-frame__row">
-                <span className="badge badge--critical">critical</span>
-                <span>SQL injection in auth.ts:42</span>
-              </div>
-              <div className="product-frame__row">
-                <span className="badge badge--high">high</span>
-                <span>Unhandled rejection in api.ts:78</span>
-              </div>
-              <div className="product-frame__row">
-                <span className="badge badge--medium">medium</span>
-                <span>Cyclomatic complexity in payment.ts:156</span>
-              </div>
+          <div className="surfaces">
+            <div className="surface">
+              <h3>Terminal</h3>
+              <p>Scan a whole project, with explanations and tech-debt hours.</p>
+              <pre>{'$ pnpm --filter @rivet/cli dev \\\n    scan . --ai --tech-debt'}</pre>
+            </div>
+            <div className="surface">
+              <h3>Dashboard</h3>
+              <p>Paste or upload one file and triage findings line by line in the browser.</p>
+              <Link href="/dashboard" className="surface__link">
+                Open the dashboard
+              </Link>
+            </div>
+            <div className="surface">
+              <h3>CI</h3>
+              <p>Emit SARIF for GitHub code scanning, or JSON and HTML reports.</p>
+              <pre>{'$ pnpm --filter @rivet/cli dev \\\n    scan . --format sarif'}</pre>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="section" style={{ paddingTop: 0 }}>
-        <header className="section__header">
-          <p className="section__eyebrow">Difference</p>
-          <h2 className="section__title">Not another rule dump.</h2>
-          <p className="section__lede">
-            Linters list problems. RIVET explains why they matter and what they cost.
-          </p>
-        </header>
-
-        <div className="compare-grid">
-          <div className="compare-col">
-            <p className="compare-col__label">Typical linter</p>
-            <h3 className="compare-col__title">Flags without context</h3>
-            <ul className="compare-list compare-list--muted">
-              <li>One engine, one surface</li>
-              <li>Cryptic rule IDs</li>
-              <li>No time-to-fix estimate</li>
-              <li>“Fix later” becomes never</li>
-            </ul>
+      <section className="sect" id="install" aria-labelledby="install-title">
+        <div className="wrap">
+          <div className="sect__head">
+            <h2 id="install-title">Run it locally</h2>
+            <p>Three steps from a fresh clone. Requires Node 20 or later and pnpm.</p>
           </div>
-          <div className="compare-col compare-col--accent">
-            <p className="compare-col__label">Rivet</p>
-            <h3 className="compare-col__title">Teachable findings</h3>
-            <ul className="compare-list compare-list--yes">
-              <li>Eight engines in parallel</li>
-              <li>AI explanations + analogies</li>
-              <li>Tech debt in hours, by category</li>
-              <li>CLI, dashboard, and SARIF for CI</li>
-            </ul>
-          </div>
+          <InstallSteps />
         </div>
       </section>
-
-      <section className="section" style={{ paddingTop: 0 }}>
-        <header className="section__header">
-          <p className="section__eyebrow">CLI</p>
-          <h2 className="section__title">Start in the terminal.</h2>
-          <p className="section__lede">
-            Local-first. Your code stays on your machine unless you opt into AI enhancement.
-          </p>
-        </header>
-
-        <CliQuickstart />
-      </section>
-
-      <div className="cta-band" style={{ marginLeft: '1.5rem', marginRight: '1.5rem' }}>
-        <h2 className="cta-band__title">Rivet your codebase.</h2>
-        <p className="cta-band__lede">
-          Paste a file, run a scan, see what holds, and what doesn’t.
-        </p>
-        <Link href="/dashboard" className="btn btn--primary btn--lg">
-          Try the dashboard
-        </Link>
-      </div>
     </main>
   )
 }

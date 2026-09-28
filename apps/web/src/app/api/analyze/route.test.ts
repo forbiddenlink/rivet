@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import { __resetRateLimits } from '../../../lib/rate-limit'
+import { __resetRateLimits, rateLimit } from '../../../lib/rate-limit'
 import { POST } from './route'
 
 function postAnalyze(code: string, fileName?: string): Promise<Response> {
@@ -108,4 +108,42 @@ export function toNumber(value: unknown): number {
     const res = await postAnalyze(code, 'snippet.ts')
     expect(res.status).toBe(200)
   }, 20_000)
+
+  // Regression test: code the parser could not read used to come back as zero
+  // detections with no other signal, and the dashboard rendered that as
+  // "Looks solid". The engine records the skip; the route must hand it on.
+  it('reports a parse failure instead of an empty clean result', async () => {
+    const res = await postAnalyze('function (( { broken syntax')
+    const json = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(json.detections).toEqual([])
+    expect(json.parseError).toBe('Identifier expected.')
+  }, 20_000)
+
+  it('omits parseError when the code parses', async () => {
+    const res = await postAnalyze('export const answer = 42\n')
+    const json = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(json.parseError).toBeUndefined()
+  }, 20_000)
+
+  // The engine scans a temp directory, so its raw filePath is the server's
+  // absolute temp path. Clients should see the name the user knows.
+  it('reports detections under the display name, not the server temp path', async () => {
+    const res = await postAnalyze('const API_KEY = "sk-live-demo-do-not-use";\n', 'keys.ts')
+    const json = await res.json()
+
+    expect(json.detections.length).toBeGreaterThan(0)
+    for (const d of json.detections) expect(d.filePath).toBe('keys.ts')
+  }, 20_000)
+
+  // Regression: both API routes used the bare client address as the bucket key,
+  // so reading ten explanations in a minute made the next scan return 429.
+  it('does not share its rate-limit bucket with the explain route', async () => {
+    for (let i = 0; i < 20; i++) rateLimit('explain:unknown', { limit: 60, windowMs: 60_000 })
+    const res = await postAnalyze('export const a = 1\n')
+    expect(res.status).toBe(200)
+  })
 })
