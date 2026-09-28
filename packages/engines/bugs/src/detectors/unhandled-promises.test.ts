@@ -2,6 +2,11 @@ import { parseTypeScript } from '@rivet/parsers'
 import { describe, expect, it } from 'vitest'
 import { detectUnhandledPromises } from './unhandled-promises'
 
+// These tests build a real TypeScript program, lib.dom.d.ts included. That takes
+// ~200ms on a laptop but went past vitest's 5s default on CI, where turbo runs every
+// package's tests at once on a small runner. The cost is real work, not a hang.
+const TYPED = { timeout: 30_000 }
+
 describe('Unhandled Promise Detector', () => {
   describe('unhandled-promise rule', () => {
     it('should detect promises without await or catch', () => {
@@ -567,8 +572,11 @@ describe('Unhandled Promise Detector', () => {
     // (Element | null, from lib.dom.d.ts) settles it directly, with no need
     // for the exclusion list at all. This is the actual fix the coordinator
     // asked for; the test above is the fallback the fix still needs.
-    it('should not flag querySelector/querySelectorAll when the resolved type says so', () => {
-      const code = `
+    it(
+      'should not flag querySelector/querySelectorAll when the resolved type says so',
+      TYPED,
+      () => {
+        const code = `
         function focusFirst(container: HTMLElement) {
           const first = container.querySelector<HTMLElement>('[tabindex]')
           const all = container.querySelectorAll<HTMLElement>('button')
@@ -576,17 +584,18 @@ describe('Unhandled Promise Detector', () => {
         }
       `
 
-      const { ast, typeInfo } = parseTypeScript({
-        filePath: 'test.ts',
-        sourceCode: code,
-        extractTypes: true,
-      })
+        const { ast, typeInfo } = parseTypeScript({
+          filePath: 'test.ts',
+          sourceCode: code,
+          extractTypes: true,
+        })
 
-      const detections = detectUnhandledPromises(ast, 'test.ts', typeInfo)
-      const unhandledPromises = detections.filter((d) => d.ruleId === 'unhandled-promise')
+        const detections = detectUnhandledPromises(ast, 'test.ts', typeInfo)
+        const unhandledPromises = detections.filter((d) => d.ruleId === 'unhandled-promise')
 
-      expect(unhandledPromises).toEqual([])
-    })
+        expect(unhandledPromises).toEqual([])
+      }
+    )
 
     // True-positive guard: real promise-returning calls named `query` and
     // `runQuery` (no DOM semantics) must still be flagged via the name-token
@@ -619,8 +628,11 @@ describe('Unhandled Promise Detector', () => {
     // its resolved return type is a real Promise - this is the
     // "queryClient.fetchQuery is judged by its return type" case, proven
     // with a name that can't ride on the heuristic by coincidence.
-    it('flags a call with a non-matching name based on its resolved Promise return type', () => {
-      const code = `
+    it(
+      'flags a call with a non-matching name based on its resolved Promise return type',
+      TYPED,
+      () => {
+        const code = `
         interface QueryClient {
           execute(key: string): Promise<unknown>
         }
@@ -629,24 +641,25 @@ describe('Unhandled Promise Detector', () => {
         }
       `
 
-      const { ast, typeInfo } = parseTypeScript({
-        filePath: 'test.ts',
-        sourceCode: code,
-        extractTypes: true,
-      })
+        const { ast, typeInfo } = parseTypeScript({
+          filePath: 'test.ts',
+          sourceCode: code,
+          extractTypes: true,
+        })
 
-      const detections = detectUnhandledPromises(ast, 'test.ts', typeInfo)
-      const unhandledPromises = detections.filter((d) => d.ruleId === 'unhandled-promise')
+        const detections = detectUnhandledPromises(ast, 'test.ts', typeInfo)
+        const unhandledPromises = detections.filter((d) => d.ruleId === 'unhandled-promise')
 
-      expect(unhandledPromises.length).toBeGreaterThan(0)
-      expect(unhandledPromises[0]?.metadata?.detectionBasis).toBe('resolved-type')
-    })
+        expect(unhandledPromises.length).toBeGreaterThan(0)
+        expect(unhandledPromises[0]?.metadata?.detectionBasis).toBe('resolved-type')
+      }
+    )
 
     // The inverse: a name that DOES match the heuristic ("query") but is
     // typed to return a plain string must not be flagged - the resolved
     // type overrides a coincidental name match, the same mechanism that
     // clears querySelector.
-    it('does not flag a name-matching call whose resolved type is not a promise', () => {
+    it('does not flag a name-matching call whose resolved type is not a promise', TYPED, () => {
       const code = `
         interface Cache {
           query(key: string): string
@@ -676,7 +689,7 @@ describe('Unhandled Promise Detector', () => {
     // call regardless of its name, that dead check surfaced as real false
     // positives on RIVET's own self-scan (genuinely awaited calls like
     // `await engine.analyze(dir)`, where "analyze" matches no name token).
-    it('does not flag a properly awaited call whose name matches no heuristic token', () => {
+    it('does not flag a properly awaited call whose name matches no heuristic token', TYPED, () => {
       const code = `
         interface Engine {
           analyze(dir: string): Promise<number>
