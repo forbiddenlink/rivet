@@ -1,57 +1,85 @@
 import type { Metadata } from 'next'
 
+import { ProsePage } from '../../components/ProsePage'
+import { REPO_URL } from '../../lib/links'
+
 export const metadata: Metadata = {
   title: 'Contact: RIVET',
-  description: 'Get in touch with the RIVET team. Report bugs, request features, or ask questions.',
+  description:
+    'Report a bug, request a feature, ask a question, or report a vulnerability in RIVET.',
 }
+
+const CHANNELS = [
+  {
+    href: `${REPO_URL}/issues/new?labels=bug`,
+    title: 'Report a bug',
+    detail: 'Opens a new issue with the bug label. Include the code and the finding you expected.',
+  },
+  {
+    href: `${REPO_URL}/issues/new?labels=enhancement`,
+    title: 'Request a feature',
+    detail: 'Opens a new issue with the enhancement label.',
+  },
+  {
+    href: `${REPO_URL}/discussions`,
+    title: 'Ask a question',
+    detail: 'GitHub Discussions, for usage questions and ideas that are not yet a request.',
+  },
+  {
+    href: `${REPO_URL}/pulls`,
+    title: 'Contribute a change',
+    detail: 'Open pull requests. CONTRIBUTING.md in the repo covers setup and conventions.',
+  },
+]
 
 export default function ContactPage(): React.ReactElement {
   return (
-    <main className="prose-page">
-      <h1>Contact</h1>
-
-      <section>
-        <h2>GitHub</h2>
-        <p>The best way to reach us is through the repository:</p>
-        <ul>
-          <li>
-            <strong>Bug reports</strong>: open an issue with the bug label
-          </li>
-          <li>
-            <strong>Feature requests</strong>: open an issue with the enhancement label
-          </li>
-          <li>
-            <strong>Questions</strong>: start a discussion
-          </li>
-          <li>
-            <strong>Contributions</strong>: submit a pull request
-          </li>
-        </ul>
-      </section>
-
-      <section>
-        <h2>Response time</h2>
-        <p>
-          We aim to respond within 48 hours. Critical security issues are prioritized and addressed
-          as quickly as possible.
-        </p>
-      </section>
-
-      <section>
-        <h2>Security</h2>
-        <p>If you discover a vulnerability in RIVET, report it responsibly:</p>
-        <ul>
-          <li>Do not open a public issue</li>
-          <li>Use GitHub&apos;s private vulnerability reporting</li>
-          <li>Include steps to reproduce</li>
-          <li>Allow time to fix before public disclosure</li>
-        </ul>
-      </section>
-
-      <section>
-        <h2>Community</h2>
-        <p>Join developers working to improve code quality. Star the repo and watch for updates.</p>
-      </section>
-    </main>
+    <ProsePage
+      title="Contact"
+      lede="RIVET is run in the open on GitHub. Pick the channel that matches what you need."
+      sections={[
+        {
+          id: 'channels',
+          title: 'GitHub',
+          body: (
+            <ul className="links">
+              {CHANNELS.map((c) => (
+                <li key={c.href}>
+                  <a href={c.href} target="_blank" rel="noopener noreferrer">
+                    <b className="ext">{c.title}</b>
+                    <span>{c.detail}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ),
+        },
+        {
+          id: 'security',
+          title: 'Report a vulnerability',
+          body: (
+            <>
+              <p>
+                Do not open a public issue for a security problem. Report it privately through
+                GitHub instead:
+              </p>
+              <ul className="links">
+                <li>
+                  <a
+                    href={`${REPO_URL}/security/advisories/new`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <b className="ext">Report privately</b>
+                    <span>Opens a private security advisory visible only to maintainers.</span>
+                  </a>
+                </li>
+              </ul>
+              <p>Include steps to reproduce, and allow time for a fix before public disclosure.</p>
+            </>
+          ),
+        },
+      ]}
+    />
   )
 }

@@ -1,64 +1,92 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
+
+import { ProsePage } from '../../components/ProsePage'
+import { ENGINES } from '../../lib/analysis'
+import { REPO_URL } from '../../lib/links'
 
 export const metadata: Metadata = {
   title: 'About: RIVET',
   description:
-    'RIVET is a professional code quality platform that finds issues and teaches developers how to fix them.',
+    'RIVET is an open-source code quality tool: eight static analysis engines for JavaScript and TypeScript, with explanations for every finding.',
+}
+
+const ENGINE_NOTES: Record<(typeof ENGINES)[number]['key'], string> = {
+  security: 'injection, hardcoded secrets, unsafe HTML, weak crypto and randomness',
+  bugs: 'loose equality, constant or duplicate conditions, empty catches, unawaited promises',
+  performance: 'nested and blocking loops, DOM queries in loops, re-render waste',
+  architecture: 'circular dependencies, layer violations, coupling',
+  smells: 'long methods, god objects, deep nesting, duplication, magic numbers',
+  practices: 'leftover console and debugger statements, thrown strings, naming',
+  dependencies: 'unused code, duplicate and side-effect imports, barrel-file chains',
+  flows: 'async paths without error handling, untested routes, missing error boundaries',
 }
 
 export default function AboutPage(): React.ReactElement {
   return (
-    <main className="prose-page">
-      <h1>About RIVET</h1>
-
-      <section>
-        <h2>Mission</h2>
-        <p>
-          RIVET helps development teams find and fix issues before they reach production. We combine
-          static analysis with AI explanations so findings are not just flags, they are teachable
-          moments.
-        </p>
-      </section>
-
-      <section>
-        <h2>What we detect</h2>
-        <ul>
-          <li>
-            <strong>Security</strong>: injection, XSS, secrets, weak crypto
-          </li>
-          <li>
-            <strong>Bugs</strong>: null refs, race conditions, async mistakes
-          </li>
-          <li>
-            <strong>Code smells</strong>: god objects, long methods, deep nesting
-          </li>
-          <li>
-            <strong>Performance</strong>: complexity hotspots, blocking work, re-render waste
-          </li>
-          <li>
-            <strong>Architecture</strong>: cycles, coupling, layer violations
-          </li>
-          <li>
-            <strong>Practices</strong>: naming, docs, framework conventions
-          </li>
-        </ul>
-      </section>
-
-      <section>
-        <h2>Technology</h2>
-        <p>
-          Built in TypeScript with a modular engine architecture. AST analysis runs in parallel; an
-          optional AI layer adds context, analogies, and tech-debt estimates.
-        </p>
-      </section>
-
-      <section>
-        <h2>Open source</h2>
-        <p>
-          RIVET is open source on GitHub. Contributions are welcome: star the repo, open an issue,
-          or ship a PR.
-        </p>
-      </section>
-    </main>
+    <ProsePage
+      title="About RIVET"
+      lede="RIVET finds quality and security problems in JavaScript and TypeScript and explains each one, so a finding is something you can act on rather than a flag to dismiss."
+      sections={[
+        {
+          id: 'engines',
+          title: 'What it checks',
+          body: (
+            <>
+              <p>Eight engines run in parallel on the parsed syntax tree:</p>
+              <ul>
+                {ENGINES.map((e) => (
+                  <li key={e.key}>
+                    <strong>{e.label}</strong>: {ENGINE_NOTES[e.key]}
+                  </li>
+                ))}
+              </ul>
+              <p>
+                The <Link href="/dashboard">dashboard</Link> scans one file. The CLI scans a whole
+                project, which is where the cross-file rules such as circular dependencies apply.
+              </p>
+            </>
+          ),
+        },
+        {
+          id: 'explanations',
+          title: 'Explanations',
+          body: (
+            <p>
+              Every finding comes with guidance on why it matters and how to fix it. With an OpenAI
+              key configured, a model writes that guidance; without one, RIVET uses its built-in
+              guide for the finding&apos;s category. The dashboard labels which one you are reading.
+            </p>
+          ),
+        },
+        {
+          id: 'status',
+          title: 'Project status',
+          body: (
+            <p>
+              RIVET is early. It runs from source today; the npm package is not published yet. The{' '}
+              <a href={`${REPO_URL}/blob/main/docs/ROADMAP.md`} className="ext">
+                roadmap
+              </a>{' '}
+              lists what is planned.
+            </p>
+          ),
+        },
+        {
+          id: 'open-source',
+          title: 'Open source',
+          body: (
+            <p>
+              RIVET is MIT licensed and{' '}
+              <a href={REPO_URL} className="ext">
+                developed on GitHub
+              </a>
+              . Issues, discussions and pull requests are welcome; the{' '}
+              <Link href="/contact">contact page</Link> lists where each one goes.
+            </p>
+          ),
+        },
+      ]}
+    />
   )
 }

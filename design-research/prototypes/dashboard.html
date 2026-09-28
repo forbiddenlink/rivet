@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RIVET prototype: dashboard (Direction A)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="proto.css">
+</head>
+<body>
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a class="brand" href="home.html"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 8.5h6.5V4H4v4.5Zm0 11.5h6.5v-4.5H4V20Zm9.5-11.5H20V4h-6.5v4.5Zm0 11.5H20v-4.5h-6.5V20Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10.5 10.5h3v3h-3v-3Z" fill="currentColor"/></svg>Rivet</a>
+    <button class="nav__menu" aria-expanded="false" onclick="const n=document.getElementById('nav');this.setAttribute('aria-expanded',n.toggleAttribute('data-open'))">Menu</button>
+    <nav class="nav__links" aria-label="Primary">
+      <a href="dashboard.html" aria-current="page">Dashboard</a>
+      <a href="#" class="ext">Docs</a>
+      <a href="#" class="ext">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap" id="app"></main>
+<div class="sheet-backdrop" id="backdrop"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title"></div>
+
+<div class="proto-bar">
+  <label for="state">State</label>
+  <select id="state">
+    <option value="empty">Input: empty</option>
+    <option value="ready">Input: file loaded</option>
+    <option value="analyzing">Analyzing</option>
+    <option value="results" selected>Results + detail</option>
+    <option value="parse">Could not parse</option>
+    <option value="clean">No findings</option>
+    <option value="error">Error: too large</option>
+  </select>
+</div>
+
+<script src="proto.js"></script>
+<script>
+const app = document.getElementById('app')
+const state = { sel: 0, sev: null, tab: 'findings' }
+const RULE_META = {
+  'hardcoded-secret': { why: 'Hardcoding secrets in source code is a security risk. Secrets should be stored in environment variables or secure key management systems.', fix: 'Move API Key to environment variables (process.env or import.meta.env) or use a secrets management service like AWS Secrets Manager, HashiCorp Vault, or Azure Key Vault.', cwe: 'CWE-798', owasp: 'A02:2021 - Cryptographic Failures' },
+}
+const GUIDE = {
+  security: ['Treat the finding as hostile input until proven otherwise', 'Prefer allowlists and parameterized APIs over string assembly', 'Remove secrets from source; rotate any that were committed', 'Add a regression test that would fail if the hole reopens'],
+  default: ['Read the surrounding code', 'Apply the smallest correct fix', 'Verify with a test', 'Re-scan to confirm it cleared'],
+}
+const counts = () => F.reduce((a, f) => ((a[f.severity] = (a[f.severity] || 0) + 1), a), {})
+
+function head(sub, actions = '') {
+  return `<div class="bench-head"><div><h1>Analyze</h1><p>${sub}</p></div><div class="actions">${actions}</div></div>`
+}
+function inputView(kind) {
+  const loaded = kind !== 'empty'
+  const banner = kind === 'parse' ? `<div class="alert alert--warn" role="alert" style="margin-bottom:12px"><span class="rivet sev-high"></span><div><b>RIVET could not parse this code, so no engines ran.</b><p>The parser reported <code>Identifier expected.</code> It tried TypeScript with JSX, then plain TypeScript. Fix the syntax below and analyze again.</p></div></div>` : kind === 'error' ? `<div class="alert alert--error" role="alert" style="margin-bottom:12px"><span class="rivet sev-critical"></span><div><b>This file is 214 KB. The web limit is 200 KB.</b><p>Trim it to the part you care about, or scan the whole project with the CLI.</p></div></div>` : ''
+  return head('Paste JavaScript or TypeScript, or upload one file. Nothing is stored.') + banner + `
+  <div class="input-bench">
+    <div class="editor">
+      <label for="code">Code <span class="spacer"></span>${loaded && kind !== 'parse' ? '<span class="mono" style="font-size:12px">31 lines</span>' : ''}<button class="btn btn--quiet" style="min-height:30px" onclick="show('ready')">Load demo snippet</button></label>
+      <textarea id="code" spellcheck="false" placeholder="// Paste a file here">${kind === 'parse' ? 'function (( { broken syntax' : loaded ? esc(DEMO) : ''}</textarea>
+      ${kind === 'analyzing' ? '<div class="progress" role="status" aria-label="Analyzing"><i></i></div>' : ''}
+    </div>
+    <div class="side">
+      <div>
+        <h2>Or upload a file</h2>
+        <button class="drop" type="button"><b>Drop a file or browse</b><span>.ts .tsx .js .jsx, up to 200 KB</span></button>
+        ${kind === 'ready' ? `<div class="file-row" style="margin-top:8px"><span class="rivet" style="color:var(--text-muted)"></span>demo.tsx 1.1 KB<span class="ok">Loaded</span></div><p class="skip" style="margin-top:6px">notes.md skipped: not a .ts, .tsx, .js or .jsx file</p>` : ''}
+      </div>
+      <div>
+        <h2>Engines</h2>
+        <ul class="engine-list">${['Security', 'Bugs', 'Performance', 'Architecture', 'Code smells', 'Practices', 'Dependencies', 'Flows'].map((e) => `<li><label><input type="checkbox" checked>${e}</label></li>`).join('')}</ul>
+      </div>
+      <div>
+        <h2><label for="minsev">Minimum severity</label></h2>
+        <select id="minsev" class="btn" style="width:100%;justify-content:flex-start"><option>Info and above</option><option>Low and above</option><option>Medium and above</option><option>High and above</option><option>Critical only</option></select>
+      </div>
+    </div>
+  </div>
+  <div class="run">
+    <button class="btn btn--primary" ${loaded ? '' : 'disabled'} onclick="show('results')">${kind === 'analyzing' ? 'Analyzing…' : 'Analyze'}</button>
+    <kbd>⌘</kbd><kbd>Enter</kbd>
+    <span style="margin-left:auto;font-size:13px;color:var(--text-muted)">${kind === 'analyzing' ? 'Running 8 engines' : loaded ? 'Ready' : 'Paste code to start'}</span>
+  </div>`
+}
+function detailHTML(f, inSheet) {
+  const list = visible()
+  const pos = list.findIndex((x) => x.i === f.i)
+  const meta = RULE_META[f.ruleId]
+  const guide = GUIDE[f.category] || GUIDE.default
+  const ex = document.createElement('pre')
+  renderSource(ex, { from: Math.max(1, f.line - 2), to: f.line + 2, active: f })
+  return `
+  <div class="detail__nav">
+    ${inSheet ? '' : '<button class="btn btn--quiet" style="min-height:28px" onclick="state.sel=null;render()">All findings</button>'}
+    <span>${pos + 1} of ${list.length}</span><span class="spacer"></span>
+    <button class="btn btn--quiet" style="min-height:28px" aria-label="Previous finding" onclick="step(-1)">↑</button>
+    <button class="btn btn--quiet" style="min-height:28px" aria-label="Next finding" onclick="step(1)">↓</button>
+    ${inSheet ? '<button class="btn" style="min-height:36px" onclick="closeSheet()">Close</button>' : ''}
+  </div>
+  <div class="detail">
+    <span class="sev-label sev-${f.severity}"><span class="rivet"></span>${f.severity}</span>
+    <h2 id="${inSheet ? 'sheet-title' : 'detail-title'}">${esc(f.message)}</h2>
+    <dl class="kv"><dt>Location</dt><dd>input.tsx:${f.line}:${f.col}</dd><dt>Rule</dt><dd>${f.ruleId}</dd><dt>Engine</dt><dd>${f.category}</dd>${meta ? `<dt>Refs</dt><dd>${meta.cwe}, OWASP ${meta.owasp}</dd>` : ''}</dl>
+    <div class="excerpt">${ex.innerHTML}</div>
+    ${meta ? `<h3>Why it matters <span class="source-tag">Detector</span></h3><p>${meta.why}</p><h3>Suggested fix <span class="source-tag">Detector</span></h3><p>${meta.fix}</p>` : `<h3>Why it matters <span class="source-tag">Detector</span></h3><p>${esc(f.message)}</p>`}
+    <h3>How to approach it <span class="source-tag">Built-in guide</span></h3>
+    <ol>${guide.map((g) => `<li>${g}</li>`).join('')}</ol>
+    <p style="margin-top:12px;font-size:12.5px;color:var(--text-muted)">AI explanations are off: this server has no OpenAI key.</p>
+  </div>`
+}
+const visible = () => F.filter((f) => !state.sev || f.severity === state.sev)
+function resultsView() {
+  const c = counts()
+  const list = visible()
+  const sel = state.sel == null ? null : F[state.sel]
+  const sevs = ['critical', 'high', 'medium', 'low', 'info']
+  return head('input.tsx, pasted', '<button class="btn">Export</button><button class="btn" onclick="show(\'ready\')">New analysis</button>') + `
+  <div class="status" role="status">
+    <span><b>12 findings</b> in 174 ms</span>
+    <div class="sev-filter" role="group" aria-label="Filter by severity">
+      ${sevs.map((s) => `<button aria-pressed="${state.sev === s}" onclick="state.sev=state.sev==='${s}'?null:'${s}';render()"><span class="rivet sev-${s}"></span>${c[s]} ${s}</button>`).join('')}
+    </div>
+    <span class="spacer" title="Severity-weighted: critical 4 h, high 2 h, medium 1 h, low 0.5 h, info 0.25 h">Estimated effort <b>17.3 h</b></span>
+  </div>
+  <div class="tabs" role="tablist"><button role="tab" aria-selected="${state.tab === 'code'}" onclick="state.tab='code';render()">Code</button><button role="tab" aria-selected="${state.tab === 'findings'}" onclick="state.tab='findings';render()">Findings (${list.length})</button></div>
+  <div class="bench" data-tab="${state.tab}">
+    <div class="src"><div class="src__bar"><strong>input.tsx</strong><span>31 lines</span><span class="spacer">Marks show the worst finding on each line</span></div><pre class="src__code" id="code-src"></pre></div>
+    <div class="pane">
+      ${sel ? `<div class="detail-wrap">${detailHTML(sel, false)}</div>` : ''}
+      <div ${sel ? 'class="list-wrap" data-desktop-hidden' : ''}>
+        <div class="pane__head"><input class="search" type="search" placeholder="Filter by message or rule" aria-label="Filter findings"></div>
+        <ul class="findings" role="listbox" aria-label="Findings" tabindex="0">
+          ${list.map((f) => `<li><button class="finding" role="option" aria-selected="${state.sel === f.i}" onclick="pick(${f.i})"><span class="rivet sev-${f.severity}"></span><span class="finding__msg">${esc(f.message)}</span><span class="finding__loc">L${f.line}</span><span class="finding__meta">${f.ruleId}</span></button></li>`).join('')}
+        </ul>
+      </div>
+    </div>
+  </div>`
+}
+function stateView(kind) {
+  const box = kind === 'parse'
+    ? `<div class="alert alert--warn" role="alert"><span class="rivet sev-high"></span><div><b>RIVET could not parse this code, so no engines ran.</b><p>The parser reported <code>Identifier expected.</code> It tried TypeScript with JSX, then plain TypeScript.</p><div class="actions"><button class="btn btn--primary" onclick="show('ready')">Edit the code</button><a class="btn" href="#">Report a parser bug</a></div></div></div>`
+    : `<div class="alert alert--ok" role="status"><span class="rivet" style="color:var(--success)"></span><div><b>No findings in 42 lines across 8 engines.</b><p>That covers this one file. Project-level checks such as circular dependencies and unused exports need the whole repository; run the CLI for those.</p><div class="actions"><button class="btn btn--primary" onclick="show('ready')">Analyze another file</button><a class="btn" href="home.html#install">Run it locally</a></div></div></div>`
+  return head(kind === 'parse' ? 'input.tsx, pasted' : 'utils.ts, uploaded', '<button class="btn" onclick="show(\'ready\')">New analysis</button>') + `<div style="max-width:760px">${box}</div>`
+}
+function render() {
+  const s = document.getElementById('state').value
+  if (s === 'results') {
+    app.innerHTML = resultsView()
+    renderSource(document.getElementById('code-src'), { active: state.sel != null ? F[state.sel] : null })
+    const hideList = state.sel != null && innerWidth > 900
+    const lw = app.querySelector('[data-desktop-hidden]'); if (lw) lw.style.display = hideList ? 'none' : ''
+  } else if (s === 'clean') app.innerHTML = stateView(s)
+  else app.innerHTML = inputView(s)
+}
+function pick(i) {
+  state.sel = i; render()
+  if (innerWidth <= 900) openSheet()
+  const ln = document.querySelector(`#code-src [data-line="${F[i].line}"]`); if (ln && innerWidth > 900) ln.scrollIntoView({ block: 'center' })
+}
+function step(d) { const l = visible(); const p = l.findIndex((x) => x.i === state.sel); const n = l[Math.min(l.length - 1, Math.max(0, p + d))]; if (n) { state.sel = n.i; render(); if (document.getElementById('sheet').hasAttribute('data-open')) openSheet() } }
+function openSheet() { const s = document.getElementById('sheet'); s.innerHTML = detailHTML(F[state.sel], true); s.setAttribute('data-open', ''); document.getElementById('backdrop').setAttribute('data-open', ''); s.querySelector('button:last-of-type')?.focus() }
+function closeSheet() { document.getElementById('sheet').removeAttribute('data-open'); document.getElementById('backdrop').removeAttribute('data-open') }
+document.getElementById('backdrop').onclick = closeSheet
+addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet() })
+function show(s) { document.getElementById('state').value = s; render() }
+document.getElementById('state').onchange = render
+function fromHash() { const h = location.hash.slice(1); if (h) { const [s, extra] = h.split(':'); document.getElementById('state').value = s; state.sel = extra === 'nosel' ? null : 0; if (extra === 'code') state.tab = 'code' } render() }
+addEventListener('hashchange', fromHash)
+fromHash()
+if (location.hash.includes(':sheet')) openSheet()
+</script>
+</body>
+</html>

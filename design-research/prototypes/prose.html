@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RIVET prototype: contact + 404 (Direction A)</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="proto.css">
+</head>
+<body>
+<header class="nav" id="nav"><div class="wrap">
+  <a class="brand" href="home.html"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 8.5h6.5V4H4v4.5Zm0 11.5h6.5v-4.5H4V20Zm9.5-11.5H20V4h-6.5v4.5Zm0 11.5H20v-4.5h-6.5V20Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10.5 10.5h3v3h-3v-3Z" fill="currentColor"/></svg>Rivet</a>
+  <button class="nav__menu" aria-expanded="false" onclick="const n=document.getElementById('nav');this.setAttribute('aria-expanded',n.toggleAttribute('data-open'))">Menu</button>
+  <nav class="nav__links" aria-label="Primary"><a href="dashboard.html">Dashboard</a><a href="#" class="ext">Docs</a><a href="#" class="ext">GitHub</a></nav>
+</div></header>
+
+<main class="wrap">
+  <div class="prose-grid">
+    <article class="prose">
+      <h1>Contact</h1>
+      <p class="lede">RIVET is an open source project. Every conversation happens on GitHub.</p>
+      <h2 id="report">Report or ask</h2>
+      <ul class="links">
+        <li><a href="https://github.com/forbiddenlink/rivet/issues/new?labels=bug"><b>Report a bug</b><span>Opens a new issue with the bug label</span><i>↗</i></a></li>
+        <li><a href="https://github.com/forbiddenlink/rivet/issues/new?labels=enhancement"><b>Request a feature</b><span>Opens a new issue with the enhancement label</span><i>↗</i></a></li>
+        <li><a href="https://github.com/forbiddenlink/rivet/discussions"><b>Ask a question</b><span>GitHub Discussions</span><i>↗</i></a></li>
+        <li><a href="https://github.com/forbiddenlink/rivet/pulls"><b>Contribute</b><span>Open a pull request; see CONTRIBUTING.md first</span><i>↗</i></a></li>
+      </ul>
+      <h2 id="security">Security</h2>
+      <p>To report a vulnerability in RIVET itself, use GitHub's private vulnerability reporting, not a public issue. Include steps to reproduce, and allow time for a fix before disclosure.</p>
+      <p><a class="btn" href="https://github.com/forbiddenlink/rivet/security/advisories/new">Report a vulnerability privately</a></p>
+      <h2 id="response">Response time</h2>
+      <p>We aim to respond within 48 hours. Critical security issues come first.</p>
+    </article>
+    <nav class="toc" aria-label="On this page"><p>On this page</p><a href="#report">Report or ask</a><a href="#security">Security</a><a href="#response">Response time</a></nav>
+  </div>
+
+  <section class="sect" aria-label="404 preview">
+    <div class="src" style="max-width:640px">
+      <div class="src__bar"><strong>404</strong><span>/pricing</span></div>
+      <pre class="src__code" style="padding:16px 18px;white-space:pre-wrap">$ rivet open /pricing
+<span class="sev-high">error</span>  no page at this address
+
+Try the <a href="home.html" style="color:var(--accent)">home page</a> or <a href="dashboard.html" style="color:var(--accent)">analyze a file</a>.</pre>
+    </div>
+    <p class="caption">Proposed 404 page, shown here below the contact page for review. It keeps the site chrome.</p>
+  </section>
+</main>
+<footer class="foot"><div class="wrap"><nav aria-label="Footer"><a href="#">About</a><a href="#">Privacy</a><a href="prose.html">Contact</a><a href="#" class="ext">GitHub</a></nav><span class="copy">© 2026 RIVET</span></div></footer>
+</body>
+</html>

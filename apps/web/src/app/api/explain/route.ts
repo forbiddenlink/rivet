@@ -6,9 +6,12 @@ import { clientKey, rateLimit, rateLimitHeaders } from '@/lib/rate-limit'
 export const runtime = 'nodejs'
 export const maxDuration = 30
 
-// This route spends money: it is unauthenticated and calls OpenAI on the project's
-// key. The cap is tighter than /api/analyze for that reason.
-const RATE_LIMIT = { limit: 6, windowMs: 60_000 }
+// The model path spends money: it is unauthenticated and calls OpenAI on the
+// project's key, so it keeps a tight cap. Past that cap the caller gets the free
+// built-in guide instead of an error. The guide is a table lookup, so its own cap
+// only stops a single client hammering the route.
+const AI_RATE_LIMIT = { limit: 6, windowMs: 60_000 }
+const GUIDE_RATE_LIMIT = { limit: 60, windowMs: 60_000 }
 
 // The detection fields are pasted straight into the model prompt, so they are
 // truncated first. An unbounded message is both a cost multiplier and the obvious
@@ -34,6 +37,8 @@ interface ExplanationResponse {
   explanation: string
   remediation: string
   references?: string[]
+  /** 'ai' when a model wrote it, 'guide' for the built-in category guide. */
+  source: 'ai' | 'guide'
 }
 
 const REPO = 'https://github.com/forbiddenlink/rivet'
@@ -88,17 +93,21 @@ function localExplanation(detection: ExplanationRequest['detection']): Explanati
     refs: [REPO],
   }
 
+  // The finding's own message is already on screen next to this, so the guide
+  // adds the reason, not a restatement of the finding.
   return {
-    explanation: `This is a ${detection.severity} ${detection.category} issue (${detection.ruleId}).\n\n${detection.message}\n\n${guide.why}`,
+    explanation: guide.why,
     remediation: guide.fix,
     references: guide.refs,
+    source: 'guide',
   }
 }
 
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<ExplanationResponse | { error: string }>> {
-  const limit = rateLimit(clientKey(request), RATE_LIMIT)
+  const caller = clientKey(request)
+  const limit = rateLimit(`explain:${caller}`, GUIDE_RATE_LIMIT)
   if (!limit.ok) {
     return NextResponse.json(
       { error: `Too many explanation requests. Try again in ${limit.retryAfter}s.` },
@@ -122,7 +131,7 @@ export async function POST(
     const code = clamp(body.code, MAX_CODE_CHARS)
 
     const apiKey = process.env.OPENAI_API_KEY
-    if (!apiKey) {
+    if (!(apiKey && rateLimit(`explain-ai:${caller}`, AI_RATE_LIMIT).ok)) {
       return NextResponse.json(localExplanation(detection))
     }
 
@@ -181,6 +190,7 @@ REMEDIATION:
         localExplanation(detection).explanation,
       remediation: remediationMatch?.[1]?.trim() || localExplanation(detection).remediation,
       references: localExplanation(detection).references,
+      source: 'ai',
     })
   } catch (error) {
     // Logged server-side; the client gets a fixed message rather than upstream
