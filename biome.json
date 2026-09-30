@@ -22,7 +22,8 @@
       "!pnpm-lock.yaml",
       "!**/*.d.ts",
       "!packages/*/src/**/*.js",
-      "!examples"
+      "!examples",
+      "!design-research"
     ]
   },
   "assist": {

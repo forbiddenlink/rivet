@@ -1,178 +1,193 @@
 # RIVET Design Guide
 
-Visual identity, UI/UX guidelines, and design system for RIVET.
+Snapshot as of 2026-09-27, revised after the second pass (see
+`design-research/second-pass.md`). Written against `6bc2114` (main) plus the
+`feat/annotated-source-redesign` working tree. The tokens in
+`apps/web/src/app/globals.css` are the source of truth; this file explains them.
 
----
+The web direction is **"Annotated source"**. It was chosen over a report-style
+alternative in `design-research/directions.md` and prototyped in
+`design-research/prototypes/`. Reference evidence (R01 to R13) is in
+`design-research/log.md`. Decisions with no external reference are marked
+**(original)**.
 
-## 🎨 Design Philosophy
+## Principles
 
-**Professional. Terminal-inspired. No AI clichés.**
+1. **The code is the artifact.** A finding is shown on the line that caused it,
+   with the source visible beside the list. Nothing pushes the code off screen
+   after a scan. (R01 Semgrep playground, R08 Oxc playground)
+2. **One memorable element.** The rivet head, the square-in-square from the logo,
+   is the severity mark in the code gutter, in lists and in filters. Everything
+   around it stays quiet. **(original)**
+3. **Say what actually happened.** A parse failure says no engines ran and quotes
+   the parser. Guidance is labeled as AI or built-in guide. The home page says the
+   npm package is not published. Never show a count, claim or state the system did
+   not produce.
+4. **Dark, warm, sharp.** Warm charcoal surfaces, one amber accent reserved for
+   action and the current selection, radii of 2 to 6px. No gradients, glows or
+   decorative shadows. (`.impeccable.md`, R09 Linear, R13 CodeRabbit)
+5. **Keyboard first, thumb friendly.** One tab stop per list, arrow keys inside it,
+   Cmd/Ctrl+Enter to run. On phones, 44px targets, a pinned run bar and a bottom
+   sheet for detail. (R01 mobile tabs, R11 Vaul drawer)
 
-RIVET's design reflects our core values:
-- **Honesty** - No flashy marketing, clear communication
-- **Efficiency** - Information-dense, fast to parse
-- **Professionalism** - Serious tool for serious developers
-- **Clarity** - Every element serves a purpose
+## Color
 
----
+All values are OKLCH. Surfaces are a four-step warm ladder:
 
-## ❌ What We Avoid (AI Clichés)
+| Token | Value | Use |
+|---|---|---|
+| `--bg-canvas` | `oklch(0.12 0.008 60)` | page, editor, code wells |
+| `--bg-primary` | `oklch(0.145 0.01 60)` | panels, nav menu, sheet |
+| `--bg-secondary` | `oklch(0.18 0.012 60)` | hover, notes, buttons |
+| `--bg-tertiary` | `oklch(0.22 0.014 60)` | pressed filters, button hover |
+| `--accent` | `oklch(0.78 0.15 70)` | primary action, focus ring, selection |
+| `--accent-muted` | accent at 12% | selected row and active code line |
 
-### The "AI Tool" Aesthetic (DON'T)
-- ❌ Purple gradients (every AI tool uses purple)
-- ❌ Sparkle/star/magic icons ✨
-- ❌ Glowing effects everywhere
-- ❌ Rounded bubbly fonts
-- ❌ Generic "assistant" vibes
-- ❌ Overly colorful dashboards
-- ❌ Cute robot mascots
-- ❌ "Powered by AI" badges everywhere
+Text: `--text-primary` 0.96, `--text-secondary` 0.76, `--text-muted` 0.68,
+`--text-faint` 0.64 (line numbers only). Borders are white at 7%, 11% and 18%.
 
-**Why?** We want to be taken seriously as a professional code quality tool, not another AI chatbot.
+Severity colors are used only on the rivet mark, the severity word and alert
+borders, never as text on a tinted fill:
 
----
+| Severity | Token |
+|---|---|
+| critical | `--critical: oklch(0.7 0.19 25)` |
+| high | `--high: oklch(0.74 0.15 45)` |
+| medium | `--medium: oklch(0.83 0.13 85)` |
+| low | `--low: oklch(0.74 0.1 230)` |
+| info | `--info: oklch(0.7 0.02 60)` |
 
-## ✅ What We Embrace
+Pairings verified with axe (WCAG 2.2 AA) on every page at 1440 and 390px:
+body text on all four surfaces, muted text on `--bg-primary`, line numbers on
+flagged-line tint, primary button text (`--text-inverse`) on amber.
 
-### Inspiration
-- **Linear** - Clean, fast, keyboard-first
-- **Vercel** - Minimalist, professional
-- **Stripe** - Information-dense, clear hierarchy
-- **GitHub CLI** - Terminal aesthetics
-- **Railway** - Dark mode excellence
+## Type
 
----
+IBM Plex Sans for interface and prose; JetBrains Mono for code, rule ids,
+file paths and commands only. Both load through `next/font` and are referenced
+as `var(--font-plex-sans)` and `var(--font-jetbrains)`.
 
-## 🎨 Color Palette
+| Role | Size / line height | Weight | Tracking |
+|---|---|---|---|
+| Home display | clamp(40px, 5.2vw, 64px) / 1.02 | 600 | -0.045em |
+| Prose h1 | 40px (32px under 900px) / 1.1 | 600 | -0.035em |
+| Section h2 | 28px / 1.15 | 600 | -0.03em |
+| Dashboard h1 | 22px | 600 | -0.02em |
+| Prose h2, detail title | 20px, 17px / 1.35 | 600 | -0.015em |
+| Lede | 18px / 1.5 | 400 | 0 |
+| Body | 15px / 1.55 | 400 | 0 |
+| UI small | 13 to 14px | 400 to 500 | 0 |
+| Code | 13px / 1.7 mono | 400 | 0 |
 
-Actual tokens are defined in `apps/web/src/app/globals.css` and use the OKLCH color space, not hex.
+Sentence case everywhere. No all-caps tracked labels, no middle-dot meta
+strings, no arrows appended to links (the `↗` external marker is the one
+exception, and it only marks links that leave the site).
 
-### Surfaces & accent
-```css
---bg-canvas: oklch(0.12 0.008 60);
---bg-primary: oklch(0.145 0.01 60);
---bg-secondary: oklch(0.18 0.012 60);
---bg-tertiary: oklch(0.22 0.014 60);
---bg-elevated: oklch(0.2 0.012 60);
+## Space and grid
 
---accent: oklch(0.78 0.15 70);         /* forge amber */
---accent-hover: oklch(0.84 0.14 75);
---accent-pressed: oklch(0.68 0.14 65);
---accent-muted: oklch(0.78 0.15 70 / 0.12);
---accent-subtle: oklch(0.78 0.15 70 / 0.06);
-```
+- Container `--container: 1200px`, gutter `--gutter` 24px (16px at 720px and
+  below). Every page family uses `.wrap`, so edges line up across pages.
+- Home and section heads use a 5:7 two-column grid with a 56px gap, collapsing
+  to one column under 1024px. (R02 Biome)
+- Dashboard results: code pane plus a 420px inspector. Input: editor plus a
+  320px settings column. Both collapse to one column under 900px.
+- Prose: a 68ch reading column and a 200px sticky on-page index, which is hidden
+  under 900px. (R10 Ghostty docs)
+- Vertical rhythm: 72px section padding on desktop, 48px on smaller screens.
 
-### Text
-```css
---text-primary: oklch(0.96 0.01 80);
---text-secondary: oklch(0.72 0.015 70);
---text-muted: oklch(0.55 0.012 65);
---text-inverse: oklch(0.14 0.01 60);
-```
+## Breakpoints
 
-### Semantic (severity) colors
-```css
---critical: oklch(0.63 0.22 25);
---high: oklch(0.7 0.17 45);
---medium: oklch(0.8 0.14 85);
---low: oklch(0.7 0.1 230);
---info: oklch(0.6 0.02 60);
---success: oklch(0.72 0.15 155);
-```
-Each has a matching `-bg` variant at 12% alpha.
+| Width | Change |
+|---|---|
+| 1023px | hero and section heads stack |
+| 900px | dashboard and prose go single column; results tabs and detail sheet appear; 44px targets |
+| 720px | nav collapses to a Menu button; gutter 16px; engines table becomes stacked rows |
 
-### Category accents
-One accent per engine, restrained, no purple:
-```css
---cat-security, --cat-bugs, --cat-performance, --cat-smells,
---cat-architecture, --cat-practices, --cat-dependencies, --cat-flows
-```
+## Components
 
-### Borders
-```css
---border-subtle: oklch(1 0 0 / 0.06);
---border-default: oklch(1 0 0 / 0.1);
---border-emphasis: oklch(1 0 0 / 0.16);
---border-accent: oklch(0.78 0.15 70 / 0.4);
-```
+- **Rivet mark** (`SeverityMark`, `.rivet.sev-*`): 10px square outline with a
+  4px center, in the severity color. Always paired with text or an sr-only
+  label; it is `aria-hidden`. **(original)**
+- **Annotated source** (`AnnotatedSource`): gutter mark for the worst finding
+  on each line, line number, lightly highlighted code (comments, strings,
+  keywords; React nodes, never HTML), optional notes printed under a line.
+  The active line gets the amber inset bar. The scroll container is a labeled,
+  focusable `section`. Notes size to the pane with a container query.
+  (R01, R08)
+- **Status line** (`.status`): count and duration, severity filter toggles
+  (`aria-pressed`) with counts, and an "Estimated effort" `<details>` whose
+  per-severity breakdown opens **inline** as a full-width row. It never floats over
+  the findings, so the native toggle is the whole interaction. On phones the
+  severity toggles stay visible in one row that scrolls sideways rather than
+  wrapping. (R01; second pass S03, S04, S06)
+- **Finding list** (`FindingList`): a listbox with one tab stop and
+  `aria-activedescendant`. Arrow keys, Home and End move the selection; Enter
+  opens it. Keeping the selection in view scrolls the list only, never the page.
+  When filters match nothing, the empty state offers **Clear filters**. (R09 Linear;
+  second pass S04)
+- **Finding detail** (`FindingDetail`): "N of M" with previous and next,
+  severity, title, a key/value table (location, rule, category, this finding's
+  effort estimate, metadata),
+  and guidance labeled **AI** or **Built-in guide**. Numbered remediation text
+  renders as an ordered list. Answers are cached for the page and requested
+  after a 200ms pause, because `/api/explain` is rate limited. (R02 Biome counter)
+- **Detail sheet** (mobile): a native `<dialog>` opened with `showModal()`, with
+  focus inside, a Close button and Esc. It includes a five-line code excerpt,
+  since the code pane is on another tab, and a **Show in code** button that closes
+  the sheet, switches to the Code view on that line and focuses it. Focus returns
+  to the list on close. (R11 Vaul; second pass S01)
+- **Input bench**: editor, single-file upload with a file row and a message
+  that names any skipped files, engine checkboxes and a minimum-severity select
+  (saved to `localStorage` under `rivet-config`), and a run bar that becomes
+  sticky on phones. (R12 upload card, R01 mobile run bar)
+- **Alerts** (`.alert--warn|error|ok`): tinted border and fill, bold first
+  line that states what happened, then what to do. Used for parse failure, the
+  empty result and guidance errors.
+- **Buttons**: primary (amber), default (secondary surface), quiet
+  (transparent). 40px default, 32px small, 46px large, and 44px minimum under
+  900px or on coarse pointers.
+- **Prose layout** (`ProsePage`): title, optional date, lede, sections with
+  ids, and the on-page index. Contact uses `.links` rows for real destinations.
+- **404 and error**: site chrome stays; a terminal-style block states the
+  error, then plain copy and two exits. **(original)**
 
----
+## Focus rules
 
-## 🔤 Typography
+- When results replace the input form, focus moves to the results heading (or the
+  no-findings message). Focus never falls back to `<body>`.
+- "Edit code" returns focus to the editor.
+- Anything that scrolls sideways must either be keyboard focusable (the annotated
+  source is a labeled `section` with `tabIndex=0`) or wrap instead of scrolling
+  (the command blocks on the home page wrap).
 
-### Fonts
+## States
 
-**Code (Monospace):** `JetBrains Mono` (Google Font, via `next/font/google` in `layout.tsx`).
-- Use for: Code snippets, file paths, commands, data
+Every dashboard state has a designed screen: empty editor, loading
+(indeterminate bar plus "Running N engines", with no fake percentage), parse
+failure (code kept in the editor), request error (inline under the run bar),
+zero findings (which names the severity threshold when one was set), results,
+filter with no matches, guidance loading and guidance error. Screenshots of each
+are in `design-research/shots/final/`.
 
-**UI (Sans-serif):** `IBM Plex Sans` (Google Font, not Inter).
-- Use for: Headings, body text, buttons, labels
+## Motion
 
-### Type Scale
-Actual values from `globals.css` (not a round 16px base):
-```css
---text-xs: 0.75rem;
---text-sm: 0.8125rem;
---text-base: 0.9375rem;
---text-lg: 1.0625rem;
---text-xl: 1.25rem;
---text-2xl: 1.5rem;
---text-3xl: clamp(1.75rem, 3vw, 2.25rem);
---text-4xl: clamp(2.25rem, 5vw, 3.5rem);
-```
+Only motion that answers an action: button background transitions (150ms),
+the sheet sliding up (280ms, `cubic-bezier(0.16, 1, 0.3, 1)`), and the
+indeterminate progress bar. No entrance animations. `prefers-reduced-motion`
+reduces every animation and transition to 0.01ms.
 
-### Font Weights
-```css
---font-normal: 400;
---font-medium: 500;
---font-semibold: 600;
---font-bold: 700;
-```
+## Constraints
 
-### Line Heights
-```css
---leading-tight: 1.25;
---leading-normal: 1.5;
---leading-relaxed: 1.75;
-```
+- Plain CSS in `globals.css`, no Tailwind. Tokens on `:root`.
+- CSP allows `font-src 'self'`, `img-src 'self' data:`, `connect-src 'self'`:
+  no external fonts, images or scripts.
+- Copy never claims an unshipped capability, customer or metric. Numbers shown
+  are computed from the scan in front of the user.
+- The `DEMO_FINDINGS` shown on the home page are guarded by
+  `apps/web/src/lib/demo.test.ts`, which fails if the engines' real output for
+  `DEMO_CODE` drifts.
 
----
-
-## 📐 Spacing System
-
-```css
---space-1: 0.25rem;   /* 4px */
---space-2: 0.5rem;    /* 8px */
---space-3: 0.75rem;   /* 12px */
---space-4: 1rem;      /* 16px */
---space-6: 1.5rem;    /* 24px */
---space-8: 2rem;      /* 32px */
---space-12: 3rem;     /* 48px */
---space-16: 4rem;     /* 64px */
-```
-
-**Consistent spacing:**
-- 4px grid system
-- Use multiples of 4px
-- No random spacing values
-
----
-
-## 🔲 Border Radius
-
-```css
---radius-none: 0;
---radius-sm: 0.125rem;    /* 2px - very subtle */
---radius-md: 0.25rem;     /* 4px - default */
---radius-lg: 0.5rem;      /* 8px - cards */
---radius-full: 9999px;    /* Pills/badges */
-```
-
-**Philosophy:** Sharp or slightly rounded. Never bubbly.
-
----
-
-## 💻 CLI Design
+## CLI output
 
 ### Terminal Output Style
 
@@ -233,353 +248,3 @@ const info = chalk.gray
 │ More content  │
 ╰───────────────╯
 ```
-
----
-
-## 🖥️ Web Dashboard Design
-
-### Layout Principles
-
-1. **Information Density**
-   - Developers want data, not whitespace
-   - Show more, scroll less
-   - Compact but not cramped
-
-2. **Hierarchy**
-   - Clear visual hierarchy
-   - Most important info first
-   - Progressive disclosure
-
-3. **Performance**
-   - Instant feedback
-   - Skeleton loaders
-   - Optimistic updates
-
-### Dashboard Layout
-
-```
-┌─────────────────────────────────────────────────────────┐
-│ RIVET                    [Project ▼]    [Scan] [Report] │ ← Header
-├─────────────────────────────────────────────────────────┤
-│                                                          │
-│  ╭─ Tech Debt Score ─╮  ╭─ Issues By Category ────────╮│
-│  │                    │  │  Security      8 ⚠         ││
-│  │      72/100        │  │  Bugs          3 ⚠         ││
-│  │       ⚠            │  │  Performance   12 ○        ││
-│  │                    │  │  Code Smells   24 ○        ││
-│  │  ▁▂▃▄▅▆▇█         │  │  Dependencies  15 ⚠         ││
-│  ╰────────────────────╯  ╰────────────────────────────╯│
-│                                                          │
-│  ╭─ Critical Issues ──────────────────────────────────╮ │
-│  │  ⚠ SQL Injection in auth.ts:42                    │ │
-│  │  ⚠ Exposed API key in config.ts:12                │ │
-│  │  ⚠ react 17.0.2 has 2 CVEs                        │ │
-│  │  → View all 8 critical issues                     │ │
-│  ╰────────────────────────────────────────────────────╯ │
-│                                                          │
-│  ╭─ Recent Scans ─────────────────────────────────────╮ │
-│  │  Jan 1, 2026 10:23am  main branch    72/100  ⚠    │ │
-│  │  Dec 31, 2025 4:45pm  feature/auth   68/100  ⚠    │ │
-│  │  Dec 30, 2025 2:10pm  main branch    71/100  ⚠    │ │
-│  ╰────────────────────────────────────────────────────╯ │
-└─────────────────────────────────────────────────────────┘
-```
-
-### Component Design
-
-#### Cards
-```css
-.card {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
-}
-
-/* Hover state - subtle */
-.card:hover {
-  border-color: var(--border-default);
-}
-```
-
-#### Buttons
-```css
-/* Primary button */
-.btn-primary {
-  background: var(--accent-primary);
-  color: var(--bg-primary);
-  font-weight: var(--font-semibold);
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-md);
-  transition: all 150ms ease;
-}
-
-.btn-primary:hover {
-  background: var(--accent-hover);
-  transform: translateY(-1px);
-}
-
-/* Ghost button */
-.btn-ghost {
-  background: transparent;
-  color: var(--text-secondary);
-  border: 1px solid var(--border-default);
-}
-```
-
-#### Badges
-```css
-.badge {
-  display: inline-flex;
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
-  font-size: var(--text-xs);
-  font-weight: var(--font-medium);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.badge-critical {
-  background: var(--error-bg);
-  color: var(--error);
-}
-```
-
----
-
-## 🎯 Icon System
-
-No icon library is a dependency of `apps/web` today; the web app currently uses emoji and inline
-SVG rather than an icon package.
-
-### Icon Guidelines
-- Line icons only (no filled)
-- 24px default size
-- 1.5px stroke width
-- Consistent style across app
-- Use semantic naming
-
-### Common Icons
-```
-⚠  Warning/Alert
-✓  Success/Check
-✗  Error/X
-○  Circle/Bullet
-●  Filled Circle
-→  Arrow Right
-↗  External Link
-⚙  Settings
-📊 Charts/Analytics
-🔒 Security
-⚡ Performance
-🔍 Search
-📄 File
-📁 Folder
-```
-
----
-
-## 📱 Responsive Design
-
-### Breakpoints
-```css
---screen-sm: 640px;   /* Mobile */
---screen-md: 768px;   /* Tablet */
---screen-lg: 1024px;  /* Desktop */
---screen-xl: 1280px;  /* Large desktop */
-```
-
-### Mobile-First Approach
-1. Design for mobile first
-2. Enhance for larger screens
-3. Touch-friendly targets (44px min)
-4. No hover-only interactions
-
----
-
-## ♿ Accessibility
-
-### Requirements
-1. **Color Contrast**
-   - WCAG AA minimum (4.5:1 for text)
-   - Test with contrast checker
-
-2. **Keyboard Navigation**
-   - All interactive elements tabbable
-   - Visible focus indicators
-   - Escape to close modals
-
-3. **Screen Readers**
-   - Semantic HTML
-   - ARIA labels where needed
-   - Alt text for images
-
-4. **Motion**
-   - Respect `prefers-reduced-motion`
-   - Subtle animations only
-
-### Focus Indicators
-```css
-:focus-visible {
-  outline: 2px solid var(--accent-primary);
-  outline-offset: 2px;
-}
-```
-
----
-
-## 🎬 Animation Guidelines
-
-### Principles
-1. **Purposeful** - Every animation serves a function
-2. **Fast** - 150-300ms max
-3. **Subtle** - Don't distract
-4. **Skippable** - Respect motion preferences
-
-### Timing Functions
-```css
---ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
---ease-out: cubic-bezier(0, 0, 0.2, 1);
---ease-in: cubic-bezier(0.4, 0, 1, 1);
-```
-
-### Common Animations
-```css
-/* Fade in */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* Slide up */
-@keyframes slideUp {
-  from { 
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to { 
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Scale in */
-@keyframes scaleIn {
-  from { 
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to { 
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-```
-
----
-
-## 🖼️ Data Visualization
-
-### Chart Colors
-```css
---chart-1: #f59e0b;  /* Amber - primary */
---chart-2: #10b981;  /* Green - success */
---chart-3: #3b82f6;  /* Blue - info */
---chart-4: #8b5cf6;  /* Purple - only acceptable use */
---chart-5: #ef4444;  /* Red - error */
-```
-
-### Chart Guidelines
-1. Use `recharts` library
-2. Dark background
-3. Muted grid lines
-4. Clear labels
-5. Tooltips on hover
-
----
-
-## 📐 Grid System
-
-```css
-.container {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 var(--space-4);
-}
-
-.grid {
-  display: grid;
-  gap: var(--space-6);
-  grid-template-columns: repeat(12, 1fr);
-}
-
-.col-span-6 {
-  grid-column: span 6;
-}
-```
-
----
-
-## 🎨 Brand Assets
-
-### Logo
-- Rivet icon: 🔩 (simple rivet symbol)
-- Wordmark: "RIVET" in JetBrains Mono
-- Color: Amber on dark or White on dark
-
-### Logo Variations
-```
-RIVET      # Primary
-🔩 RIVET   # With icon
-rivet      # Lowercase (CLI contexts)
-```
-
-### Tagline
-"Rivet your codebase"
-
-### Usage
-- On dark backgrounds: Amber or white
-- On light backgrounds: Charcoal
-- Minimum clear space: 16px all sides
-- Minimum size: 100px width
-
----
-
-## 🎯 Design Checklist
-
-Before shipping any UI:
-
-- [ ] Follows color palette
-- [ ] Uses correct typography
-- [ ] Consistent spacing (4px grid)
-- [ ] Accessible (contrast, keyboard, screen reader)
-- [ ] Responsive (mobile to desktop)
-- [ ] Dark mode tested
-- [ ] Loading states
-- [ ] Error states
-- [ ] Empty states
-- [ ] No AI clichés (purple, sparkles, etc.)
-
----
-
-## 🚫 Common Mistakes to Avoid
-
-1. ❌ **Too much color** - Keep it professional
-2. ❌ **Inconsistent spacing** - Use the spacing system
-3. ❌ **Poor contrast** - Test accessibility
-4. ❌ **Overly rounded corners** - Keep it sharp
-5. ❌ **Flashy animations** - Subtle is better
-6. ❌ **Generic AI aesthetics** - Be unique
-
----
-
-## 🎓 Design Resources
-
-`apps/web` has no UI component library, icon package, or charting library as a dependency today;
-components are hand-built with plain React/CSS.
-
-- **Examples**: Linear, Vercel, Stripe
-
----
-
-**Design with purpose. Build with confidence.** 🔩

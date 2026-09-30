@@ -5,12 +5,15 @@ import { useState } from 'react'
 interface CopyButtonProps {
   text: string
   label?: string
+  /** Accessible name when several copy buttons share the visible label. */
+  ariaLabel?: string
   className?: string
 }
 
 export function CopyButton({
   text,
   label = 'Copy',
+  ariaLabel,
   className = 'btn btn--ghost btn--sm',
 }: CopyButtonProps) {
   const [copied, setCopied] = useState(false)
@@ -34,7 +37,13 @@ export function CopyButton({
   }
 
   return (
-    <button type="button" className={className} onClick={handleCopy} aria-live="polite">
+    <button
+      type="button"
+      className={className}
+      onClick={handleCopy}
+      aria-label={ariaLabel}
+      aria-live="polite"
+    >
       {copied ? 'Copied' : label}
     </button>
   )

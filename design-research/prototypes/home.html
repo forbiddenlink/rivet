@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RIVET prototype: home (Direction A)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="proto.css">
+</head>
+<body>
+<a class="sr-only" href="#main">Skip to main content</a>
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a class="brand" href="home.html"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 8.5h6.5V4H4v4.5Zm0 11.5h6.5v-4.5H4V20Zm9.5-11.5H20V4h-6.5v4.5Zm0 11.5H20v-4.5h-6.5V20Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10.5 10.5h3v3h-3v-3Z" fill="currentColor"/></svg>Rivet</a>
+    <button class="nav__menu" aria-expanded="false" aria-controls="nav-links" onclick="const n=document.getElementById('nav');const o=n.toggleAttribute('data-open');this.setAttribute('aria-expanded',o)">Menu</button>
+    <nav class="nav__links" id="nav-links" aria-label="Primary">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="#" class="ext">Docs</a>
+      <a href="#" class="ext">GitHub</a>
+      <a href="dashboard.html" class="btn btn--primary" style="margin-left:8px;min-height:34px">Analyze code</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero">
+    <div class="wrap hero__grid">
+      <div>
+        <h1>Code quality that holds.</h1>
+        <p class="hero__lede proposed">Eight static analysis engines read your JavaScript and TypeScript and pin each finding to the line that caused it.</p>
+        <div class="hero__actions">
+          <a class="btn btn--primary" href="dashboard.html">Analyze a file</a>
+          <a class="btn" href="#install">Run it locally</a>
+        </div>
+        <p class="hero__req proposed">Runs from source today. The npm package is not published yet.</p>
+      </div>
+      <figure style="margin:0">
+        <div class="src">
+          <div class="src__bar"><strong>demo.tsx</strong><span>12 findings</span><span class="spacer sev-label sev-critical"><span class="rivet"></span>1 critical</span><span class="sev-label sev-high"><span class="rivet"></span>4 high</span></div>
+          <pre class="src__code" id="hero-src"></pre>
+        </div>
+        <figcaption class="caption proposed">The dashboard's built-in demo snippet, scanned by all eight engines. Findings shown are the real output, trimmed to lines 1 to 17.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="sect" aria-labelledby="engines-h">
+    <div class="wrap">
+      <div class="sect__head">
+        <h2 id="engines-h">What each engine looks for</h2>
+        <p class="proposed">Engines run in parallel on the parsed syntax tree. Each finding carries a rule id, a severity, and the exact line and column.</p>
+      </div>
+      <table class="engines">
+        <thead><tr><th>Engine</th><th>Looks for</th><th>Example rules</th></tr></thead>
+        <tbody>
+          <tr><td>Security</td><td>Injection, hardcoded secrets, unsafe HTML, weak crypto and randomness, path traversal</td><td><code>sql-injection</code> <code>hardcoded-secret</code> <code>xss-react</code></td></tr>
+          <tr><td>Bugs</td><td>Loose equality, constant or duplicate conditions, empty catches, unawaited promises</td><td><code>loose-equality</code> <code>empty-catch</code></td></tr>
+          <tr><td>Performance</td><td>Nested and blocking loops, DOM queries in loops, re-render waste in React</td><td><code>nested-loops</code> <code>state-update-in-render</code></td></tr>
+          <tr><td>Architecture</td><td>Circular dependencies, layer violations, high coupling, SOLID breaks</td><td><code>circular-dependency</code> <code>layer-violation</code></td></tr>
+          <tr><td>Code smells</td><td>Long methods, god objects, deep nesting, duplication, magic numbers</td><td><code>deep-nesting</code> <code>god-object</code></td></tr>
+          <tr><td>Practices</td><td>Leftover console and debugger statements, thrown strings, naming, missing docs</td><td><code>debugger-statement</code> <code>throw-string</code></td></tr>
+          <tr><td>Dependencies</td><td>Unused code, duplicate and side-effect imports, barrel-file chains</td><td><code>unused-code</code> <code>duplicate-imports</code></td></tr>
+          <tr><td>Flows</td><td>Async paths without error handling, untested routes and reducers, missing error boundaries</td><td><code>untested-route</code> <code>missing-error-boundary</code></td></tr>
+        </tbody>
+      </table>
+      <p class="note proposed"><b>Explanations.</b> Every finding comes with guidance. When the server has an OpenAI key, that guidance is written by a model and labeled as AI. Without one, you get RIVET's built-in guide for the category, labeled as such.</p>
+    </div>
+  </section>
+
+  <section class="sect" aria-labelledby="where-h">
+    <div class="wrap">
+      <div class="sect__head">
+        <h2 id="where-h">Use it where you already work</h2>
+        <p>Local-first. Your code stays on your machine unless you opt into AI enhancement.</p>
+      </div>
+      <div class="surfaces">
+        <div class="surface"><h3>Terminal</h3><p>Scan a whole project, add explanations and tech-debt hours.</p><pre>$ pnpm --filter @rivet/cli dev \
+    scan . --ai --tech-debt</pre></div>
+        <div class="surface"><h3>Dashboard</h3><p>Paste or upload one file and triage findings line by line in the browser.</p><a href="dashboard.html" style="color:var(--accent)">Open the dashboard</a></div>
+        <div class="surface"><h3>CI</h3><p>Emit SARIF for GitHub code scanning, or JSON and HTML reports.</p><pre>$ pnpm --filter @rivet/cli dev \
+    scan . --format sarif</pre></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sect" id="install" aria-labelledby="install-h">
+    <div class="wrap">
+      <div class="sect__head">
+        <h2 id="install-h">Run it locally</h2>
+        <p class="proposed">Three steps from a fresh clone. Requires Node 20 or later and pnpm.</p>
+      </div>
+      <ol class="steps">
+        <li><span class="n">1</span><div><code>git clone https://github.com/forbiddenlink/rivet && cd rivet</code></div><button class="btn btn--quiet">Copy</button></li>
+        <li><span class="n">2</span><div><code>pnpm install && pnpm build</code></div><button class="btn btn--quiet">Copy</button></li>
+        <li><span class="n">3</span><div><code>pnpm --filter @rivet/cli dev scan /path/to/project</code><small>Add <code>--ai</code> with <code>OPENAI_API_KEY</code> set for model-written explanations.</small></div><button class="btn btn--quiet">Copy</button></li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<footer class="foot"><div class="wrap"><nav aria-label="Footer"><a href="#">About</a><a href="#">Privacy</a><a href="prose.html">Contact</a><a href="#" class="ext">GitHub</a></nav><span class="copy">© 2026 RIVET</span></div></footer>
+
+<div class="proto-bar"><label><input type="checkbox" onchange="document.body.classList.toggle('proto-on',this.checked)"> Outline proposed copy</label></div>
+<script src="proto.js"></script>
+<script>renderSource(document.getElementById('hero-src'), { from: 1, to: 17, notes: [0, 8] })</script>
+<style>.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.sr-only:focus{position:fixed;left:8px;top:8px;width:auto;height:auto;clip:auto;z-index:99;background:var(--accent);color:var(--text-inverse);padding:8px 12px}</style>
+</body>
+</html>
