@@ -53,7 +53,12 @@ function openingElementName(node: ASTNode): string | undefined {
 
 // Deliberately recognize only straight-line, same-component previous-value guards.
 // React permits this pattern: https://react.dev/reference/react/useState#storing-information-from-previous-renders
-type GuardBindings = { stable: Set<string>; setters: Map<string, string> }
+type GuardBindings = {
+  stable: Set<string>
+  // Stable identity alone is insufficient: functions are updaters and NaN !== NaN.
+  targets: Set<string>
+  setters: Map<string, string>
+}
 
 function addStableBindings(pattern: TSESTree.Node, stable: Set<string>): void {
   if (pattern.type === 'Identifier') stable.add(pattern.name)
@@ -110,8 +115,17 @@ function recordDeclaration(
     const [state, setter] = declaration.id.elements
     if (state?.type === 'Identifier' && setter?.type === 'Identifier')
       bindings.setters.set(setter.name, state.name)
-  } else if (stableInitializer(init, bindings.stable))
+  } else if (stableInitializer(init, bindings.stable)) {
     addStableBindings(declaration.id, bindings.stable)
+    // Do not infer safe values from props, member reads or TypeScript annotations.
+    // Only locally proven primitives and deterministic serialized keys qualify.
+    const safeTarget =
+      (init.type === 'Literal' && stableValue(init, new Set())) ||
+      (init.type === 'Identifier' && bindings.targets.has(init.name)) ||
+      (init.type === 'CallExpression' && isStringify(init.callee))
+    if (safeTarget && declaration.id.type === 'Identifier')
+      bindings.targets.add(declaration.id.name)
+  }
 }
 
 function collectBindings(
@@ -206,7 +220,7 @@ function guardedCalls(
   bindings: GuardBindings,
   counts: Map<string, number>
 ): TSESTree.CallExpression[] {
-  const names = guardNames(statement, bindings.stable)
+  const names = guardNames(statement, bindings.targets)
   if (!names || statement.consequent.type !== 'BlockStatement') return []
   const [previous, target] = names
   const calls: TSESTree.CallExpression[] = []
@@ -235,7 +249,7 @@ function convergentUpdates(component: ASTNode, hooks: Set<string>): Set<TSESTree
   )
     return safe
   if (fn.body.type !== 'BlockStatement' || hasMutation(component)) return safe
-  const bindings: GuardBindings = { stable: new Set(), setters: new Map() }
+  const bindings: GuardBindings = { stable: new Set(), targets: new Set(), setters: new Map() }
   for (const param of fn.params) addStableBindings(param, bindings.stable)
   if (bindings.stable.has('JSON') || [...hooks].some((name) => bindings.stable.has(name)))
     return safe

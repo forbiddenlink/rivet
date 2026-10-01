@@ -605,6 +605,16 @@ describe('convergent previous-value guards', () => {
     expect(scan('if (previous !== key) { setPrevious(key); setConsent(null) }')).toEqual([])
   })
 
+  it.each(["'fixed'", 'false', '42', 'null', 'JSON.stringify([value])'])(
+    'accepts a locally proven target %s and its alias',
+    (initializer) => {
+      expect(
+        scan(`const target = ${initializer}; const alias = target;
+        if (previous !== alias) { setPrevious(alias); setConsent(null) }`)
+      ).toEqual([])
+    }
+  )
+
   it('accepts the reviewed FindingDetail guard without changing the component', () => {
     const sourceCode = readFileSync(
       new URL('../../../../../apps/web/src/components/FindingDetail.tsx', import.meta.url),
@@ -631,6 +641,17 @@ describe('convergent previous-value guards', () => {
     [
       'unstable serialized value',
       'const next = JSON.stringify([Math.random()]); if (previous !== next) { setPrevious(next) }',
+      1,
+    ],
+    ['unknown incoming prop', 'if (previous !== value) { setPrevious(value) }', 1],
+    [
+      'incoming function prop',
+      'const next = value; if (previous !== next) { setPrevious(next) }',
+      1,
+    ],
+    [
+      'incoming NaN prop',
+      'const next = finding.value; if (previous !== next) { setPrevious(next) }',
       1,
     ],
     ['NaN comparison', 'const next = NaN; if (previous !== next) { setPrevious(next) }', 1],
@@ -684,4 +705,25 @@ describe('convergent previous-value guards', () => {
   ])('still reports %s', (_name, body, count) => {
     expect(scan(body)).toHaveLength(count)
   })
+})
+
+// Model the React value/updater distinction and render-phase rescheduling without a provider or DOM.
+describe('previous-value convergence semantics', () => {
+  function settles(value: unknown): boolean {
+    let previous: unknown = null
+    for (let render = 0; render < 25; render++) {
+      if (previous === value) return true
+      previous = typeof value === 'function' ? value(previous) : value
+    }
+    return false
+  }
+
+  it.each([NaN, () => 'result'])('does not converge for an unsafe incoming value %s', (value) => {
+    expect(settles(value)).toBe(false)
+  })
+
+  it.each(['key', false, 42, null, JSON.stringify([NaN, 'finding'])])(
+    'converges for supported primitive %s',
+    (value) => expect(settles(value)).toBe(true)
+  )
 })
