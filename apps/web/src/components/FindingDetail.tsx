@@ -66,6 +66,7 @@ export function FindingDetail({
     finding.category,
   ])
   const [consentedFinding, setConsentedFinding] = useState<string | null>(null)
+  const [requestAttempt, setRequestAttempt] = useState(0)
   const ai = consentedFinding === findingKey
 
   useEffect(() => {
@@ -112,7 +113,7 @@ export function FindingDetail({
       window.clearTimeout(timer)
       controller.abort()
     }
-  }, [finding.message, finding.severity, finding.category, finding.ruleId, ai])
+  }, [finding.message, finding.severity, finding.category, finding.ruleId, ai, requestAttempt])
 
   const metadata = finding.metadata ? Object.entries(finding.metadata) : []
 
@@ -218,6 +219,30 @@ export function FindingDetail({
               <div>
                 <b>Guidance did not load</b>
                 <p>{guidance.message}</p>
+                <div className="alert__actions">
+                  <button
+                    type="button"
+                    className="btn btn--sm"
+                    onClick={() => {
+                      setGuidance({ state: 'loading' })
+                      setRequestAttempt((attempt) => attempt + 1)
+                    }}
+                  >
+                    {ai ? 'Retry AI guidance' : 'Retry guidance'}
+                  </button>
+                  {ai && (
+                    <button
+                      type="button"
+                      className="btn btn--quiet btn--sm"
+                      onClick={() => {
+                        setGuidance({ state: 'loading' })
+                        setConsentedFinding(null)
+                      }}
+                    >
+                      Use built-in guidance
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           )}

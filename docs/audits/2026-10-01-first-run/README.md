@@ -28,3 +28,35 @@ Local branch: `fix/first-run-ai-consent-20261001`, based on `f8217cc0c5308a54b91
 The existing fix writer is not repaired by this documentation/consent task. It still requires separate engineering and validation before being called safe. Explicit AI consent is not authentication, distributed abuse prevention or a provider spending cap; the existing public endpoint and in-memory rate-limit limitations remain. No live provider, minimum-version Node 22.12.0, hosted behavior or publication was tested.
 
 Optional browser reproduction: after a local web build/start on loopback 4322, run `node docs/audits/2026-10-01-first-run/browser-check.cjs /path/to/installed/@playwright/test`. The test used the already-installed Playwright from the separate MyAquaLog test workspace; Rivet's dependency lockfile was not expanded for this evidence-only runner. The normal regression suite requires no browser dependency.
+
+## Integrated recovery follow-up
+
+The original candidate `0d04ecb` is preserved. Branch `fix/first-run-ai-recovery-20261001`
+in `/Volumes/LizsDisk/_wt/rivet-consent-recovery-20261001` starts from main
+`8b3e8eafcecedf46868080663637f2f4d33c002e` and reapplies the reviewed first-run commits,
+retaining main's dependency and security updates.
+
+Guidance errors now offer an explicit retry. An opted-in AI error additionally offers
+built-in guidance, which clears AI mode without another provider request. Retry retains
+only the existing per-finding consent; merely opening another finding does not opt in.
+The integrated baseline reproduced the absent retry control in Chromium before this fix.
+
+`browser-recovery.cjs` starts/stops a local production server and runs synthetic desktop
+(1440x1000) and mobile (390x844) checks. It covers built-in failure/retry, keyboard opt-in,
+AI network failure/retry, HTTP 429 with built-in recovery, next-finding consent isolation,
+and a delayed response after navigation. Browser external requests are blocked and all
+explanation requests are intercepted. Run after building:
+
+```sh
+node docs/audits/2026-10-01-first-run/browser-recovery.cjs /path/to/@playwright/test /path/to/evidence-output
+```
+
+For a server-side network boundary too, run with a loopback-only Node socket guard and
+an empty environment (no provider keys). No new browser dependency was added to Rivet.
+
+The integrated implementation passed 638 uncached unit tests, 13 build tasks, 24 typecheck
+tasks, the first-run CLI smoke, and the desktop/mobile browser journeys. Lint remains
+warning-bearing. Full fresh logs/screenshots and exact commit identification are stored
+in the local review packet under `task/audit-evidence/rivet-recovery`. The original logs
+above are historical, not substituted for the integrated run. Three trailing blank lines
+in historical evidence were removed. No live provider or hosted verification occurred.

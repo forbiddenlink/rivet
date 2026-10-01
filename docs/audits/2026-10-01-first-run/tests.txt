@@ -126,4 +126,3 @@
  Tasks:    26 successful, 26 total
 Cached:    22 cached, 26 total
   Time:    4.5s
-

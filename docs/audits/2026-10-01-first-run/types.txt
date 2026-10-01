@@ -88,4 +88,3 @@
  Tasks:    24 successful, 24 total
 Cached:    11 cached, 24 total
   Time:    3.405s
-
