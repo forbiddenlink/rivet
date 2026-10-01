@@ -60,3 +60,26 @@ warning-bearing. Full fresh logs/screenshots and exact commit identification are
 in the local review packet under `task/audit-evidence/rivet-recovery`. The original logs
 above are historical, not substituted for the integrated run. Three trailing blank lines
 in historical evidence were removed. No live provider or hosted verification occurred.
+
+## Navigation consent follow-up (local, not pushed)
+
+The expanded browser regression reproduced an extra AI request when returning to an
+aborted finding: the call count rose from four to five without a new opt-in. FindingDetail
+now clears consent when the finding identity changes, before committing that render.
+The navigation controls stay mounted to preserve keyboard focus. Returning after a failed
+or aborted request shows built-in guidance; sending AI again requires an explicit action.
+Retry for the current finding remains available without another disclosure step.
+
+Desktop and mobile regressions now also cover returning to aborted/failed findings,
+explicit opt-in after returning, navigation focus retention, and the corrected Node and
+cross-file copy. The homepage specifies Node >=22.12.0 (24 recommended); About, the
+empty-results message and README explain that the CLI scans files individually and does
+not verify cross-file dependency cycles. The architecture detector's optional allFiles
+argument is not used; the engine calls it with one AST and path, so a cross-file claim
+would be misleading.
+
+The final sequential build/typecheck and browser runs pass. Running build and typecheck
+concurrently first exposed a generated .next/types/routes.js race; sequential checks
+resolved it without code changes for that tooling race. Evidence is saved locally under
+`task/audit-evidence/rivet-navigation`. No push or hosted change was performed for this
+follow-up; PR #99 still points to the previously approved commit until separately approved.

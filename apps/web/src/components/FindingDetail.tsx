@@ -67,6 +67,13 @@ export function FindingDetail({
   ])
   const [consentedFinding, setConsentedFinding] = useState<string | null>(null)
   const [requestAttempt, setRequestAttempt] = useState(0)
+  const [viewedFinding, setViewedFinding] = useState(findingKey)
+  // Clear consent before committing a different finding, without remounting the
+  // navigation controls and losing keyboard focus. Returning requires opt-in.
+  if (viewedFinding !== findingKey) {
+    setViewedFinding(findingKey)
+    setConsentedFinding(null)
+  }
   const ai = consentedFinding === findingKey
 
   useEffect(() => {

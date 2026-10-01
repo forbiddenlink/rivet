@@ -1,6 +1,6 @@
 # RIVET
 
-RIVET is an early-stage TypeScript/JavaScript static-analysis tool with a local CLI and a web dashboard. Eight engines check code smells, bugs, security patterns, performance patterns, architecture, practices, import hygiene and flows. Findings are heuristics to review, not proof that code is secure or correct.
+RIVET is an early-stage TypeScript/JavaScript static-analysis tool with a local CLI and a web dashboard. Eight engines check code smells, bugs, security patterns, performance patterns, architecture, practices, import hygiene and flows. Findings are heuristics to review, not proof that code is secure or correct. The CLI scans files individually; it does not build a cross-file dependency graph or verify dependency cycles.
 
 ## First run from source
 

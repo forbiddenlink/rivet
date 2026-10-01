@@ -187,7 +187,10 @@ export default function Home(): React.ReactElement {
         <div className="wrap">
           <div className="sect__head">
             <h2 id="install-title">Run it locally</h2>
-            <p>Three steps from a fresh clone. Requires Node 20 or later and pnpm.</p>
+            <p>
+              Three steps from a fresh clone. Requires Node 22.12.0 or later (24 recommended) and
+              pnpm 10.34.5.
+            </p>
           </div>
           <InstallSteps />
         </div>

@@ -67,6 +67,14 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
           },
         })
       })
+      await page.goto(base)
+      assert.ok((await page.locator('body').innerText()).includes('Requires Node 22.12.0 or later'))
+      await page.goto(`${base}/about`)
+      assert.ok(
+        (await page.locator('body').innerText()).includes(
+          'Neither interface builds a cross-file dependency graph'
+        )
+      )
       await page.goto(`${base}/dashboard`)
       await page
         .locator('#code-input')
@@ -93,6 +101,10 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
       await page.getByText('Synthetic AI recovered', { exact: true }).waitFor()
       assert.equal(aiCalls, 2)
       await page.getByRole('button', { name: 'Next finding', exact: true }).click()
+      assert.equal(
+        await page.evaluate(() => document.activeElement?.getAttribute('aria-label')),
+        'Next finding'
+      )
       await page.getByText('Synthetic built-in guidance', { exact: true }).waitFor()
       assert.equal(aiCalls, 2)
       mode = '429'
@@ -106,6 +118,10 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
       for (let i = 0; i < 100 && !held; i++) await sleep(20)
       assert.ok(held)
       await page.getByRole('button', { name: 'Next finding', exact: true }).click()
+      assert.equal(
+        await page.evaluate(() => document.activeElement?.getAttribute('aria-label')),
+        'Next finding'
+      )
       await page.getByText('Synthetic built-in guidance', { exact: true }).waitFor()
       await held
         .fulfill({ json: { explanation: 'STALE AI RESPONSE', remediation: 'stale', source: 'ai' } })
@@ -113,6 +129,36 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
       await sleep(300)
       assert.equal(await page.getByText('STALE AI RESPONSE', { exact: true }).count(), 0)
       assert.equal(requests.at(-1).ai, false)
+      // Returning to an aborted request must not silently retry the provider.
+      await page.getByRole('button', { name: 'Previous finding', exact: true }).click()
+      await sleep(500)
+      assert.equal(aiCalls, 4, 'Returning to an aborted finding must require explicit opt-in')
+      await page.getByText('Synthetic built-in guidance', { exact: true }).waitFor()
+      await consent.waitFor()
+      mode = 'network'
+      await consent.click()
+      await page.getByText('Guidance did not load', { exact: true }).waitFor()
+      assert.equal(aiCalls, 5)
+      await page.getByRole('button', { name: 'Next finding', exact: true }).click()
+      assert.equal(
+        await page.evaluate(() => document.activeElement?.getAttribute('aria-label')),
+        'Next finding'
+      )
+      await page.getByText('Synthetic built-in guidance', { exact: true }).waitFor()
+      await page.getByRole('button', { name: 'Previous finding', exact: true }).click()
+      await sleep(500)
+      assert.equal(aiCalls, 5, 'Returning to a failed finding must require explicit opt-in')
+      await page.getByText('Synthetic built-in guidance', { exact: true }).waitFor()
+      mode = 'success'
+      await consent.click()
+      await page.getByText('Synthetic AI recovered', { exact: true }).waitFor()
+      assert.equal(aiCalls, 6, 'Explicit opt-in after returning sends exactly one request')
+      await page.getByRole('button', { name: 'Next finding', exact: true }).click()
+      assert.equal(
+        await page.evaluate(() => document.activeElement?.getAttribute('aria-label')),
+        'Next finding'
+      )
+      await page.getByText('Synthetic built-in guidance', { exact: true }).waitFor()
       await consent.waitFor()
       await consent.scrollIntoViewIfNeeded()
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
@@ -133,6 +179,11 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
           'built-in recovery',
           'stale response ignored',
           'no overflow',
+          'aborted finding return requires opt-in',
+          'failed finding return requires opt-in',
+          'explicit retry after return',
+          'navigation retains focus',
+          'runtime and cross-file copy',
         ],
       })
       await page.close()

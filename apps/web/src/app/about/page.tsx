@@ -15,7 +15,7 @@ const ENGINE_NOTES: Record<(typeof ENGINES)[number]['key'], string> = {
   security: 'injection, hardcoded secrets, unsafe HTML, weak crypto and randomness',
   bugs: 'loose equality, constant or duplicate conditions, empty catches, unawaited promises',
   performance: 'nested and blocking loops, DOM queries in loops, re-render waste',
-  architecture: 'circular dependencies, layer violations, coupling',
+  architecture: 'import-risk heuristics, layer violations, coupling',
   smells: 'long methods, god objects, deep nesting, duplication, magic numbers',
   practices: 'leftover console and debugger statements, thrown strings, naming',
   dependencies: 'unused code, duplicate and side-effect imports, barrel-file chains',
@@ -43,7 +43,8 @@ export default function AboutPage(): React.ReactElement {
               </ul>
               <p>
                 The <Link href="/dashboard">dashboard</Link> scans one file. The CLI scans a whole
-                project, which is where the cross-file rules such as circular dependencies apply.
+                project one file at a time. Neither interface builds a cross-file dependency graph
+                or verifies dependency cycles.
               </p>
             </>
           ),
