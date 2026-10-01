@@ -27,65 +27,65 @@
 @rivet/ai:typecheck: cache miss, executing a20bf722433ee893
 @rivet/engine-practices:build: cache hit, suppressing logs 5411bf32cb74440a
 @rivet/engine-bugs:typecheck: cache miss, executing 9510ab788346d5ef
-@rivet/engine-practices:typecheck: 
+@rivet/engine-practices:typecheck:
 @rivet/engine-practices:typecheck: > @rivet/engine-practices@0.1.0 typecheck /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/practices
 @rivet/engine-practices:typecheck: > tsc --noEmit
-@rivet/engine-practices:typecheck: 
-@rivet/engine-security:typecheck: 
+@rivet/engine-practices:typecheck:
+@rivet/engine-security:typecheck:
 @rivet/engine-security:typecheck: > @rivet/engine-security@0.1.0 typecheck /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/security
 @rivet/engine-security:typecheck: > tsc --noEmit
-@rivet/engine-security:typecheck: 
-@rivet/engine-dependencies:typecheck: 
+@rivet/engine-security:typecheck:
+@rivet/engine-dependencies:typecheck:
 @rivet/engine-dependencies:typecheck: > @rivet/engine-dependencies@0.1.0 typecheck /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/dependencies
 @rivet/engine-dependencies:typecheck: > tsc --noEmit
-@rivet/engine-dependencies:typecheck: 
-@rivet/core:typecheck: 
+@rivet/engine-dependencies:typecheck:
+@rivet/core:typecheck:
 @rivet/core:typecheck: > @rivet/core@0.1.0 typecheck /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/core
 @rivet/core:typecheck: > tsc --noEmit
-@rivet/core:typecheck: 
-@rivet/engine-flows:typecheck: 
+@rivet/core:typecheck:
+@rivet/engine-flows:typecheck:
 @rivet/engine-flows:typecheck: > @rivet/engine-flows@0.1.0 typecheck /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/flows
 @rivet/engine-flows:typecheck: > tsc --noEmit
-@rivet/engine-flows:typecheck: 
-@rivet/parsers:typecheck: 
+@rivet/engine-flows:typecheck:
+@rivet/parsers:typecheck:
 @rivet/parsers:typecheck: > @rivet/parsers@0.1.0 typecheck /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/parsers
 @rivet/parsers:typecheck: > tsc --noEmit
-@rivet/parsers:typecheck: 
-@rivet/ai:typecheck: 
+@rivet/parsers:typecheck:
+@rivet/ai:typecheck:
 @rivet/ai:typecheck: > @rivet/ai@0.1.0 typecheck /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/ai
 @rivet/ai:typecheck: > tsc --noEmit
-@rivet/ai:typecheck: 
-@rivet/engine-bugs:typecheck: 
+@rivet/ai:typecheck:
+@rivet/engine-bugs:typecheck:
 @rivet/engine-bugs:typecheck: > @rivet/engine-bugs@0.1.0 typecheck /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/bugs
 @rivet/engine-bugs:typecheck: > tsc --noEmit
-@rivet/engine-bugs:typecheck: 
-@rivet/engine-architecture:typecheck: 
+@rivet/engine-bugs:typecheck:
+@rivet/engine-architecture:typecheck:
 @rivet/engine-architecture:typecheck: > @rivet/engine-architecture@0.1.0 typecheck /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/architecture
 @rivet/engine-architecture:typecheck: > tsc --noEmit
-@rivet/engine-architecture:typecheck: 
-@rivet/engine-smells:typecheck: 
+@rivet/engine-architecture:typecheck:
+@rivet/engine-smells:typecheck:
 @rivet/engine-smells:typecheck: > @rivet/engine-smells@0.1.0 typecheck /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/smells
 @rivet/engine-smells:typecheck: > tsc --noEmit
-@rivet/engine-smells:typecheck: 
+@rivet/engine-smells:typecheck:
 @rivet/engine-dependencies:build: cache hit, suppressing logs 9259798a2b57c2cc
 @rivet/engine-performance:typecheck: cache miss, executing 2fcf3ddb5f832149
 @rivet/engine-bugs:build: cache hit, suppressing logs dee6cd15fd36fc9c
 @rivet/cli:typecheck: cache miss, executing 88bd88654525fd7a
 @rivet/web:typecheck: cache miss, executing 9a83638839f46aba
-@rivet/engine-performance:typecheck: 
+@rivet/engine-performance:typecheck:
 @rivet/engine-performance:typecheck: > @rivet/engine-performance@0.1.0 typecheck /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/performance
 @rivet/engine-performance:typecheck: > tsc --noEmit
-@rivet/engine-performance:typecheck: 
-@rivet/cli:typecheck: 
+@rivet/engine-performance:typecheck:
+@rivet/cli:typecheck:
 @rivet/cli:typecheck: > @rivet/cli@0.1.0 typecheck /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/apps/cli
 @rivet/cli:typecheck: > tsc --noEmit
-@rivet/cli:typecheck: 
-@rivet/web:typecheck: 
+@rivet/cli:typecheck:
+@rivet/web:typecheck:
 @rivet/web:typecheck: > @rivet/web@0.1.0 typecheck /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/apps/web
 @rivet/web:typecheck: > tsc --noEmit
-@rivet/web:typecheck: 
+@rivet/web:typecheck:
 
  Tasks:    24 successful, 24 total
 Cached:    11 cached, 24 total
-  Time:    3.405s 
+  Time:    3.405s
 

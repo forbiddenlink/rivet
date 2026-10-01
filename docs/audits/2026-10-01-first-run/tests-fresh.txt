@@ -1,166 +1,166 @@
 Scope: 13 of 14 workspace projects
 packages/parsers test$ vitest run
-packages/parsers test: [1m[30m[46m RUN [49m[39m[22m [36mv4.1.11 [39m[90m/Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/parsers[39m
-packages/parsers test:  [32m✓[39m src/typescript-parser.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 567[2mms[22m[39m
-packages/parsers test: [2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
-packages/parsers test: [2m      Tests [22m [1m[32m10 passed[39m[22m[90m (10)[39m
-packages/parsers test: [2m   Start at [22m 20:11:46
-packages/parsers test: [2m   Duration [22m 1.05s[2m (transform 64ms, setup 0ms, import 367ms, tests 567ms, environment 0ms)[22m
+packages/parsers test:  RUN  v4.1.11 /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/parsers
+packages/parsers test:  ✓ src/typescript-parser.test.ts (10 tests) 567ms
+packages/parsers test:  Test Files  1 passed (1)
+packages/parsers test:       Tests  10 passed (10)
+packages/parsers test:    Start at  20:11:46
+packages/parsers test:    Duration  1.05s (transform 64ms, setup 0ms, import 367ms, tests 567ms, environment 0ms)
 packages/parsers test: Done
 packages/core test$ vitest run
-packages/core test: [1m[30m[46m RUN [49m[39m[22m [36mv4.1.11 [39m[90m/Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/core[39m
-packages/core test:  [32m✓[39m src/config.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 9[2mms[22m[39m
-packages/core test:  [32m✓[39m src/detection-id.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 6[2mms[22m[39m
-packages/core test:  [32m✓[39m src/engine.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 3[2mms[22m[39m
-packages/core test:  [32m✓[39m src/engine.file-discovery.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 865[2mms[22m[39m
-packages/core test: [2m Test Files [22m [1m[32m4 passed[39m[22m[90m (4)[39m
-packages/core test: [2m      Tests [22m [1m[32m33 passed[39m[22m[90m (33)[39m
-packages/core test: [2m   Start at [22m 20:11:47
-packages/core test: [2m   Duration [22m 1.39s[2m (transform 309ms, setup 0ms, import 935ms, tests 882ms, environment 0ms)[22m
+packages/core test:  RUN  v4.1.11 /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/core
+packages/core test:  ✓ src/config.test.ts (1 test) 9ms
+packages/core test:  ✓ src/detection-id.test.ts (10 tests) 6ms
+packages/core test:  ✓ src/engine.test.ts (17 tests) 3ms
+packages/core test:  ✓ src/engine.file-discovery.test.ts (5 tests) 865ms
+packages/core test:  Test Files  4 passed (4)
+packages/core test:       Tests  33 passed (33)
+packages/core test:    Start at  20:11:47
+packages/core test:    Duration  1.39s (transform 309ms, setup 0ms, import 935ms, tests 882ms, environment 0ms)
 packages/core test: Done
 packages/engines/bugs test$ vitest run
 packages/engines/architecture test$ vitest run
 packages/ai test$ vitest run
 packages/engines/dependencies test$ vitest run
-packages/ai test: [1m[30m[46m RUN [49m[39m[22m [36mv4.1.11 [39m[90m/Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/ai[39m
-packages/engines/dependencies test: [1m[30m[46m RUN [49m[39m[22m [36mv4.1.11 [39m[90m/Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/dependencies[39m
-packages/engines/architecture test: [1m[30m[46m RUN [49m[39m[22m [36mv4.1.11 [39m[90m/Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/architecture[39m
-packages/engines/bugs test: [1m[30m[46m RUN [49m[39m[22m [36mv4.1.11 [39m[90m/Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/bugs[39m
-packages/engines/bugs test:  [32m✓[39m src/index.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 3[2mms[22m[39m
-packages/engines/dependencies test:  [32m✓[39m src/detectors/side-effect-imports.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 32[2mms[22m[39m
-packages/engines/dependencies test:  [32m✓[39m src/detectors/barrel-files.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 30[2mms[22m[39m
-packages/engines/architecture test:  [32m✓[39m src/detectors/circular-dependencies.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 17[2mms[22m[39m
-packages/engines/dependencies test:  [32m✓[39m src/detectors/unused-code.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 18[2mms[22m[39m
-packages/engines/bugs test:  [32m✓[39m src/detectors/type-coercion.test.ts [2m([22m[2m30 tests[22m[2m)[22m[32m 45[2mms[22m[39m
-packages/engines/dependencies test:  [32m✓[39m src/detectors/circular-imports.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 42[2mms[22m[39m
-packages/engines/architecture test:  [32m✓[39m src/detectors/tight-coupling.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 38[2mms[22m[39m
-packages/engines/architecture test: [2m Test Files [22m [1m[32m2 passed[39m[22m[90m (2)[39m
-packages/engines/architecture test: [2m      Tests [22m [1m[32m16 passed[39m[22m[90m (16)[39m
-packages/engines/architecture test: [2m   Start at [22m 20:11:49
-packages/engines/architecture test: [2m   Duration [22m 2.28s[2m (transform 362ms, setup 0ms, import 3.69s, tests 55ms, environment 0ms)[22m
-packages/engines/bugs test:  [32m✓[39m src/detectors/unreachable-code.test.ts [2m([22m[2m25 tests[22m[2m)[22m[32m 41[2mms[22m[39m
+packages/ai test:  RUN  v4.1.11 /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/ai
+packages/engines/dependencies test:  RUN  v4.1.11 /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/dependencies
+packages/engines/architecture test:  RUN  v4.1.11 /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/architecture
+packages/engines/bugs test:  RUN  v4.1.11 /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/bugs
+packages/engines/bugs test:  ✓ src/index.test.ts (2 tests) 3ms
+packages/engines/dependencies test:  ✓ src/detectors/side-effect-imports.test.ts (12 tests) 32ms
+packages/engines/dependencies test:  ✓ src/detectors/barrel-files.test.ts (8 tests) 30ms
+packages/engines/architecture test:  ✓ src/detectors/circular-dependencies.test.ts (2 tests) 17ms
+packages/engines/dependencies test:  ✓ src/detectors/unused-code.test.ts (7 tests) 18ms
+packages/engines/bugs test:  ✓ src/detectors/type-coercion.test.ts (30 tests) 45ms
+packages/engines/dependencies test:  ✓ src/detectors/circular-imports.test.ts (7 tests) 42ms
+packages/engines/architecture test:  ✓ src/detectors/tight-coupling.test.ts (14 tests) 38ms
+packages/engines/architecture test:  Test Files  2 passed (2)
+packages/engines/architecture test:       Tests  16 passed (16)
+packages/engines/architecture test:    Start at  20:11:49
+packages/engines/architecture test:    Duration  2.28s (transform 362ms, setup 0ms, import 3.69s, tests 55ms, environment 0ms)
+packages/engines/bugs test:  ✓ src/detectors/unreachable-code.test.ts (25 tests) 41ms
 packages/engines/architecture test: Done
 packages/engines/flows test$ vitest
-packages/ai test: [90mstderr[2m | src/enhancer.test.ts[2m > [22m[2mAIEnhancer[2m > [22m[2mreturns the original detection when the model call fails
-packages/ai test: [22m[39mAI enhancement failed for test-rule: Error: rate limited
-packages/ai test:     at [90m/Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/ai/[39msrc/enhancer.test.ts:136:30
-packages/ai test:     at file:///Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/node_modules/[4m.pnpm[24m/@vitest+runner@4.1.11/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:302:11
-packages/ai test:     at file:///Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/node_modules/[4m.pnpm[24m/@vitest+runner@4.1.11/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:1903:26
-packages/ai test:     at file:///Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/node_modules/[4m.pnpm[24m/@vitest+runner@4.1.11/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2326:20
+packages/ai test: stderr | src/enhancer.test.ts > AIEnhancer > returns the original detection when the model call fails
+packages/ai test: AI enhancement failed for test-rule: Error: rate limited
+packages/ai test:     at /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/ai/src/enhancer.test.ts:136:30
+packages/ai test:     at file:///Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11
+packages/ai test:     at file:///Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26
+packages/ai test:     at file:///Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20
 packages/ai test:     at new Promise (<anonymous>)
-packages/ai test:     at runWithCancel (file:///Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/node_modules/[4m.pnpm[24m/@vitest+runner@4.1.11/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2323:10)
-packages/ai test:     at file:///Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/node_modules/[4m.pnpm[24m/@vitest+runner@4.1.11/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2305:20
+packages/ai test:     at runWithCancel (file:///Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)
+packages/ai test:     at file:///Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20
 packages/ai test:     at new Promise (<anonymous>)
-packages/ai test:     at runWithTimeout (file:///Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/node_modules/[4m.pnpm[24m/@vitest+runner@4.1.11/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2272:10)
-packages/ai test:     at file:///Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/node_modules/[4m.pnpm[24m/@vitest+runner@4.1.11/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2956:64
-packages/ai test:  [32m✓[39m src/enhancer.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 23[2mms[22m[39m
-packages/ai test: [2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
-packages/ai test: [2m      Tests [22m [1m[32m14 passed[39m[22m[90m (14)[39m
-packages/ai test: [2m   Start at [22m 20:11:49
-packages/ai test: [2m   Duration [22m 2.34s[2m (transform 364ms, setup 0ms, import 1.92s, tests 23ms, environment 0ms)[22m
-packages/engines/dependencies test:  [32m✓[39m src/detectors/duplicate-imports.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 48[2mms[22m[39m
-packages/engines/dependencies test: [2m Test Files [22m [1m[32m5 passed[39m[22m[90m (5)[39m
-packages/engines/dependencies test: [2m      Tests [22m [1m[32m41 passed[39m[22m[90m (41)[39m
-packages/engines/dependencies test: [2m   Start at [22m 20:11:49
-packages/engines/dependencies test: [2m   Duration [22m 2.33s[2m (transform 1.23s, setup 0ms, import 9.23s, tests 169ms, environment 0ms)[22m
-packages/engines/bugs test:  [32m✓[39m src/detectors/null-checks.test.ts [2m([22m[2m26 tests[22m[2m)[22m[32m 52[2mms[22m[39m
+packages/ai test:     at runWithTimeout (file:///Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10)
+packages/ai test:     at file:///Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/node_modules/.pnpm/@vitest+runner@4.1.11/node_modules/@vitest/runner/dist/chunk-artifact.js:2956:64
+packages/ai test:  ✓ src/enhancer.test.ts (14 tests) 23ms
+packages/ai test:  Test Files  1 passed (1)
+packages/ai test:       Tests  14 passed (14)
+packages/ai test:    Start at  20:11:49
+packages/ai test:    Duration  2.34s (transform 364ms, setup 0ms, import 1.92s, tests 23ms, environment 0ms)
+packages/engines/dependencies test:  ✓ src/detectors/duplicate-imports.test.ts (7 tests) 48ms
+packages/engines/dependencies test:  Test Files  5 passed (5)
+packages/engines/dependencies test:       Tests  41 passed (41)
+packages/engines/dependencies test:    Start at  20:11:49
+packages/engines/dependencies test:    Duration  2.33s (transform 1.23s, setup 0ms, import 9.23s, tests 169ms, environment 0ms)
+packages/engines/bugs test:  ✓ src/detectors/null-checks.test.ts (26 tests) 52ms
 packages/ai test: Done
 packages/engines/performance test$ vitest run
 packages/engines/dependencies test: Done
 packages/engines/practices test$ vitest run
-packages/engines/bugs test:  [32m✓[39m src/detectors/logic-errors.test.ts [2m([22m[2m24 tests[22m[2m)[22m[32m 74[2mms[22m[39m
-packages/engines/flows test: [1m[30m[46m RUN [49m[39m[22m [36mv4.1.11 [39m[90m/Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/flows[39m
-packages/engines/performance test: [1m[30m[46m RUN [49m[39m[22m [36mv4.1.11 [39m[90m/Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/performance[39m
-packages/engines/practices test: [1m[30m[46m RUN [49m[39m[22m [36mv4.1.11 [39m[90m/Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/practices[39m
-packages/engines/bugs test:  [32m✓[39m src/detectors/unhandled-promises.test.ts [2m([22m[2m31 tests[22m[2m)[22m[33m 1684[2mms[22m[39m
-packages/engines/bugs test:        [33m[2m✓[22m[39m flags a call with a non-matching name based on its resolved Promise return type [33m 590[2mms[22m[39m
-packages/engines/bugs test:        [33m[2m✓[22m[39m does not flag a name-matching call whose resolved type is not a promise [33m 397[2mms[22m[39m
-packages/engines/bugs test:        [33m[2m✓[22m[39m does not flag a properly awaited call whose name matches no heuristic token [33m 365[2mms[22m[39m
-packages/engines/bugs test: [2m Test Files [22m [1m[32m6 passed[39m[22m[90m (6)[39m
-packages/engines/bugs test: [2m      Tests [22m [1m[32m138 passed[39m[22m[90m (138)[39m
-packages/engines/bugs test: [2m   Start at [22m 20:11:49
-packages/engines/bugs test: [2m   Duration [22m 4.05s[2m (transform 995ms, setup 0ms, import 9.51s, tests 1.90s, environment 0ms)[22m
+packages/engines/bugs test:  ✓ src/detectors/logic-errors.test.ts (24 tests) 74ms
+packages/engines/flows test:  RUN  v4.1.11 /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/flows
+packages/engines/performance test:  RUN  v4.1.11 /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/performance
+packages/engines/practices test:  RUN  v4.1.11 /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/practices
+packages/engines/bugs test:  ✓ src/detectors/unhandled-promises.test.ts (31 tests) 1684ms
+packages/engines/bugs test:        ✓ flags a call with a non-matching name based on its resolved Promise return type  590ms
+packages/engines/bugs test:        ✓ does not flag a name-matching call whose resolved type is not a promise  397ms
+packages/engines/bugs test:        ✓ does not flag a properly awaited call whose name matches no heuristic token  365ms
+packages/engines/bugs test:  Test Files  6 passed (6)
+packages/engines/bugs test:       Tests  138 passed (138)
+packages/engines/bugs test:    Start at  20:11:49
+packages/engines/bugs test:    Duration  4.05s (transform 995ms, setup 0ms, import 9.51s, tests 1.90s, environment 0ms)
 packages/engines/bugs test: Done
 packages/engines/security test$ vitest run
-packages/engines/flows test:  [32m✓[39m src/detectors/untested-state-transitions.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 23[2mms[22m[39m
-packages/engines/performance test:  [32m✓[39m src/detectors/nested-loops.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 151[2mms[22m[39m
-packages/engines/flows test:  [32m✓[39m src/detectors/missing-error-boundaries.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 57[2mms[22m[39m
-packages/engines/flows test:  [32m✓[39m src/detectors/critical-path-gaps.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 13[2mms[22m[39m
-packages/engines/flows test:  [32m✓[39m src/detectors/untested-routes.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 73[2mms[22m[39m
-packages/engines/flows test: [2m Test Files [22m [1m[32m4 passed[39m[22m[90m (4)[39m
-packages/engines/flows test: [2m      Tests [22m [1m[32m20 passed[39m[22m[90m (20)[39m
-packages/engines/flows test: [2m   Start at [22m 20:11:52
-packages/engines/flows test: [2m   Duration [22m 1.51s[2m (transform 297ms, setup 0ms, import 4.43s, tests 166ms, environment 0ms)[22m
+packages/engines/flows test:  ✓ src/detectors/untested-state-transitions.test.ts (4 tests) 23ms
+packages/engines/performance test:  ✓ src/detectors/nested-loops.test.ts (17 tests) 151ms
+packages/engines/flows test:  ✓ src/detectors/missing-error-boundaries.test.ts (4 tests) 57ms
+packages/engines/flows test:  ✓ src/detectors/critical-path-gaps.test.ts (6 tests) 13ms
+packages/engines/flows test:  ✓ src/detectors/untested-routes.test.ts (6 tests) 73ms
+packages/engines/flows test:  Test Files  4 passed (4)
+packages/engines/flows test:       Tests  20 passed (20)
+packages/engines/flows test:    Start at  20:11:52
+packages/engines/flows test:    Duration  1.51s (transform 297ms, setup 0ms, import 4.43s, tests 166ms, environment 0ms)
 packages/engines/flows test: Done
 packages/engines/smells test$ vitest run
-packages/engines/practices test:  [32m✓[39m src/detectors/naming-conventions.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 25[2mms[22m[39m
-packages/engines/practices test:  [32m✓[39m src/detectors/error-handling.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 26[2mms[22m[39m
-packages/engines/practices test:  [32m✓[39m src/detectors/console-statements.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 43[2mms[22m[39m
-packages/engines/performance test:  [32m✓[39m src/detectors/blocking-operations.test.ts [2m([22m[2m21 tests[22m[2m)[22m[32m 77[2mms[22m[39m
-packages/engines/practices test:  [32m✓[39m src/detectors/documentation.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 33[2mms[22m[39m
-packages/engines/practices test:  [32m✓[39m src/detectors/test-practices.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 68[2mms[22m[39m
-packages/engines/performance test:  [32m✓[39m src/detectors/inefficient-loops.test.ts [2m([22m[2m20 tests[22m[2m)[22m[32m 92[2mms[22m[39m
-packages/engines/practices test: [2m Test Files [22m [1m[32m5 passed[39m[22m[90m (5)[39m
-packages/engines/practices test: [2m      Tests [22m [1m[32m46 passed[39m[22m[90m (46)[39m
-packages/engines/practices test: [2m   Start at [22m 20:11:52
-packages/engines/practices test: [2m   Duration [22m 1.57s[2m (transform 1.35s, setup 0ms, import 6.04s, tests 195ms, environment 0ms)[22m
-packages/engines/performance test:  [32m✓[39m src/detectors/unnecessary-renders.test.ts [2m([22m[2m26 tests[22m[2m)[22m[32m 66[2mms[22m[39m
-packages/engines/performance test:  [32m✓[39m src/detectors/big-o-violations.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 107[2mms[22m[39m
-packages/engines/performance test: [2m Test Files [22m [1m[32m5 passed[39m[22m[90m (5)[39m
-packages/engines/performance test: [2m      Tests [22m [1m[32m100 passed[39m[22m[90m (100)[39m
-packages/engines/performance test: [2m   Start at [22m 20:11:52
-packages/engines/performance test: [2m   Duration [22m 1.60s[2m (transform 526ms, setup 0ms, import 5.62s, tests 494ms, environment 0ms)[22m
+packages/engines/practices test:  ✓ src/detectors/naming-conventions.test.ts (10 tests) 25ms
+packages/engines/practices test:  ✓ src/detectors/error-handling.test.ts (9 tests) 26ms
+packages/engines/practices test:  ✓ src/detectors/console-statements.test.ts (9 tests) 43ms
+packages/engines/performance test:  ✓ src/detectors/blocking-operations.test.ts (21 tests) 77ms
+packages/engines/practices test:  ✓ src/detectors/documentation.test.ts (8 tests) 33ms
+packages/engines/practices test:  ✓ src/detectors/test-practices.test.ts (10 tests) 68ms
+packages/engines/performance test:  ✓ src/detectors/inefficient-loops.test.ts (20 tests) 92ms
+packages/engines/practices test:  Test Files  5 passed (5)
+packages/engines/practices test:       Tests  46 passed (46)
+packages/engines/practices test:    Start at  20:11:52
+packages/engines/practices test:    Duration  1.57s (transform 1.35s, setup 0ms, import 6.04s, tests 195ms, environment 0ms)
+packages/engines/performance test:  ✓ src/detectors/unnecessary-renders.test.ts (26 tests) 66ms
+packages/engines/performance test:  ✓ src/detectors/big-o-violations.test.ts (16 tests) 107ms
+packages/engines/performance test:  Test Files  5 passed (5)
+packages/engines/performance test:       Tests  100 passed (100)
+packages/engines/performance test:    Start at  20:11:52
+packages/engines/performance test:    Duration  1.60s (transform 526ms, setup 0ms, import 5.62s, tests 494ms, environment 0ms)
 packages/engines/practices test: Done
 packages/engines/performance test: Done
-packages/engines/security test: [1m[30m[46m RUN [49m[39m[22m [36mv4.1.11 [39m[90m/Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/security[39m
-packages/engines/smells test: [1m[30m[46m RUN [49m[39m[22m [36mv4.1.11 [39m[90m/Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/smells[39m
-packages/engines/security test:  [32m✓[39m src/index.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 5[2mms[22m[39m
-packages/engines/smells test:  [32m✓[39m src/index.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 3[2mms[22m[39m
-packages/engines/security test:  [32m✓[39m src/detectors/dynamic-code-execution.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 23[2mms[22m[39m
-packages/engines/security test:  [32m✓[39m src/detectors/xss.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 29[2mms[22m[39m
-packages/engines/security test:  [32m✓[39m src/detectors/command-injection.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 34[2mms[22m[39m
-packages/engines/security test:  [32m✓[39m src/detectors/hardcoded-secrets.test.ts [2m([22m[2m37 tests[22m[2m)[22m[32m 32[2mms[22m[39m
-packages/engines/security test:  [32m✓[39m src/detectors/sql-injection.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 29[2mms[22m[39m
-packages/engines/security test:  [32m✓[39m src/detectors/path-traversal.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 21[2mms[22m[39m
-packages/engines/security test:  [32m✓[39m src/detectors/insecure-crypto.test.ts [2m([22m[2m22 tests[22m[2m)[22m[32m 26[2mms[22m[39m
-packages/engines/smells test:  [32m✓[39m src/detectors/magic-number.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 18[2mms[22m[39m
-packages/engines/smells test:  [32m✓[39m src/detectors/deep-nesting.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 17[2mms[22m[39m
-packages/engines/security test: [2m Test Files [22m [1m[32m8 passed[39m[22m[90m (8)[39m
-packages/engines/security test: [2m      Tests [22m [1m[32m141 passed[39m[22m[90m (141)[39m
-packages/engines/security test: [2m   Start at [22m 20:11:53
-packages/engines/security test: [2m   Duration [22m 749ms[2m (transform 747ms, setup 0ms, import 4.08s, tests 199ms, environment 1ms)[22m
-packages/engines/smells test:  [32m✓[39m src/detectors/god-object.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+packages/engines/security test:  RUN  v4.1.11 /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/security
+packages/engines/smells test:  RUN  v4.1.11 /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/smells
+packages/engines/security test:  ✓ src/index.test.ts (2 tests) 5ms
+packages/engines/smells test:  ✓ src/index.test.ts (2 tests) 3ms
+packages/engines/security test:  ✓ src/detectors/dynamic-code-execution.test.ts (12 tests) 23ms
+packages/engines/security test:  ✓ src/detectors/xss.test.ts (15 tests) 29ms
+packages/engines/security test:  ✓ src/detectors/command-injection.test.ts (16 tests) 34ms
+packages/engines/security test:  ✓ src/detectors/hardcoded-secrets.test.ts (37 tests) 32ms
+packages/engines/security test:  ✓ src/detectors/sql-injection.test.ts (19 tests) 29ms
+packages/engines/security test:  ✓ src/detectors/path-traversal.test.ts (18 tests) 21ms
+packages/engines/security test:  ✓ src/detectors/insecure-crypto.test.ts (22 tests) 26ms
+packages/engines/smells test:  ✓ src/detectors/magic-number.test.ts (5 tests) 18ms
+packages/engines/smells test:  ✓ src/detectors/deep-nesting.test.ts (4 tests) 17ms
+packages/engines/security test:  Test Files  8 passed (8)
+packages/engines/security test:       Tests  141 passed (141)
+packages/engines/security test:    Start at  20:11:53
+packages/engines/security test:    Duration  749ms (transform 747ms, setup 0ms, import 4.08s, tests 199ms, environment 1ms)
+packages/engines/smells test:  ✓ src/detectors/god-object.test.ts (5 tests) 16ms
 packages/engines/security test: Done
-packages/engines/smells test:  [32m✓[39m src/detectors/long-method.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 27[2mms[22m[39m
-packages/engines/smells test: [2m Test Files [22m [1m[32m5 passed[39m[22m[90m (5)[39m
-packages/engines/smells test: [2m      Tests [22m [1m[32m23 passed[39m[22m[90m (23)[39m
-packages/engines/smells test: [2m   Start at [22m 20:11:53
-packages/engines/smells test: [2m   Duration [22m 634ms[2m (transform 380ms, setup 0ms, import 1.90s, tests 81ms, environment 2ms)[22m
+packages/engines/smells test:  ✓ src/detectors/long-method.test.ts (7 tests) 27ms
+packages/engines/smells test:  Test Files  5 passed (5)
+packages/engines/smells test:       Tests  23 passed (23)
+packages/engines/smells test:    Start at  20:11:53
+packages/engines/smells test:    Duration  634ms (transform 380ms, setup 0ms, import 1.90s, tests 81ms, environment 2ms)
 packages/engines/smells test: Done
 apps/cli test$ vitest run
 apps/web test$ vitest run
-apps/cli test: [1m[30m[46m RUN [49m[39m[22m [36mv4.1.11 [39m[90m/Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/apps/cli[39m
-apps/web test: [1m[30m[46m RUN [49m[39m[22m [36mv4.1.11 [39m[90m/Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/apps/web[39m
-apps/web test:  [32m✓[39m src/lib/analysis.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 5[2mms[22m[39m
-apps/cli test:  [32m✓[39m src/formatters.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 35[2mms[22m[39m
-apps/web test:  [32m✓[39m src/lib/rate-limit.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 14[2mms[22m[39m
-apps/web test:  [32m✓[39m src/lib/report.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 14[2mms[22m[39m
-apps/web test:  [32m✓[39m src/app/sitemap.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 3[2mms[22m[39m
-apps/web test:  [32m✓[39m src/app/api/explain/route.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 19[2mms[22m[39m
-apps/web test:  [32m✓[39m src/lib/demo.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 862[2mms[22m[39m
-apps/web test:      [33m[2m✓[22m[39m matches what the engines report for DEMO_CODE [33m 861[2mms[22m[39m
-apps/web test:  [32m✓[39m src/app/api/analyze/route.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 1702[2mms[22m[39m
-apps/web test:      [33m[2m✓[22m[39m still detects issues in a snippet that contains JSX [33m 841[2mms[22m[39m
-apps/web test: [2m Test Files [22m [1m[32m7 passed[39m[22m[90m (7)[39m
-apps/web test: [2m      Tests [22m [1m[32m43 passed[39m[22m[90m (43)[39m
-apps/web test: [2m   Start at [22m 20:11:54
-apps/web test: [2m   Duration [22m 1.96s[2m (transform 568ms, setup 0ms, import 889ms, tests 2.62s, environment 0ms)[22m
+apps/cli test:  RUN  v4.1.11 /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/apps/cli
+apps/web test:  RUN  v4.1.11 /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/apps/web
+apps/web test:  ✓ src/lib/analysis.test.ts (7 tests) 5ms
+apps/cli test:  ✓ src/formatters.test.ts (9 tests) 35ms
+apps/web test:  ✓ src/lib/rate-limit.test.ts (10 tests) 14ms
+apps/web test:  ✓ src/lib/report.test.ts (3 tests) 14ms
+apps/web test:  ✓ src/app/sitemap.test.ts (2 tests) 3ms
+apps/web test:  ✓ src/app/api/explain/route.test.ts (12 tests) 19ms
+apps/web test:  ✓ src/lib/demo.test.ts (1 test) 862ms
+apps/web test:      ✓ matches what the engines report for DEMO_CODE  861ms
+apps/web test:  ✓ src/app/api/analyze/route.test.ts (8 tests) 1702ms
+apps/web test:      ✓ still detects issues in a snippet that contains JSX  841ms
+apps/web test:  Test Files  7 passed (7)
+apps/web test:       Tests  43 passed (43)
+apps/web test:    Start at  20:11:54
+apps/web test:    Duration  1.96s (transform 568ms, setup 0ms, import 889ms, tests 2.62s, environment 0ms)
 apps/web test: Done
-apps/cli test:  [32m✓[39m src/commands/scan.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 1331[2mms[22m[39m
-apps/cli test:      [33m[2m✓[22m[39m reports untested Next.js App Router pages through the CLI analysis pipeline [33m 465[2mms[22m[39m
-apps/cli test:      [33m[2m✓[22m[39m uses .rivetrc file patterns when scanning the compiled CLI [33m 864[2mms[22m[39m
-apps/cli test: [2m Test Files [22m [1m[32m2 passed[39m[22m[90m (2)[39m
-apps/cli test: [2m      Tests [22m [1m[32m13 passed[39m[22m[90m (13)[39m
-apps/cli test: [2m   Start at [22m 20:11:54
-apps/cli test: [2m   Duration [22m 2.23s[2m (transform 381ms, setup 0ms, import 819ms, tests 1.37s, environment 1ms)[22m
+apps/cli test:  ✓ src/commands/scan.test.ts (4 tests) 1331ms
+apps/cli test:      ✓ reports untested Next.js App Router pages through the CLI analysis pipeline  465ms
+apps/cli test:      ✓ uses .rivetrc file patterns when scanning the compiled CLI  864ms
+apps/cli test:  Test Files  2 passed (2)
+apps/cli test:       Tests  13 passed (13)
+apps/cli test:    Start at  20:11:54
+apps/cli test:    Duration  2.23s (transform 381ms, setup 0ms, import 819ms, tests 1.37s, environment 1ms)
 apps/cli test: Done
