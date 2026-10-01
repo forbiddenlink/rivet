@@ -159,6 +159,17 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
         'Next finding'
       )
       await page.getByText('Synthetic built-in guidance', { exact: true }).waitFor()
+      for (let step = 0; step < 3; step++) {
+        await page.getByRole('button', { name: 'Next finding', exact: true }).click()
+        await page.getByRole('button', { name: 'Previous finding', exact: true }).click()
+      }
+      await sleep(500)
+      assert.equal(aiCalls, 6, 'Rapid navigation must not reuse consent')
+      assert.equal(
+        await page.evaluate(() => document.activeElement?.getAttribute('aria-label')),
+        'Previous finding'
+      )
+      await page.getByText('Synthetic built-in guidance', { exact: true }).waitFor()
       await consent.waitFor()
       await consent.scrollIntoViewIfNeeded()
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
@@ -184,6 +195,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
           'explicit retry after return',
           'navigation retains focus',
           'runtime and cross-file copy',
+          'rapid navigation preserves consent isolation and focus',
         ],
       })
       await page.close()

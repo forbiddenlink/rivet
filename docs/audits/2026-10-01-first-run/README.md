@@ -83,3 +83,27 @@ concurrently first exposed a generated .next/types/routes.js race; sequential ch
 resolved it without code changes for that tooling race. Evidence is saved locally under
 `task/audit-evidence/rivet-navigation`. No push or hosted change was performed for this
 follow-up; PR #99 still points to the previously approved commit until separately approved.
+
+## Detector convergence correction (local, not pushed)
+
+PR #99's render-state alerts are false positives for the guarded previous-value pattern
+in FindingDetail. React explicitly documents same-component updates that synchronize the
+previous value so the condition becomes false on the next render:
+https://react.dev/reference/react/useState#storing-information-from-previous-renders
+https://react.dev/reference/eslint-plugin-react-hooks/lints/set-state-in-render#valid
+
+The detector now recognizes a deliberately narrow subset: a top-level strict inequality
+against a stable input/key, a directly imported useState binding from this component,
+and the first unconditional call in the guarded block synchronizing that previous value.
+Only literal resets of other owned state may follow. Multiple calls to the synchronization
+setter, local mutation, unknown setters, nested synchronization, wrong values, and unstable
+initializers remain outside the exception. No general exemption for conditionals was added.
+FindingDetail and its consent/focus implementation are unchanged in this correction.
+
+Twenty new tests cover the exact source and positive/negative guard cases. Final validation:
+658 uncached tests, 13 build tasks, 24 typecheck tasks, lint (102 warnings / 3 infos), and
+16 browser checks each at desktop/mobile sizes pass. Browser checks include failed/aborted
+A-B-A navigation, explicit retries, rapid navigation, delayed replies and preserved focus.
+The CI-equivalent local SARIF scan reports 103 errors / 312 warnings and zero
+state-update-in-render alerts on FindingDetail. Existing alerts remain; no SARIF was uploaded
+and no remote alert dismissed. Evidence lives in `task/audit-evidence/rivet-detector`.

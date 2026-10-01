@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { parseTypeScript } from '@rivet/parsers'
 import { describe, expect, it } from 'vitest'
 import { detectUnnecessaryRenders } from './unnecessary-renders'
@@ -576,5 +577,111 @@ describe('Unnecessary Renders Detector', () => {
 
       expect(inlineDetections.length).toBeGreaterThan(0)
     })
+  })
+})
+
+describe('convergent previous-value guards', () => {
+  function scan(body: string) {
+    const { ast } = parseTypeScript({
+      filePath: 'guard.tsx',
+      extractTypes: false,
+      sourceCode: `
+      import { useState } from 'react'
+      function Finding({ finding, value, enabled, setOther }) {
+        const key = JSON.stringify([finding.id, finding.message])
+        const [previous, setPrevious] = useState(key)
+        const [consent, setConsent] = useState(null)
+        ${body}
+        return <div>{previous}</div>
+      }
+    `,
+    })
+    return detectUnnecessaryRenders(ast, 'guard.tsx').filter(
+      (d) => d.ruleId === 'state-update-in-render'
+    )
+  }
+
+  it('accepts same-component synchronization followed by a consent reset', () => {
+    expect(scan('if (previous !== key) { setPrevious(key); setConsent(null) }')).toEqual([])
+  })
+
+  it('accepts the reviewed FindingDetail guard without changing the component', () => {
+    const sourceCode = readFileSync(
+      new URL('../../../../../apps/web/src/components/FindingDetail.tsx', import.meta.url),
+      'utf8'
+    )
+    const { ast } = parseTypeScript({
+      filePath: 'FindingDetail.tsx',
+      sourceCode,
+      extractTypes: false,
+    })
+    expect(
+      detectUnnecessaryRenders(ast, 'FindingDetail.tsx').filter(
+        (d) => d.ruleId === 'state-update-in-render'
+      )
+    ).toEqual([])
+  })
+
+  it.each([
+    [
+      'competing synchronization',
+      'if (previous !== key) { setPrevious(key) } if (previous !== value) { setPrevious(value) }',
+      2,
+    ],
+    [
+      'unstable serialized value',
+      'const next = JSON.stringify([Math.random()]); if (previous !== next) { setPrevious(next) }',
+      1,
+    ],
+    ['NaN comparison', 'const next = NaN; if (previous !== next) { setPrevious(next) }', 1],
+    ['fresh regex', 'const next = /fresh/; if (previous !== next) { setPrevious(next) }', 1],
+    ['unconditional', 'setPrevious(key)', 1],
+    ['prop-only guard', 'if (enabled) { setPrevious(key); setConsent(null) }', 2],
+    ['missing synchronization', 'if (previous !== key) { setConsent(null) }', 1],
+    ['wrong synchronization', 'if (previous !== key) { setPrevious(value); setConsent(null) }', 2],
+    [
+      'conditional synchronization',
+      'if (previous !== key) { if (enabled) setPrevious(key); setConsent(null) }',
+      2,
+    ],
+    ['external setter', 'if (previous !== key) { setPrevious(key); setOther(null) }', 2],
+    ['wrong comparison', 'if (previous === key) { setPrevious(key); setConsent(null) }', 2],
+    [
+      'unrelated guard',
+      'if (previous !== key) { setPrevious(key); setConsent(null) } if (enabled) setConsent(null)',
+      1,
+    ],
+    [
+      'fresh object',
+      'const next = {}; if (previous !== next) { setPrevious(next); setConsent(null) }',
+      2,
+    ],
+    [
+      'fresh array',
+      'const next = []; if (previous !== next) { setPrevious(next); setConsent(null) }',
+      2,
+    ],
+    [
+      'random value',
+      'const next = Math.random(); if (previous !== next) { setPrevious(next); setConsent(null) }',
+      2,
+    ],
+    [
+      'state-derived target',
+      'const next = JSON.stringify([consent]); if (previous !== next) { setPrevious(next); setConsent(null) }',
+      2,
+    ],
+    [
+      'updater synchronization',
+      'if (previous !== key) { setPrevious(() => key); setConsent(null) }',
+      2,
+    ],
+    [
+      'repeated synchronization',
+      'if (previous !== key) { setPrevious(key); setPrevious(value) }',
+      2,
+    ],
+  ])('still reports %s', (_name, body, count) => {
+    expect(scan(body)).toHaveLength(count)
   })
 })
