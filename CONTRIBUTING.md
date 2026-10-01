@@ -28,7 +28,7 @@ Be respectful, inclusive, and professional. We're all here to build something gr
 
 ### Prerequisites
 
-- **Node.js 20+**
+- **Node.js 24 recommended (minimum 22.12.0)**
 - **pnpm 9+**
 - **Git**
 - **OpenAI API key** (or Anthropic/Ollama for local development)

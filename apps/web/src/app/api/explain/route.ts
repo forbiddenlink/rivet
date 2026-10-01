@@ -17,7 +17,6 @@ const GUIDE_RATE_LIMIT = { limit: 60, windowMs: 60_000 }
 // truncated first. An unbounded message is both a cost multiplier and the obvious
 // place to smuggle instructions into the prompt.
 const MAX_PROMPT_FIELD = 500
-const MAX_CODE_CHARS = 4_000
 
 function clamp(value: unknown, max: number): string {
   return typeof value === 'string' ? value.slice(0, max) : ''
@@ -30,7 +29,7 @@ interface ExplanationRequest {
     category: string
     ruleId: string
   }
-  code?: string
+  ai?: boolean
 }
 
 interface ExplanationResponse {
@@ -76,7 +75,7 @@ function localExplanation(detection: ExplanationRequest['detection']): Explanati
       refs: [REPO],
     },
     dependencies: {
-      why: 'Dependency issues are supply-chain and maintenance risk: unused weight, outdated packages, and dead exports.',
+      why: 'This engine flags import hygiene and unused identifiers. It does not check package versions, vulnerability databases or licenses.',
       fix: '1. Remove unused imports and packages\n2. Upgrade vulnerable versions promptly\n3. Prefer one shared utility over duplicates\n4. Re-run the scan after cleanup',
       refs: ['https://github.com/webpro-nl/knip', REPO],
     },
@@ -128,10 +127,9 @@ export async function POST(
       category: clamp(body.detection.category, 32),
       ruleId: clamp(body.detection.ruleId, 64),
     }
-    const code = clamp(body.code, MAX_CODE_CHARS)
 
     const apiKey = process.env.OPENAI_API_KEY
-    if (!(apiKey && rateLimit(`explain-ai:${caller}`, AI_RATE_LIMIT).ok)) {
+    if (!(body.ai === true && apiKey && rateLimit(`explain-ai:${caller}`, AI_RATE_LIMIT).ok)) {
       return NextResponse.json(localExplanation(detection))
     }
 
@@ -156,7 +154,6 @@ Category: ${detection.category}
 Severity: ${detection.severity}
 Issue: ${detection.message}
 Rule: ${detection.ruleId}
-${code ? `\nCode context:\n${code.slice(0, 4000)}` : ''}
 
 Respond exactly in this format:
 EXPLANATION:

@@ -1,0 +1,128 @@
+
+> rivet@0.1.0 test /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local
+> turbo run test
+
+• turbo 2.10.12
+
+   • Packages in scope: @rivet/ai, @rivet/cli, @rivet/core, @rivet/engine-architecture, @rivet/engine-bugs, @rivet/engine-dependencies, @rivet/engine-flows, @rivet/engine-performance, @rivet/engine-practices, @rivet/engine-security, @rivet/engine-smells, @rivet/parsers, @rivet/web
+   • Running test in 13 packages
+   • Remote caching disabled
+
+@rivet/parsers:build: cache hit, suppressing logs 5acb0a6f68879bb5
+@rivet/parsers:test: cache hit, suppressing logs 67228223586ca83f
+@rivet/core:build: cache hit, suppressing logs 965ae26d202e1d71
+@rivet/engine-bugs:build: cache hit, suppressing logs dee6cd15fd36fc9c
+@rivet/engine-performance:build: cache hit, suppressing logs fe21be6b6a803a5f
+@rivet/ai:build: cache hit, suppressing logs 029ef2fe3681216e
+@rivet/engine-architecture:build: cache hit, suppressing logs e381883579d7d990
+@rivet/core:test: cache hit, suppressing logs 20a28b71760cad96
+@rivet/engine-practices:build: cache hit, suppressing logs 5411bf32cb74440a
+@rivet/engine-dependencies:build: cache hit, suppressing logs 9259798a2b57c2cc
+@rivet/engine-smells:build: cache hit, suppressing logs cc95aa9fb087f801
+@rivet/engine-security:build: cache hit, suppressing logs ca7cdde63c9d4c93
+@rivet/engine-flows:build: cache hit, suppressing logs a0ed37bb022bf72d
+@rivet/web:build: cache miss, executing 66fc21d354fe5f65
+@rivet/ai:test: cache hit, suppressing logs 07f8583deabd4cc0
+@rivet/engine-performance:test: cache hit, suppressing logs 995ddf300085258d
+@rivet/cli:build: cache miss, executing 80f8f78f8f3d7546
+@rivet/engine-bugs:test: cache hit, suppressing logs b2fe032aa4b82b2a
+@rivet/engine-practices:test: cache hit, suppressing logs f60c32f748d1ca40
+@rivet/engine-architecture:test: cache hit, suppressing logs 79aafeb9b645eb71
+@rivet/engine-dependencies:test: cache hit, suppressing logs 24f34d0b4bcb8321
+@rivet/engine-smells:test: cache hit, suppressing logs 46e218dd93ec53ae
+@rivet/engine-security:test: cache hit, suppressing logs 654a9204b3776583
+@rivet/engine-flows:test: cache hit, suppressing logs c0b3c91e184be730
+@rivet/cli:build:
+@rivet/cli:build: > @rivet/cli@0.1.0 build /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/apps/cli
+@rivet/cli:build: > tsup src/index.ts --format cjs --dts --tsconfig ../../tsconfig.tsup.json --clean --external @rivet/core --external @rivet/parsers --external @rivet/ai --external @rivet/engine-smells --external @rivet/engine-security --external @rivet/engine-bugs --external @rivet/engine-performance --external @rivet/engine-architecture --external @rivet/engine-practices --external @rivet/engine-dependencies --external @rivet/engine-flows
+@rivet/cli:build:
+@rivet/web:build:
+@rivet/web:build: > @rivet/web@0.1.0 build /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/apps/web
+@rivet/web:build: > next build
+@rivet/web:build:
+@rivet/cli:build: CLI Building entry: src/index.ts
+@rivet/cli:build: CLI Using tsconfig: ../../tsconfig.tsup.json
+@rivet/cli:build: CLI tsup v8.5.1
+@rivet/cli:build: CLI Target: es2022
+@rivet/cli:build: CLI Cleaning output folder
+@rivet/cli:build: CJS Build start
+@rivet/cli:build: CJS dist/index.js 40.14 KB
+@rivet/cli:build: CJS ⚡️ Build success in 18ms
+@rivet/web:build: ▲ Next.js 16.3.5 (Turbopack)
+@rivet/web:build: ✓ Running next.config.js took 9ms
+@rivet/web:build:
+@rivet/web:build:   Creating an optimized production build ...
+@rivet/cli:build: DTS Build start
+@rivet/web:build: ✓ Compiled successfully in 330ms
+@rivet/web:build:   Running TypeScript ...
+@rivet/cli:build: DTS ⚡️ Build success in 510ms
+@rivet/cli:build: DTS dist/index.d.ts 20.00 B
+@rivet/cli:test: cache miss, executing 330bc42897365233
+@rivet/cli:test:
+@rivet/cli:test: > @rivet/cli@0.1.0 test /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/apps/cli
+@rivet/cli:test: > vitest run
+@rivet/cli:test:
+@rivet/cli:test:
+@rivet/cli:test:  RUN  v4.1.11 /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/apps/cli
+@rivet/cli:test:
+@rivet/cli:test:  ✓ src/formatters.test.ts (9 tests) 14ms
+@rivet/web:build:   Finished TypeScript in 813ms ...
+@rivet/web:build:   Collecting page data using 12 workers ...
+@rivet/web:build:   Generating static pages using 12 workers (0/11) ...
+@rivet/web:build:   Generating static pages using 12 workers (2/11)
+@rivet/web:build:   Generating static pages using 12 workers (5/11)
+@rivet/web:build:   Generating static pages using 12 workers (8/11)
+@rivet/web:build: ✓ Generating static pages using 12 workers (11/11) in 460ms
+@rivet/web:build:   Finalizing page optimization ...
+@rivet/web:build:
+@rivet/web:build: Route (app)
+@rivet/web:build: ┌ ○ /
+@rivet/web:build: ├ ○ /_not-found
+@rivet/web:build: ├ ○ /about
+@rivet/web:build: ├ ƒ /api/analyze
+@rivet/web:build: ├ ƒ /api/explain
+@rivet/web:build: ├ ○ /contact
+@rivet/web:build: ├ ○ /dashboard
+@rivet/web:build: ├ ○ /privacy
+@rivet/web:build: ├ ○ /robots.txt
+@rivet/web:build: └ ○ /sitemap.xml
+@rivet/web:build:
+@rivet/web:build:
+@rivet/web:build: ○  (Static)   prerendered as static content
+@rivet/web:build: ƒ  (Dynamic)  server-rendered on demand
+@rivet/web:build:
+@rivet/web:test: cache miss, executing 11c2167383f38e91
+@rivet/cli:test:  ✓ src/commands/scan.test.ts (4 tests) 765ms
+@rivet/cli:test:      ✓ uses .rivetrc file patterns when scanning the compiled CLI  580ms
+@rivet/cli:test:
+@rivet/cli:test:  Test Files  2 passed (2)
+@rivet/cli:test:       Tests  13 passed (13)
+@rivet/cli:test:    Start at  20:08:43
+@rivet/cli:test:    Duration  1.42s (transform 244ms, setup 0ms, import 619ms, tests 779ms, environment 0ms)
+@rivet/cli:test:
+@rivet/web:test:
+@rivet/web:test: > @rivet/web@0.1.0 test /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/apps/web
+@rivet/web:test: > vitest run
+@rivet/web:test:
+@rivet/web:test:
+@rivet/web:test:  RUN  v4.1.11 /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/apps/web
+@rivet/web:test:
+@rivet/web:test:  ✓ src/lib/analysis.test.ts (7 tests) 3ms
+@rivet/web:test:  ✓ src/lib/rate-limit.test.ts (10 tests) 15ms
+@rivet/web:test:  ✓ src/app/sitemap.test.ts (2 tests) 4ms
+@rivet/web:test:  ✓ src/lib/report.test.ts (3 tests) 14ms
+@rivet/web:test:  ✓ src/app/api/explain/route.test.ts (12 tests) 12ms
+@rivet/web:test:  ✓ src/lib/demo.test.ts (1 test) 483ms
+@rivet/web:test:      ✓ matches what the engines report for DEMO_CODE  483ms
+@rivet/web:test:  ✓ src/app/api/analyze/route.test.ts (8 tests) 972ms
+@rivet/web:test:      ✓ still detects issues in a snippet that contains JSX  486ms
+@rivet/web:test:
+@rivet/web:test:  Test Files  7 passed (7)
+@rivet/web:test:       Tests  43 passed (43)
+@rivet/web:test:    Start at  20:08:45
+@rivet/web:test:    Duration  1.14s (transform 358ms, setup 0ms, import 589ms, tests 1.50s, environment 0ms)
+@rivet/web:test:
+
+ Tasks:    26 successful, 26 total
+Cached:    22 cached, 26 total
+  Time:    4.5s

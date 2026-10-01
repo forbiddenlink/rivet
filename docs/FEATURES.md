@@ -6,7 +6,7 @@ many detectors, security categories, auto-fix/codemod capabilities, and a scored
 not exist in the code; this rewrite replaces that content with what's actually implemented.
 
 Each analysis engine is a workspace package (`@rivet/engine-<name>`) with its own
-`src/detectors/*.ts` files. `apps/cli` wires 7 of the 8 engines (all except flows);
+`src/detectors/*.ts` files. `apps/cli` scan wires all 8 engines;
 `apps/web/src/app/api/analyze/route.ts` wires all 8, gated per-engine by config flags.
 
 ---
@@ -122,7 +122,9 @@ the repo, and no auto-generated test code.
 ## 🔧 Fixing
 
 `apps/cli/src/commands/fix.ts` applies fixes that a detector provides directly (a `fix.replacements`
-field on the `Detection`), sorted so replacements don't shift line offsets. Today that's a small
+field on the `Detection`). The current writer replaces whole lines rather than honoring
+character spans; it is experimental, not a verified-safe autofixer. Preview with `--dry-run`.
+Today eligible edits come from a small
 subset of detectors: `insecure-crypto`, `hardcoded-secrets`, and `xss` in the security engine.
 There's no interactive fix-confirmation flow and no migration codemods (React class-to-hooks,
 CommonJS-to-ESM, Jest-to-Vitest, CRA-to-Vite); none of that exists in the code.

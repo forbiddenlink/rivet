@@ -62,6 +62,9 @@ jobs:
 
       # The fixture project is deliberately broken, so the CLI exits 1 by design
       # via --fail-on. The assertion below is what decides whether this job passes.
+      - name: Verify documented first-run commands
+        run: pnpm test:first-run
+
       - name: Scan the example project
         run: |
           node apps/cli/dist/index.js scan examples/test-project \

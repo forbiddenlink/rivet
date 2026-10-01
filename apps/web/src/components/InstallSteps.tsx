@@ -3,9 +3,12 @@ import { CopyButton } from './CopyButton'
 
 const STEPS: Array<{ command: string; note?: React.ReactNode }> = [
   { command: `git clone ${REPO_URL} && cd rivet` },
-  { command: 'pnpm install && pnpm build' },
   {
-    command: 'pnpm --filter @rivet/cli dev scan /path/to/project',
+    command: 'pnpm install --frozen-lockfile && pnpm --filter @rivet/cli... build',
+    note: 'Use Node.js 24 (minimum 22.12.0) and pnpm 10.34.5.',
+  },
+  {
+    command: 'node apps/cli/dist/index.js scan /absolute/path/to/project',
     note: (
       <>
         Add <code>--ai</code> with <code>OPENAI_API_KEY</code> set for model-written explanations,

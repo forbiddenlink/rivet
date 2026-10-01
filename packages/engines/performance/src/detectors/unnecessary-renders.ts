@@ -1,5 +1,5 @@
 import type { Detection } from '@rivet/core'
-import type { ASTNode } from '@rivet/parsers'
+import type { ASTNode, TSESTree } from '@rivet/parsers'
 
 const FUNCTION_NODE_TYPES = new Set([
   'FunctionDeclaration',
@@ -34,6 +34,7 @@ type RenderContext = {
    * DOM element rather than a component.
    */
   jsxElementIsHost: boolean
+  convergentCalls: Set<TSESTree.Node>
 }
 
 /** A lowercase JSX name is a DOM element; an uppercase one is a component. */
@@ -50,6 +51,204 @@ function openingElementName(node: ASTNode): string | undefined {
   return undefined
 }
 
+// Deliberately recognize only straight-line, same-component previous-value guards.
+// React permits this pattern: https://react.dev/reference/react/useState#storing-information-from-previous-renders
+type GuardBindings = { stable: Set<string>; setters: Map<string, string> }
+
+function addStableBindings(pattern: TSESTree.Node, stable: Set<string>): void {
+  if (pattern.type === 'Identifier') stable.add(pattern.name)
+  if (pattern.type !== 'ObjectPattern') return
+  for (const property of pattern.properties) {
+    if (property.type === 'Property' && property.value.type === 'Identifier')
+      stable.add(property.value.name)
+  }
+}
+
+function stableValue(node: TSESTree.Node, stable: Set<string>): boolean {
+  if (node.type === 'Identifier') return stable.has(node.name)
+  if (node.type === 'Literal') {
+    return node.value === null || ['string', 'boolean', 'number'].includes(typeof node.value)
+  }
+  if (node.type === 'MemberExpression') return !node.computed && stableValue(node.object, stable)
+  return false
+}
+
+function isStringify(node: TSESTree.Node): boolean {
+  if (node.type !== 'MemberExpression' || node.computed) return false
+  return (
+    node.object.type === 'Identifier' &&
+    node.object.name === 'JSON' &&
+    node.property.type === 'Identifier' &&
+    node.property.name === 'stringify'
+  )
+}
+
+function stableInitializer(node: TSESTree.Node, stable: Set<string>): boolean {
+  if (stableValue(node, stable)) return true
+  if (node.type !== 'CallExpression' || !isStringify(node.callee) || node.arguments.length !== 1)
+    return false
+  const argument = node.arguments[0]
+  return (
+    argument?.type === 'ArrayExpression' &&
+    argument.elements.every((item) => item !== null && stableValue(item, stable))
+  )
+}
+
+function recordDeclaration(
+  declaration: TSESTree.VariableDeclarator,
+  hooks: Set<string>,
+  bindings: GuardBindings
+): void {
+  const init = declaration.init
+  if (!init) return
+  if (
+    declaration.id.type === 'ArrayPattern' &&
+    init.type === 'CallExpression' &&
+    init.callee.type === 'Identifier' &&
+    hooks.has(init.callee.name)
+  ) {
+    const [state, setter] = declaration.id.elements
+    if (state?.type === 'Identifier' && setter?.type === 'Identifier')
+      bindings.setters.set(setter.name, state.name)
+  } else if (stableInitializer(init, bindings.stable))
+    addStableBindings(declaration.id, bindings.stable)
+}
+
+function collectBindings(
+  body: TSESTree.BlockStatement,
+  hooks: Set<string>,
+  bindings: GuardBindings
+): boolean {
+  const names = new Set<string>()
+  for (const statement of body.body) {
+    if (statement.type === 'FunctionDeclaration' && statement.id) names.add(statement.id.name)
+    if (statement.type !== 'VariableDeclaration') continue
+    for (const declaration of statement.declarations) {
+      addStableBindings(declaration.id, names)
+      if (statement.kind === 'const') recordDeclaration(declaration, hooks, bindings)
+    }
+  }
+  return !names.has('JSON') && ![...hooks].some((name) => names.has(name))
+}
+
+function hasMutation(node: ASTNode): boolean {
+  return (
+    node.type === 'AssignmentExpression' ||
+    node.type === 'UpdateExpression' ||
+    (node.children ?? []).some(hasMutation)
+  )
+}
+
+function countRenderCalls(node: ASTNode, calls: Map<string, number>): void {
+  if (FUNCTION_NODE_TYPES.has(node.type)) return
+  if (node.raw.type === 'CallExpression' && node.raw.callee.type === 'Identifier') {
+    const name = node.raw.callee.name
+    calls.set(name, (calls.get(name) ?? 0) + 1)
+  }
+  for (const child of node.children ?? []) countRenderCalls(child, calls)
+}
+
+function guardNames(statement: TSESTree.IfStatement, stable: Set<string>): [string, string] | null {
+  if (
+    statement.alternate ||
+    statement.test.type !== 'BinaryExpression' ||
+    statement.test.operator !== '!=='
+  )
+    return null
+  const { left, right } = statement.test
+  if (left.type !== 'Identifier' || right.type !== 'Identifier' || !stable.has(right.name))
+    return null
+  return [left.name, right.name]
+}
+
+function directCall(statement: TSESTree.Statement): TSESTree.CallExpression | null {
+  return statement.type === 'ExpressionStatement' && statement.expression.type === 'CallExpression'
+    ? statement.expression
+    : null
+}
+
+function synchronizes(
+  call: TSESTree.CallExpression,
+  previous: string,
+  target: string,
+  setters: Map<string, string>,
+  counts: Map<string, number>
+): boolean {
+  if (
+    call.callee.type !== 'Identifier' ||
+    setters.get(call.callee.name) !== previous ||
+    counts.get(call.callee.name) !== 1
+  )
+    return false
+  return (
+    call.arguments.length === 1 &&
+    call.arguments[0]?.type === 'Identifier' &&
+    call.arguments[0].name === target
+  )
+}
+
+function localReset(
+  call: TSESTree.CallExpression,
+  previous: string,
+  setters: Map<string, string>
+): boolean {
+  if (
+    call.callee.type !== 'Identifier' ||
+    !setters.has(call.callee.name) ||
+    setters.get(call.callee.name) === previous
+  )
+    return false
+  return call.arguments.length === 1 && call.arguments[0]?.type === 'Literal'
+}
+
+function guardedCalls(
+  statement: TSESTree.IfStatement,
+  bindings: GuardBindings,
+  counts: Map<string, number>
+): TSESTree.CallExpression[] {
+  const names = guardNames(statement, bindings.stable)
+  if (!names || statement.consequent.type !== 'BlockStatement') return []
+  const [previous, target] = names
+  const calls: TSESTree.CallExpression[] = []
+  for (const item of statement.consequent.body) {
+    const call = directCall(item)
+    if (!call) return []
+    const valid =
+      calls.length === 0
+        ? synchronizes(call, previous, target, bindings.setters, counts)
+        : localReset(call, previous, bindings.setters)
+    if (!valid) return []
+    calls.push(call)
+  }
+  return calls
+}
+
+function convergentUpdates(component: ASTNode, hooks: Set<string>): Set<TSESTree.Node> {
+  const safe = new Set<TSESTree.Node>()
+  const fn = component.raw
+  if (
+    !(
+      fn.type === 'FunctionDeclaration' ||
+      fn.type === 'FunctionExpression' ||
+      fn.type === 'ArrowFunctionExpression'
+    )
+  )
+    return safe
+  if (fn.body.type !== 'BlockStatement' || hasMutation(component)) return safe
+  const bindings: GuardBindings = { stable: new Set(), setters: new Map() }
+  for (const param of fn.params) addStableBindings(param, bindings.stable)
+  if (bindings.stable.has('JSON') || [...hooks].some((name) => bindings.stable.has(name)))
+    return safe
+  if (!collectBindings(fn.body, hooks, bindings)) return safe
+  const counts = new Map<string, number>()
+  for (const child of component.children ?? []) countRenderCalls(child, counts)
+  for (const statement of fn.body.body) {
+    if (statement.type !== 'IfStatement') continue
+    for (const call of guardedCalls(statement, bindings, counts)) safe.add(call)
+  }
+  return safe
+}
+
 /**
  * Detect unnecessary re-renders in React components
  * - Missing dependency arrays in useEffect/useMemo/useCallback
@@ -58,6 +257,20 @@ function openingElementName(node: ASTNode): string | undefined {
  */
 export function detectUnnecessaryRenders(ast: ASTNode, filePath: string): Detection[] {
   const detections: Detection[] = []
+  const hooks = new Set<string>()
+  if (ast.raw.type === 'Program') {
+    for (const statement of ast.raw.body) {
+      if (statement.type !== 'ImportDeclaration' || statement.source.value !== 'react') continue
+      for (const specifier of statement.specifiers) {
+        if (
+          specifier.type === 'ImportSpecifier' &&
+          specifier.imported.type === 'Identifier' &&
+          specifier.imported.name === 'useState'
+        )
+          hooks.add(specifier.local.name)
+      }
+    }
+  }
   // Was module scope, so ids depended on how many files had already been scanned.
   let detectionCounter = 0
 
@@ -159,7 +372,7 @@ export function detectUnnecessaryRenders(ast: ASTNode, filePath: string): Detect
         callee.raw.name[3] === callee.raw.name[3]?.toUpperCase()
       ) {
         const isRenderPhase = context.inComponentBody && context.functionDepth === 1
-        if (isRenderPhase) {
+        if (isRenderPhase && !context.convergentCalls.has(node.raw)) {
           detections.push({
             id: `performance-${++detectionCounter}`,
             ruleId: 'state-update-in-render',
@@ -191,6 +404,7 @@ export function detectUnnecessaryRenders(ast: ASTNode, filePath: string): Detect
       childContext = {
         ...childContext,
         functionDepth: context.functionDepth + 1,
+        convergentCalls: context.functionDepth === 0 ? convergentUpdates(node, hooks) : new Set(),
         inComponentBody: context.functionDepth === 0 ? returnsJsx(node) : context.inComponentBody,
       }
     }
@@ -200,6 +414,11 @@ export function detectUnnecessaryRenders(ast: ASTNode, filePath: string): Detect
     }
   }
 
-  visit(ast, { functionDepth: 0, inComponentBody: false, jsxElementIsHost: false })
+  visit(ast, {
+    functionDepth: 0,
+    inComponentBody: false,
+    jsxElementIsHost: false,
+    convergentCalls: new Set(),
+  })
   return detections
 }
