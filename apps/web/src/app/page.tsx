@@ -145,9 +145,9 @@ export default function Home(): React.ReactElement {
             </tbody>
           </table>
           <p className="note">
-            <b>Explanations.</b> Every finding comes with guidance. When the server has an OpenAI
-            key, a model writes it and the dashboard labels it as AI. Without one, you get
-            RIVET&apos;s built-in guide for the category, labeled as such.
+            <b>Explanations.</b> Every finding comes with guidance. Built-in category guidance is
+            the default. Only choosing “Send this finding to OpenAI” requests model guidance, using
+            the server’s configured key. The result is labeled AI or built-in guide.
           </p>
         </div>
       </section>
@@ -156,13 +156,16 @@ export default function Home(): React.ReactElement {
         <div className="wrap">
           <div className="sect__head">
             <h2 id="surfaces-title">Use it where you already work</h2>
-            <p>Local-first. Your code stays on your machine unless you opt into AI enhancement.</p>
+            <p>
+              CLI scans run on your machine. Dashboard scans send submitted code to the server; AI
+              explanations require a separate opt-in.
+            </p>
           </div>
           <div className="surfaces">
             <div className="surface">
               <h3>Terminal</h3>
               <p>Scan a whole project, with explanations and tech-debt hours.</p>
-              <pre>{'$ pnpm --filter @rivet/cli dev \\\n    scan . --ai --tech-debt'}</pre>
+              <pre>{'$ node apps/cli/dist/index.js \\\n    scan . --ai --tech-debt'}</pre>
             </div>
             <div className="surface">
               <h3>Dashboard</h3>
@@ -174,7 +177,7 @@ export default function Home(): React.ReactElement {
             <div className="surface">
               <h3>CI</h3>
               <p>Emit SARIF for GitHub code scanning, or JSON and HTML reports.</p>
-              <pre>{'$ pnpm --filter @rivet/cli dev \\\n    scan . --format sarif'}</pre>
+              <pre>{'$ node apps/cli/dist/index.js \\\n    scan . --format sarif'}</pre>
             </div>
           </div>
         </div>

@@ -1,0 +1,7 @@
+
+> rivet@0.1.0 test:first-run /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local
+> node scripts/check-first-run.cjs
+
+- Initializing analysis engines...
+✔ Analyzed 2 issues across 1 files
+First-run CLI passed: 2 findings; documented executable and explicit env-file loading work.

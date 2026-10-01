@@ -9,6 +9,7 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsup src/index.ts --format cjs --dts --tsconfig ../../tsconfig.tsup.json --clean --external @rivet/core --external @rivet/parsers --external @rivet/ai --external @rivet/engine-smells --external @rivet/engine-security --external @rivet/engine-bugs --external @rivet/engine-performance --external @rivet/engine-architecture --external @rivet/engine-practices --external @rivet/engine-dependencies --external @rivet/engine-flows",
+    "start": "node dist/index.js",
     "dev": "tsup src/index.ts --format cjs --dts --tsconfig ../../tsconfig.tsup.json --watch --external @rivet/core --external @rivet/parsers --external @rivet/ai --external @rivet/engine-smells --external @rivet/engine-security --external @rivet/engine-bugs --external @rivet/engine-performance --external @rivet/engine-architecture --external @rivet/engine-practices --external @rivet/engine-dependencies --external @rivet/engine-flows",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
@@ -36,6 +37,9 @@
     "@types/node": "20.19.43",
     "tsup": "8.5.1",
     "vitest": "4.1.11"
+  },
+  "engines": {
+    "node": ">=22.12.0"
   },
   "keywords": [
     "cli",

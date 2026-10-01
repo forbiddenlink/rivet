@@ -1,0 +1,212 @@
+Scope: 12 of 14 workspace projects
+packages/parsers build$ tsup src/index.ts --format cjs,esm --dts --tsconfig ../../tsconfig.tsup.json --clean
+packages/parsers build: CLI Building entry: src/index.ts
+packages/parsers build: CLI Using tsconfig: ../../tsconfig.tsup.json
+packages/parsers build: CLI tsup v8.5.1
+packages/parsers build: CLI Target: es2022
+packages/parsers build: CLI Cleaning output folder
+packages/parsers build: CJS Build start
+packages/parsers build: ESM Build start
+packages/parsers build: DTS Build start
+packages/parsers build: ESM dist/index.mjs 4.88 KB
+packages/parsers build: ESM ⚡️ Build success in 363ms
+packages/parsers build: CJS dist/index.js 6.47 KB
+packages/parsers build: CJS ⚡️ Build success in 367ms
+packages/parsers build: DTS ⚡️ Build success in 617ms
+packages/parsers build: DTS dist/index.d.ts  3.00 KB
+packages/parsers build: DTS dist/index.d.mts 3.00 KB
+packages/parsers build: Done
+packages/core build$ tsup src/index.ts --format cjs,esm --dts --tsconfig ../../tsconfig.tsup.json --clean --external @rivet/parsers
+packages/core build: CLI Building entry: src/index.ts
+packages/core build: CLI Using tsconfig: ../../tsconfig.tsup.json
+packages/core build: CLI tsup v8.5.1
+packages/core build: CLI Target: es2022
+packages/core build: CLI Cleaning output folder
+packages/core build: CJS Build start
+packages/core build: ESM Build start
+packages/core build: CJS dist/index.js 19.60 KB
+packages/core build: CJS ⚡️ Build success in 44ms
+packages/core build: ESM dist/index.mjs 17.09 KB
+packages/core build: ESM ⚡️ Build success in 44ms
+packages/core build: DTS Build start
+packages/core build: DTS ⚡️ Build success in 662ms
+packages/core build: DTS dist/index.d.ts  11.36 KB
+packages/core build: DTS dist/index.d.mts 11.36 KB
+packages/core build: Done
+packages/ai build$ tsup src/index.ts --format cjs,esm --dts --tsconfig ../../tsconfig.tsup.json --clean --external @rivet/core --external langchain --external @langchain/openai
+packages/engines/architecture build$ tsup src/index.ts --format cjs,esm --dts --tsconfig ../../../tsconfig.tsup.json --clean --external @rivet/core --external @rivet/parsers --external typescript
+packages/engines/bugs build$ tsup src/index.ts --format cjs,esm --dts --tsconfig ../../../tsconfig.tsup.json --clean --external @rivet/core --external @rivet/parsers --external typescript
+packages/engines/dependencies build$ tsup src/index.ts --format cjs,esm --dts --tsconfig ../../../tsconfig.tsup.json --clean --external @rivet/core --external @rivet/parsers --external typescript
+packages/ai build: CLI Building entry: src/index.ts
+packages/ai build: CLI Using tsconfig: ../../tsconfig.tsup.json
+packages/ai build: CLI tsup v8.5.1
+packages/ai build: CLI Using tsup config: /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/ai/tsup.config.ts
+packages/ai build: CLI Target: es2022
+packages/ai build: CLI Cleaning output folder
+packages/ai build: CJS Build start
+packages/ai build: ESM Build start
+packages/ai build: ESM dist/index.js 5.75 KB
+packages/ai build: ESM ⚡️ Build success in 26ms
+packages/ai build: CJS dist/index.cjs 7.00 KB
+packages/ai build: CJS ⚡️ Build success in 27ms
+packages/engines/bugs build: CLI Building entry: src/index.ts
+packages/engines/bugs build: CLI Using tsconfig: ../../../tsconfig.tsup.json
+packages/engines/bugs build: CLI tsup v8.5.1
+packages/engines/bugs build: CLI Using tsup config: /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/bugs/tsup.config.ts
+packages/engines/bugs build: CLI Target: es2022
+packages/engines/bugs build: CLI Cleaning output folder
+packages/engines/bugs build: CJS Build start
+packages/engines/bugs build: ESM Build start
+packages/engines/bugs build: ESM dist/index.js 33.48 KB
+packages/engines/bugs build: ESM ⚡️ Build success in 50ms
+packages/engines/bugs build: CJS dist/index.cjs 34.73 KB
+packages/engines/bugs build: CJS ⚡️ Build success in 51ms
+packages/ai build: DTS Build start
+packages/engines/architecture build: CLI Building entry: src/index.ts
+packages/engines/architecture build: CLI Using tsconfig: ../../../tsconfig.tsup.json
+packages/engines/architecture build: CLI tsup v8.5.1
+packages/engines/architecture build: CLI Using tsup config: /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/architecture/tsup.config.ts
+packages/engines/architecture build: CLI Target: es2022
+packages/engines/architecture build: CLI Cleaning output folder
+packages/engines/architecture build: CJS Build start
+packages/engines/architecture build: ESM Build start
+packages/engines/architecture build: ESM dist/index.js 17.26 KB
+packages/engines/architecture build: ESM ⚡️ Build success in 51ms
+packages/engines/architecture build: CJS dist/index.cjs 18.55 KB
+packages/engines/architecture build: CJS ⚡️ Build success in 51ms
+packages/engines/bugs build: DTS Build start
+packages/engines/dependencies build: CLI Building entry: src/index.ts
+packages/engines/dependencies build: CLI Using tsconfig: ../../../tsconfig.tsup.json
+packages/engines/dependencies build: CLI tsup v8.5.1
+packages/engines/dependencies build: CLI Using tsup config: /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/dependencies/tsup.config.ts
+packages/engines/dependencies build: CLI Target: es2022
+packages/engines/dependencies build: CLI Cleaning output folder
+packages/engines/dependencies build: CJS Build start
+packages/engines/dependencies build: ESM Build start
+packages/engines/dependencies build: ESM dist/index.js 8.01 KB
+packages/engines/dependencies build: ESM ⚡️ Build success in 66ms
+packages/engines/dependencies build: CJS dist/index.cjs 9.28 KB
+packages/engines/dependencies build: CJS ⚡️ Build success in 66ms
+packages/engines/architecture build: DTS Build start
+packages/engines/dependencies build: DTS Build start
+packages/engines/bugs build: DTS ⚡️ Build success in 1217ms
+packages/engines/bugs build: DTS dist/index.d.cts 1.48 KB
+packages/engines/bugs build: DTS dist/index.d.ts  1.48 KB
+packages/engines/bugs build: Done
+packages/engines/flows build$ tsup --tsconfig ../../../tsconfig.tsup.json
+packages/engines/architecture build: DTS ⚡️ Build success in 1156ms
+packages/engines/architecture build: DTS dist/index.d.cts 1.75 KB
+packages/engines/architecture build: DTS dist/index.d.ts  1.75 KB
+packages/engines/architecture build: Done
+packages/engines/performance build$ tsup src/index.ts --format cjs,esm --dts --tsconfig ../../../tsconfig.tsup.json --clean --external @rivet/core --external @rivet/parsers --external typescript
+packages/engines/dependencies build: DTS ⚡️ Build success in 905ms
+packages/engines/dependencies build: DTS dist/index.d.cts 1.12 KB
+packages/engines/dependencies build: DTS dist/index.d.ts  1.12 KB
+packages/engines/dependencies build: Done
+packages/engines/practices build$ tsup src/index.ts --format cjs,esm --dts --tsconfig ../../../tsconfig.tsup.json --clean --external @rivet/core --external @rivet/parsers --external typescript
+packages/ai build: DTS ⚡️ Build success in 1964ms
+packages/ai build: DTS dist/index.d.cts 1.25 KB
+packages/ai build: DTS dist/index.d.ts  1.25 KB
+packages/engines/flows build: CLI Building entry: src/index.ts
+packages/engines/flows build: CLI Using tsconfig: ../../../tsconfig.tsup.json
+packages/engines/flows build: CLI tsup v8.5.1
+packages/engines/flows build: CLI Using tsup config: /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/flows/tsup.config.ts
+packages/ai build: Done
+packages/engines/security build$ tsup src/index.ts --format cjs,esm --dts --tsconfig ../../../tsconfig.tsup.json --clean --external @rivet/core --external @rivet/parsers --external typescript
+packages/engines/flows build: CLI Target: es2022
+packages/engines/flows build: CLI Cleaning output folder
+packages/engines/flows build: CJS Build start
+packages/engines/flows build: ESM Build start
+packages/engines/flows build: ESM dist/index.js     19.02 KB
+packages/engines/flows build: ESM dist/index.js.map 41.77 KB
+packages/engines/flows build: ESM ⚡️ Build success in 180ms
+packages/engines/flows build: CJS dist/index.cjs     19.19 KB
+packages/engines/flows build: CJS dist/index.cjs.map 41.77 KB
+packages/engines/flows build: CJS ⚡️ Build success in 180ms
+packages/engines/flows build: DTS Build start
+packages/engines/performance build: CLI Building entry: src/index.ts
+packages/engines/performance build: CLI Using tsconfig: ../../../tsconfig.tsup.json
+packages/engines/performance build: CLI tsup v8.5.1
+packages/engines/performance build: CLI Using tsup config: /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/performance/tsup.config.ts
+packages/engines/performance build: CLI Target: es2022
+packages/engines/performance build: CLI Cleaning output folder
+packages/engines/performance build: CJS Build start
+packages/engines/performance build: ESM Build start
+packages/engines/practices build: CLI Building entry: src/index.ts
+packages/engines/practices build: CLI Using tsconfig: ../../../tsconfig.tsup.json
+packages/engines/practices build: CLI tsup v8.5.1
+packages/engines/practices build: CLI Using tsup config: /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/practices/tsup.config.ts
+packages/engines/practices build: CLI Target: es2022
+packages/engines/practices build: CLI Cleaning output folder
+packages/engines/practices build: CJS Build start
+packages/engines/practices build: ESM Build start
+packages/engines/performance build: CJS dist/index.cjs 18.99 KB
+packages/engines/performance build: CJS ⚡️ Build success in 110ms
+packages/engines/performance build: ESM dist/index.js 17.70 KB
+packages/engines/performance build: ESM ⚡️ Build success in 110ms
+packages/engines/practices build: CJS dist/index.cjs 11.70 KB
+packages/engines/practices build: CJS ⚡️ Build success in 44ms
+packages/engines/practices build: ESM dist/index.js 10.43 KB
+packages/engines/practices build: ESM ⚡️ Build success in 44ms
+packages/engines/performance build: DTS Build start
+packages/engines/security build: CLI Building entry: src/index.ts
+packages/engines/security build: CLI Using tsconfig: ../../../tsconfig.tsup.json
+packages/engines/security build: CLI tsup v8.5.1
+packages/engines/security build: CLI Using tsup config: /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/security/tsup.config.ts
+packages/engines/security build: CLI Target: es2022
+packages/engines/security build: CLI Cleaning output folder
+packages/engines/security build: CJS Build start
+packages/engines/security build: ESM Build start
+packages/engines/practices build: DTS Build start
+packages/engines/security build: CJS dist/index.cjs 39.24 KB
+packages/engines/security build: CJS ⚡️ Build success in 23ms
+packages/engines/security build: ESM dist/index.js 37.72 KB
+packages/engines/security build: ESM ⚡️ Build success in 23ms
+packages/engines/security build: DTS Build start
+packages/engines/flows build: DTS ⚡️ Build success in 1068ms
+packages/engines/flows build: DTS dist/index.d.cts 1.13 KB
+packages/engines/flows build: DTS dist/index.d.ts  1.13 KB
+packages/engines/flows build: Done
+packages/engines/smells build$ tsup src/index.ts --format cjs,esm --dts --tsconfig ../../../tsconfig.tsup.json --clean --external @rivet/core --external @rivet/parsers --external typescript
+packages/engines/performance build: DTS ⚡️ Build success in 1162ms
+packages/engines/performance build: DTS dist/index.d.cts 1.62 KB
+packages/engines/performance build: DTS dist/index.d.ts  1.62 KB
+packages/engines/performance build: Done
+packages/engines/practices build: DTS ⚡️ Build success in 1028ms
+packages/engines/practices build: DTS dist/index.d.cts 1.48 KB
+packages/engines/practices build: DTS dist/index.d.ts  1.48 KB
+packages/engines/practices build: Done
+packages/engines/smells build: CLI Building entry: src/index.ts
+packages/engines/smells build: CLI Using tsconfig: ../../../tsconfig.tsup.json
+packages/engines/smells build: CLI tsup v8.5.1
+packages/engines/smells build: CLI Using tsup config: /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local/packages/engines/smells/tsup.config.ts
+packages/engines/security build: DTS ⚡️ Build success in 1067ms
+packages/engines/security build: DTS dist/index.d.cts 1.85 KB
+packages/engines/security build: DTS dist/index.d.ts  1.85 KB
+packages/engines/smells build: CLI Target: es2022
+packages/engines/smells build: CLI Cleaning output folder
+packages/engines/smells build: CJS Build start
+packages/engines/smells build: ESM Build start
+packages/engines/security build: Done
+packages/engines/smells build: ESM dist/index.js 15.35 KB
+packages/engines/smells build: ESM ⚡️ Build success in 39ms
+packages/engines/smells build: CJS dist/index.cjs 16.58 KB
+packages/engines/smells build: CJS ⚡️ Build success in 39ms
+packages/engines/smells build: DTS Build start
+packages/engines/smells build: DTS ⚡️ Build success in 619ms
+packages/engines/smells build: DTS dist/index.d.cts 2.81 KB
+packages/engines/smells build: DTS dist/index.d.ts  2.81 KB
+packages/engines/smells build: Done
+apps/cli build$ tsup src/index.ts --format cjs --dts --tsconfig ../../tsconfig.tsup.json --clean --external @rivet/core --external @rivet/parsers --external @rivet/ai --external @rivet/engine-smells --external @rivet/engine-security --external @rivet/engine-bugs --external @rivet/engine-performance --external @rivet/engine-architecture --external @rivet/engine-practices --external @rivet/engine-dependencies --external @rivet/engine-flows
+apps/cli build: CLI Building entry: src/index.ts
+apps/cli build: CLI Using tsconfig: ../../tsconfig.tsup.json
+apps/cli build: CLI tsup v8.5.1
+apps/cli build: CLI Target: es2022
+apps/cli build: CLI Cleaning output folder
+apps/cli build: CJS Build start
+apps/cli build: CJS dist/index.js 40.14 KB
+apps/cli build: CJS ⚡️ Build success in 20ms
+apps/cli build: DTS Build start
+apps/cli build: DTS ⚡️ Build success in 541ms
+apps/cli build: DTS dist/index.d.ts 20.00 B
+apps/cli build: Done

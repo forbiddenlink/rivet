@@ -53,9 +53,10 @@ export default function AboutPage(): React.ReactElement {
           title: 'Explanations',
           body: (
             <p>
-              Every finding comes with guidance on why it matters and how to fix it. With an OpenAI
-              key configured, a model writes that guidance; without one, RIVET uses its built-in
-              guide for the finding&apos;s category. The dashboard labels which one you are reading.
+              Every finding comes with guidance on why it matters and how to fix it. RIVET uses its
+              built-in category guide by default. A model is called only when you explicitly request
+              AI for that finding and the server has a key. The dashboard labels which one you are
+              reading.
             </p>
           ),
         },

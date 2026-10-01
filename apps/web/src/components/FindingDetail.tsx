@@ -56,6 +56,17 @@ export function FindingDetail({
 }: FindingDetailProps): React.ReactElement {
   const [guidance, setGuidance] = useState<Guidance>({ state: 'loading' })
   const { line, column } = finding.loc.start
+  const findingKey = JSON.stringify([
+    finding.filePath,
+    line,
+    column,
+    finding.ruleId,
+    finding.message,
+    finding.severity,
+    finding.category,
+  ])
+  const [consentedFinding, setConsentedFinding] = useState<string | null>(null)
+  const ai = consentedFinding === findingKey
 
   useEffect(() => {
     const detection = {
@@ -64,7 +75,7 @@ export function FindingDetail({
       category: finding.category,
       ruleId: finding.ruleId,
     }
-    const cacheKey = JSON.stringify(detection)
+    const cacheKey = JSON.stringify({ detection, ai })
     const hit = cache.get(cacheKey)
     if (hit) {
       setGuidance({ state: 'ready', data: hit })
@@ -78,13 +89,14 @@ export function FindingDetail({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         signal: controller.signal,
-        body: JSON.stringify({ detection }),
+        body: JSON.stringify({ detection, ai }),
       })
         .then(async (res) => {
           const data = await res.json().catch(() => null)
           if (!(res.ok && data)) {
             throw new Error(data?.error ?? `Guidance request failed (${res.status}).`)
           }
+          if (controller.signal.aborted) return
           cache.set(cacheKey, data)
           setGuidance({ state: 'ready', data })
         })
@@ -100,7 +112,7 @@ export function FindingDetail({
       window.clearTimeout(timer)
       controller.abort()
     }
-  }, [finding.message, finding.severity, finding.category, finding.ruleId])
+  }, [finding.message, finding.severity, finding.category, finding.ruleId, ai])
 
   const metadata = finding.metadata ? Object.entries(finding.metadata) : []
 
@@ -184,6 +196,21 @@ export function FindingDetail({
           </div>
         )}
 
+        <div className="guidance__consent">
+          <p>
+            Built-in guidance is the default. Requesting AI sends this finding&apos;s rule, message,
+            severity and category to OpenAI; messages may quote code. It uses the server&apos;s API
+            key and may incur provider charges. Your file is not sent.
+          </p>
+          <button
+            type="button"
+            className="btn btn--sm"
+            disabled={ai}
+            onClick={() => setConsentedFinding(findingKey)}
+          >
+            {ai ? 'AI requested for this finding' : 'Send this finding to OpenAI'}
+          </button>
+        </div>
         <section className="guidance" aria-live="polite" aria-busy={guidance.state === 'loading'}>
           {guidance.state === 'loading' && <p className="guidance__status">Loading guidance…</p>}
           {guidance.state === 'error' && (

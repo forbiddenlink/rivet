@@ -24,7 +24,10 @@ export default function PrivacyPage(): React.ReactElement {
                 scan, and deleted when the scan finishes. It is not stored.
               </li>
               <li>Results are returned to your browser and are not kept on the server.</li>
-              <li>Code is not sold or shared.</li>
+              <li>
+                Code is not sold. The optional AI disclosure below describes the finding details
+                sent to OpenAI.
+              </li>
             </ul>
           ),
         },
@@ -33,10 +36,11 @@ export default function PrivacyPage(): React.ReactElement {
           title: 'AI explanations',
           body: (
             <p>
-              When the server has an OpenAI key, the details of a finding you open (rule, message,
-              severity and category) are sent to OpenAI to write its explanation. Your file is not
-              sent, but a finding&apos;s message can quote a short fragment of code. Without a key,
-              explanations come from RIVET&apos;s built-in guide and nothing leaves the server.
+              Opening a finding uses built-in guidance. Only choosing “Send this finding to OpenAI”
+              sends its rule, message, severity and category to OpenAI using the server’s configured
+              key. Your file is not sent, but a finding&apos;s message can quote a short fragment of
+              code. Without a key, explanations come from RIVET&apos;s built-in guide and nothing
+              leaves the server.
             </p>
           ),
         },

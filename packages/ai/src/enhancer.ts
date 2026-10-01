@@ -29,7 +29,7 @@ export class AIEnhancer {
       model: resolveModel(config.model, DEFAULT_OPENAI_MODEL),
       temperature: config.temperature ?? 0.7,
       maxTokens: config.maxTokens || 500,
-      enabled: config.enabled ?? true,
+      enabled: config.enabled === true,
     }
 
     if (this.config.enabled && this.config.apiKey) {
@@ -43,7 +43,7 @@ export class AIEnhancer {
   }
 
   async enhanceDetection(detection: Detection): Promise<EnhancedDetection> {
-    if (!this.llm || !this.config.enabled) {
+    if (!(this.llm && this.config.enabled)) {
       return detection
     }
 
@@ -104,7 +104,7 @@ Format as JSON:
     detections: Detection[],
     maxConcurrent: number = 5
   ): Promise<EnhancedDetection[]> {
-    if (!this.llm || !this.config.enabled || detections.length === 0) {
+    if (!(this.llm && this.config.enabled) || detections.length === 0) {
       return detections
     }
 

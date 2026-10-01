@@ -15,7 +15,7 @@ are dependencies anywhere in this repo. This rewrite (2026-09-19) replaces that 
 | TypeScript | 6.0.3 | Language, used across every package |
 | Turborepo | 2.10.12 | Monorepo task orchestration |
 | pnpm | 10.34.5 (pinned via `packageManager`) | Package manager / workspaces |
-| Node.js | >=20.0.0 | Runtime |
+| Node.js | >=22.12.0 | Runtime |
 | Biome | 2.5.11 | Lint + format (root `pnpm lint`/`pnpm format`); no ESLint or Prettier config at the root |
 | fta-cli | 3.0.1 | Complexity metrics (`pnpm complexity`) |
 | Changesets | 3.0.2 | Versioning and releases |

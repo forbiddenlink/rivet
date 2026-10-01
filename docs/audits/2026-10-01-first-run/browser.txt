@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "requests": [
+    {
+      "ruleId": "dynamic-code-execution",
+      "ai": false
+    },
+    {
+      "ruleId": "dynamic-code-execution",
+      "ai": true
+    },
+    {
+      "ruleId": "loose-equality",
+      "ai": false
+    }
+  ],
+  "externalRequestsAllowed": false
+}
