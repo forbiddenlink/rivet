@@ -47,7 +47,7 @@
     "clean:stray": "find apps packages -path '*/src/*' \\( -name '*.js' -o -name '*.js.map' -o -name '*.d.ts' -o -name '*.d.ts.map' \\) -not -path '*/node_modules/*' -not -name 'next-env.d.ts' -delete"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.14",
+    "@biomejs/biome": "2.5.15",
     "@changesets/cli": "3.0.3",
     "@types/node": "20.19.43",
     "fta-cli": "3.0.1",
