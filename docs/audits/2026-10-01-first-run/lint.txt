@@ -1,0 +1,387 @@
+
+> rivet@0.1.0 lint /Users/elizabethstein/Documents/Codex/2026-09-30/task-2/rivet-local
+> biome check . && node scripts/check-no-stray-build-output.mjs
+
+apps/cli/src/commands/scan.ts:74:16 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━
+
+  ! Excessive complexity of 22 detected (max: 15).
+
+    72 │  * Run a single analysis with progress indicators
+    73 │  */
+  > 74 │ async function runAnalysis(
+       │                ^^^^^^^^^^^
+    75 │   projectRoot: string,
+    76 │   options: Record<string, string | boolean>,
+
+  i Please refactor this function to reduce its complexity score from 22 to the max allowed complexity 15.
+
+
+apps/web/src/app/api/analyze/route.ts:79:23 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  ! Excessive complexity of 26 detected (max: 15).
+
+    77 │ const RATE_LIMIT = { limit: 10, windowMs: 60_000 }
+    78 │
+  > 79 │ export async function POST(
+       │                       ^^^^
+    80 │   request: NextRequest
+    81 │ ): Promise<NextResponse<AnalysisResponse | { error: string }>> {
+
+  i Please refactor this function to reduce its complexity score from 26 to the max allowed complexity 15.
+
+
+apps/web/src/app/api/analyze/route.ts:136:20 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  ! Excessive complexity of 19 detected (max: 15).
+
+    134 │     // the parser choked on that extension (via the `parser`-tagged entry `analyzeFile`
+    135 │     // pushes into `errors` on a syntax error) so the caller can decide whether to retry.
+  > 136 │     async function runScan(
+        │                    ^^^^^^^
+    137 │       code: string,
+    138 │       extension: string
+
+  i Please refactor this function to reduce its complexity score from 19 to the max allowed complexity 15.
+
+
+apps/web/src/app/api/analyze/route.ts:94:11 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━
+
+  ! Change to an optional chain.
+
+    92 │     const body: AnalysisRequest = await request.json()
+    93 │
+  > 94 │     if (!(body.code && body.code.trim())) {
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    95 │       return NextResponse.json({ error: 'No code provided' }, { status: 400 })
+    96 │     }
+
+  i Unsafe fix: Change to an optional chain.
+
+     92  92 │       const body: AnalysisRequest = await request.json()
+     93  93 │
+     94     │ - ····if·(!(body.code·&&·body.code.trim()))·{
+         94 │ + ····if·(!(body.code?.trim()))·{
+     95  95 │         return NextResponse.json({ error: 'No code provided' }, { status: 400 })
+     96  96 │       }
+
+
+apps/web/src/app/api/analyze/route.ts:245:5 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+
+    243 │     // carries temp-directory paths and engine internals that a public endpoint
+    244 │     // should not hand back.
+  > 245 │     console.error('Analysis error:', error)
+        │     ^^^^^^^^^^^^^
+    246 │     return NextResponse.json({ error: 'Analysis failed' }, { status: 500 })
+    247 │   }
+
+  i The use of console is often reserved for debugging.
+
+  i Unsafe fix: Remove console.
+
+    240 240 │       })
+    241 241 │     } catch (error) {
+    242     │ - ····//·Logged·in·full·server-side;·the·client·gets·a·fixed·message.·The·raw·error
+    243     │ - ····//·carries·temp-directory·paths·and·engine·internals·that·a·public·endpoint
+    244     │ - ····//·should·not·hand·back.
+    245     │ - ····console.error('Analysis·error:',·error)
+    246 242 │       return NextResponse.json({ error: 'Analysis failed' }, { status: 500 })
+    247 243 │     }
+
+
+apps/web/src/app/api/explain/route.ts:195:5 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+
+    193 │     // Logged server-side; the client gets a fixed message rather than upstream
+    194 │     // error text, which can quote the request sent to OpenAI.
+  > 195 │     console.error('Explanation error:', error)
+        │     ^^^^^^^^^^^^^
+    196 │     return NextResponse.json({ error: 'Failed to generate explanation' }, { status: 500 })
+    197 │   }
+
+  i The use of console is often reserved for debugging.
+
+  i Unsafe fix: Remove console.
+
+    191 191 │       })
+    192 192 │     } catch (error) {
+    193     │ - ····//·Logged·server-side;·the·client·gets·a·fixed·message·rather·than·upstream
+    194     │ - ····//·error·text,·which·can·quote·the·request·sent·to·OpenAI.
+    195     │ - ····console.error('Explanation·error:',·error)
+    196 193 │       return NextResponse.json({ error: 'Failed to generate explanation' }, { status: 500 })
+    197 194 │     }
+
+
+apps/web/src/app/error.tsx:13:5 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+
+    11 │ }): React.ReactElement {
+    12 │   useEffect(() => {
+  > 13 │     console.error(error)
+       │     ^^^^^^^^^^^^^
+    14 │   }, [error])
+    15 │
+
+  i The use of console is often reserved for debugging.
+
+  i Unsafe fix: Remove console.
+
+    11 11 │   }): React.ReactElement {
+    12 12 │     useEffect(() => {
+    13    │ - ····console.error(error)
+    14 13 │     }, [error])
+    15 14 │
+
+
+apps/web/src/components/AnnotatedSource.tsx:86:17 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  ! Excessive complexity of 20 detected (max: 15).
+
+    84 │  * under the line. Used by the home page hero and the dashboard results.
+    85 │  */
+  > 86 │ export function AnnotatedSource({
+       │                 ^^^^^^^^^^^^^^^
+    87 │   code,
+    88 │   findings,
+
+  i Please refactor this function to reduce its complexity score from 20 to the max allowed complexity 15.
+
+
+apps/web/src/components/FindingList.tsx:60:66 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  ! Excessive complexity of 18 detected (max: 15).
+
+    58 │   }
+    59 │
+  > 60 │   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+       │                                                                  ^^^
+    61 │     let next = index < 0 ? 0 : index
+    62 │     if (e.key === 'ArrowDown') next = Math.min(findings.length - 1, index + 1)
+
+  i Please refactor this function to reduce its complexity score from 18 to the max allowed complexity 15.
+
+
+packages/parsers/src/typescript-parser.ts:79:10 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  ! Excessive complexity of 25 detected (max: 15).
+
+    77 │  * Convert ESTree node to our unified AST format
+    78 │  */
+  > 79 │ function convertESTreeNode(node: TSESTree.Node): ASTNode {
+       │          ^^^^^^^^^^^^^^^^^
+    80 │   const loc: SourceLocation = {
+    81 │     start: {
+
+  i Please refactor this function to reduce its complexity score from 25 to the max allowed complexity 15.
+
+
+packages/parsers/src/typescript-parser.ts:102:28 lint/suspicious/noExplicitAny ━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected any. Specify a different type.
+
+    100 │     }
+    101 │
+  > 102 │     const value = (node as any)[key]
+        │                            ^^^
+    103 │
+    104 │     if (value && typeof value === 'object') {
+
+  i any disables many type checking rules. Its use should be avoided.
+
+
+packages/parsers/src/typescript-parser.ts:131:10 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  ! Excessive complexity of 16 detected (max: 15).
+
+    129 │  * Extract import dependencies from the AST
+    130 │  */
+  > 131 │ function extractDependencies(ast: TSESTree.Node, dependencies: Dependency[]): void {
+        │          ^^^^^^^^^^^^^^^^^^^
+    132 │   if (ast.type !== 'Program') return
+    133 │
+
+  i Please refactor this function to reduce its complexity score from 16 to the max allowed complexity 15.
+
+
+scripts/check-no-stray-build-output.mjs:41:9 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━━━━━━━━
+
+  ! Logical expression contains unnecessary complexity.
+
+    39 │   for (const file of walk(root)) {
+    40 │     // Only source directories matter; a `.js` config file at a package root is fine.
+  > 41 │     if (!file.includes(`${'src'}/`) && !file.includes(`/src/`)) continue
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    42 │     if (ALLOWED.has(file.split('/').pop())) continue
+    43 │     if (OFFENDING.test(file)) {
+
+  i Safe fix: Reduce the complexity of the logical expression.
+
+    39 39 │     for (const file of walk(root)) {
+    40 40 │       // Only source directories matter; a `.js` config file at a package root is fine.
+    41    │ - ····if·(!file.includes(`${'src'}/`)·&&·!file.includes(`/src/`))·continue
+       41 │ + ····if·(!(file.includes(`${'src'}/`)·||·file.includes(`/src/`)))·continue
+    42 42 │       if (ALLOWED.has(file.split('/').pop())) continue
+    43 43 │       if (OFFENDING.test(file)) {
+
+
+scripts/check-no-stray-build-output.mjs:50:3 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+
+    49 │ if (offenders.length > 0) {
+  > 50 │   console.error('Compiled output found inside source directories:')
+       │   ^^^^^^^^^^^^^
+    51 │   for (const file of offenders.sort()) {
+    52 │     console.error(`  ${file}`)
+
+  i The use of console is often reserved for debugging.
+
+  i Unsafe fix: Remove console.
+
+    48 48 │
+    49 49 │   if (offenders.length > 0) {
+    50    │ - ··console.error('Compiled·output·found·inside·source·directories:')
+    51 50 │     for (const file of offenders.sort()) {
+    52 51 │       console.error(`  ${file}`)
+
+
+scripts/check-no-stray-build-output.mjs:52:5 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+
+    50 │   console.error('Compiled output found inside source directories:')
+    51 │   for (const file of offenders.sort()) {
+  > 52 │     console.error(`  ${file}`)
+       │     ^^^^^^^^^^^^^
+    53 │   }
+    54 │   console.error('')
+
+  i The use of console is often reserved for debugging.
+
+  i Unsafe fix: Remove console.
+
+    50 50 │     console.error('Compiled output found inside source directories:')
+    51 51 │     for (const file of offenders.sort()) {
+    52    │ - ····console.error(`··${file}`)
+    53 52 │     }
+    54 53 │     console.error('')
+
+
+scripts/check-no-stray-build-output.mjs:54:3 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+
+    52 │     console.error(`  ${file}`)
+    53 │   }
+  > 54 │   console.error('')
+       │   ^^^^^^^^^^^^^
+    55 │   console.error('These shadow their .ts siblings during module resolution, so type')
+    56 │   console.error('changes stop propagating. Remove them and build into dist/ instead:')
+
+  i The use of console is often reserved for debugging.
+
+  i Unsafe fix: Remove console.
+
+    52 52 │       console.error(`  ${file}`)
+    53 53 │     }
+    54    │ - ··console.error('')
+    55 54 │     console.error('These shadow their .ts siblings during module resolution, so type')
+    56 55 │     console.error('changes stop propagating. Remove them and build into dist/ instead:')
+
+
+scripts/check-no-stray-build-output.mjs:55:3 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+
+    53 │   }
+    54 │   console.error('')
+  > 55 │   console.error('These shadow their .ts siblings during module resolution, so type')
+       │   ^^^^^^^^^^^^^
+    56 │   console.error('changes stop propagating. Remove them and build into dist/ instead:')
+    57 │   console.error('  pnpm clean:stray')
+
+  i The use of console is often reserved for debugging.
+
+  i Unsafe fix: Remove console.
+
+    53 53 │     }
+    54 54 │     console.error('')
+    55    │ - ··console.error('These·shadow·their·.ts·siblings·during·module·resolution,·so·type')
+    56 55 │     console.error('changes stop propagating. Remove them and build into dist/ instead:')
+    57 56 │     console.error('  pnpm clean:stray')
+
+
+scripts/check-no-stray-build-output.mjs:56:3 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+
+    54 │   console.error('')
+    55 │   console.error('These shadow their .ts siblings during module resolution, so type')
+  > 56 │   console.error('changes stop propagating. Remove them and build into dist/ instead:')
+       │   ^^^^^^^^^^^^^
+    57 │   console.error('  pnpm clean:stray')
+    58 │   process.exit(1)
+
+  i The use of console is often reserved for debugging.
+
+  i Unsafe fix: Remove console.
+
+    54 54 │     console.error('')
+    55 55 │     console.error('These shadow their .ts siblings during module resolution, so type')
+    56    │ - ··console.error('changes·stop·propagating.·Remove·them·and·build·into·dist/·instead:')
+    57 56 │     console.error('  pnpm clean:stray')
+    58 57 │     process.exit(1)
+
+
+scripts/check-no-stray-build-output.mjs:57:3 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+
+    55 │   console.error('These shadow their .ts siblings during module resolution, so type')
+    56 │   console.error('changes stop propagating. Remove them and build into dist/ instead:')
+  > 57 │   console.error('  pnpm clean:stray')
+       │   ^^^^^^^^^^^^^
+    58 │   process.exit(1)
+    59 │ }
+
+  i The use of console is often reserved for debugging.
+
+  i Unsafe fix: Remove console.
+
+    55 55 │     console.error('These shadow their .ts siblings during module resolution, so type')
+    56 56 │     console.error('changes stop propagating. Remove them and build into dist/ instead:')
+    57    │ - ··console.error('··pnpm·clean:stray')
+    58 57 │     process.exit(1)
+    59 58 │   }
+
+
+scripts/check-no-stray-build-output.mjs:61:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+
+    59 │ }
+    60 │
+  > 61 │ console.log('No compiled output in source directories.')
+       │ ^^^^^^^^^^^
+    62 │
+
+  i The use of console is often reserved for debugging.
+
+  i Unsafe fix: Remove console.
+
+    58 58 │     process.exit(1)
+    59 59 │   }
+    60    │ -
+    61    │ - console.log('No·compiled·output·in·source·directories.')
+    62 60 │
+
+
+The number of diagnostics exceeds the limit allowed. Use --max-diagnostics to increase it.
+Diagnostics not shown: 80.
+Checked 203 files in 95ms. No fixes applied.
+Found 98 warnings.
+Found 2 infos.
+No compiled output in source directories.

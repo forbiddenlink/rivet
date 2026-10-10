@@ -4,7 +4,7 @@ Target CLI design. **Only `scan` and `fix` are implemented today** (Phase 1 MVP,
 `apps/cli/src/commands/{scan,fix}.ts`); every other command below (`deps`, `flows`, `refactor`,
 `modernize`, `migrate`, `score`, `bundle`, `coverage`, `report`, `explain`, `learn`, `ci`,
 `init`) is planned, not built. RIVET is not published to npm; run it from the monorepo via
-`pnpm --filter @rivet/cli dev <command>` (see `QUICK_START.md`). Flag lists under `scan`/`fix`
+`node apps/cli/dist/index.js <command>` (see `QUICK_START.md`). Flag lists under `scan`/`fix`
 below include planned flags beyond what `apps/cli/src/commands/scan.ts`/`fix.ts` accept today;
 see `QUICK_START.md` for the flags that are real now.
 

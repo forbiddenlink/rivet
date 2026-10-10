@@ -133,8 +133,8 @@ export function ResultsBench({
           <b>No findings in {fileName}.</b>
           <p>
             The enabled engines ran in {result.duration} ms and flagged nothing
-            {minSeverity === 'info' ? '' : ` at ${minSeverity} severity or above`}. Rules that need
-            a whole project, such as circular dependencies, only run in the CLI.
+            {minSeverity === 'info' ? '' : ` at ${minSeverity} severity or above`}. The CLI scans
+            multiple files individually; neither interface verifies cross-file dependency cycles.
           </p>
           <div className="alert__actions">
             <button type="button" className="btn btn--sm" onClick={onEdit}>

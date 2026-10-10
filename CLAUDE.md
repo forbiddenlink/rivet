@@ -3,14 +3,14 @@
 AI-powered code quality and security platform. Combines 8 static analysis
 engines (smells, bugs, security, performance, architecture, practices,
 dependencies, flows) with an AI explanation layer. Ships as a CLI (`rivet
-scan`) and a Next.js web dashboard. Phase 1 MVP, ~90% per README.
+scan`) and a Next.js web dashboard. Experimental; README lists the current implemented capabilities.
 
 Repo: github.com/forbiddenlink/rivet. Vercel project: `rivet` (team
 `team_lpmfVKK0eS53XS6cvuFHK9AN`).
 
 ## Stack
 
-- Turborepo monorepo with pnpm-managed workspaces (`pnpm@10.34.5`, Node >=20)
+- Turborepo monorepo with pnpm-managed workspaces (`pnpm@10.34.5`, Node >=22.12.0 (24 recommended))
 - TypeScript 6, Biome 2 (lint + format, not ESLint/Prettier)
 - `apps/web`: Next.js 16, React 19
 - `apps/cli`: Commander-based CLI, built with tsup (CJS + dts)

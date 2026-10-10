@@ -1,0 +1,3 @@
+- Initializing analysis engines...
+✔ Analyzed 2 issues across 1 files
+First-run CLI passed: 2 findings; documented executable and explicit env-file loading work.

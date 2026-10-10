@@ -1,6 +1,9 @@
 # RIVET Roadmap
 
-Development timeline and feature release plan.
+Historical planning document, not a shipped-capability checklist or delivery promise.
+Dates and completion labels below are not a current release status. Use [README](../README.md)
+and [Features](FEATURES.md) for the implemented surface; paid plans, IDE integrations and
+automated refactoring described here are not available product entitlements.
 
 ---
 

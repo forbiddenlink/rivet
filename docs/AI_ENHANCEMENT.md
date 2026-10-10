@@ -1,138 +1,45 @@
-# Using RIVET AI Enhancement
+# Optional AI explanations
 
-RIVET can enhance code quality detections with AI-powered explanations and suggestions using GPT-4.
+OpenAI is the only wired provider. No included monthly allowance or paid Rivet plan is implemented.
+Provider calls can incur charges. Default model identifiers are defined in
+`packages/core/src/models.ts`; `OPENAI_MODEL` overrides them, and CLI `--ai-model` takes precedence.
 
-## Setup
+## CLI
 
-1. **Get an OpenAI API Key**
-   - Sign up at [OpenAI](https://platform.openai.com/)
-   - Generate an API key from your dashboard
-
-2. **Set Environment Variable**
-   ```bash
-   export OPENAI_API_KEY="your-api-key-here"
-   ```
-
-## Using AI Enhancement in CLI
-
-Currently, the AI enhancement feature is implemented in the `@rivet/ai` package and ready for integration. To use it:
-
-### Option 1: Programmatic Usage
-
-```typescript
-import { RivetEngine } from '@rivet/core'
-import { AIEnhancer, TechDebtCalculator } from '@rivet/ai'
-import { SmellsEngine } from '@rivet/engine-smells'
-
-// Create engine and run analysis
-const engine = new RivetEngine()
-engine.registerEngine(new SmellsEngine())
-const result = await engine.analyze('./src')
-
-// Enhance with AI explanations
-const aiEnhancer = new AIEnhancer({
-  apiKey: process.env.OPENAI_API_KEY,
-  model: 'gpt-4',
-  temperature: 0.7,
-})
-
-const enhanced = await aiEnhancer.enhanceDetections(result.detections)
-
-// Calculate tech debt
-const metrics = TechDebtCalculator.calculate(enhanced)
-console.log(TechDebtCalculator.formatMetrics(metrics))
-
-// Show enhanced detections
-enhanced.forEach(detection => {
-  console.log(`\n${detection.ruleId}: ${detection.message}`)
-  if (detection.aiExplanation) {
-    console.log(`💡 ${detection.aiExplanation}`)
-  }
-  if (detection.aiSuggestion) {
-    console.log(`🔧 ${detection.aiSuggestion}`)
-  }
-  if (detection.aiAnalogy) {
-    console.log(`📖 ${detection.aiAnalogy}`)
-  }
-})
-```
-
-### Option 2: CLI Integration
-
-`--ai` and `--tech-debt` are wired into `rivet scan` (`apps/cli/src/commands/scan.ts`):
+Build using [Quick Start](../QUICK_START.md), then explicitly opt in:
 
 ```bash
-pnpm --filter @rivet/cli dev scan ./src --ai
-pnpm --filter @rivet/cli dev scan ./src --ai --tech-debt
+# Export OPENAI_API_KEY privately in your shell first.
+node apps/cli/dist/index.js scan /absolute/path/to/project --ai
+# Or explicitly load a private environment file from the repo root:
+node --env-file=.env.local apps/cli/dist/index.js scan /absolute/path/to/project --ai
 ```
 
-## AI Features
+The CLI does not auto-load environment files. Without `--ai`, a configured key alone causes
+no provider requests. `--tech-debt` uses fixed heuristic estimates, not AI or measured effort.
+AI prompts contain rule, severity, category, message and file path. Messages can include code fragments. Review these before opting in for sensitive projects.
 
-### 1. Enhanced Explanations
-AI provides clear, contextual explanations for each detection:
-- **Why it matters**: Understanding the impact of the issue
-- **How to fix**: Specific actionable steps
-- **Simple analogy**: Easy-to-understand comparison
+## Dashboard
 
-### 2. Tech Debt Calculation
-Automatically estimates time to fix issues:
-- Critical: 4 hours
-- High: 2 hours
-- Medium: 1 hour
-- Low: 30 minutes
+Opening findings requests built-in category guidance. The **Send this finding to OpenAI**
+button is explicit consent for that finding. The server requires literal `ai: true` in the
+explanation request before calling the provider; a key alone is insufficient. Only rule,
+message, severity and category are forwarded. The full file, path and any extra `code` field
+are not forwarded by this endpoint. Finding messages can still quote code.
 
-### 3. Batch Processing
-Process multiple detections efficiently with rate limiting to avoid API throttling.
+The server key pays for dashboard requests. The endpoint retains its existing rate limits;
+missing keys, exhausted AI limits and unsuccessful provider responses use a labeled built-in
+guide. Consent is not authentication or a distributed billing limit.
 
-## Configuration Options
+## Programmatic use
+
+`AIEnhancer` defaults to disabled even with a configured key. Pass `enabled: true` only after
+obtaining consent for the findings you intend to send:
 
 ```typescript
-const aiEnhancer = new AIEnhancer({
-  apiKey: process.env.OPENAI_API_KEY,  // Required
-  model: 'gpt-4',                       // Default: 'gpt-4'
-  temperature: 0.7,                     // Default: 0.7
-  maxTokens: 500,                       // Default: 500
-  enabled: true,                        // Default: true
-})
+import { AIEnhancer } from '@rivet/ai'
+const enhancer = new AIEnhancer({ apiKey: process.env.OPENAI_API_KEY, enabled: true })
+const enhanced = await enhancer.enhanceDetections(detections)
 ```
 
-## Cost Considerations
-
-- Each detection enhancement costs ~$0.001-0.003 (GPT-4)
-- Use selective enhancement for large codebases
-- Consider using GPT-3.5-turbo for lower costs: `model: 'gpt-3.5-turbo'`
-
-## Example Output
-
-```
-[HIGH] unhandled-promise
-  File: src/api.ts:42:2
-  Message: Unhandled promise: promise result not awaited or caught
-
-💡 Explanation: Unhandled promises can lead to silent failures in your application. 
-When a promise rejects and there's no error handler, the error is swallowed, making 
-debugging extremely difficult. This is particularly problematic in production where 
-you won't see console errors.
-
-🔧 Suggestion: Add `await` before the promise call or chain a `.catch()` handler. 
-If in an async function, wrap in try-catch. For fire-and-forget scenarios, 
-explicitly add `.catch(err => console.error('Background task failed:', err))`.
-
-📖 Analogy: It's like sending a letter without a return address - if something 
-goes wrong, you'll never know about it.
-```
-
-## Privacy & Security
-
-- Code snippets are sent to OpenAI for analysis
-- No code is stored; only used for generating explanations
-- Review [OpenAI's API data usage policy](https://openai.com/policies/api-data-usage-policies)
-- For sensitive codebases, consider self-hosted LLM alternatives
-
-## Disabling AI Features
-
-```typescript
-const aiEnhancer = new AIEnhancer({ enabled: false })
-```
-
-Or don't set the `OPENAI_API_KEY` environment variable - the enhancement will be skipped automatically.
+AI output is advice to review; it does not automatically edit source files.

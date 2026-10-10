@@ -75,6 +75,12 @@ describe('AIEnhancer', () => {
     expect(result).toEqual([mockDetection])
   })
 
+  it('does not use a configured key without explicit enablement', async () => {
+    const enhancer = new AIEnhancer({ apiKey: 'synthetic-key' })
+    await enhancer.enhanceDetections([mockDetection])
+    expect(invoke).not.toHaveBeenCalled()
+  })
+
   it('should handle empty detection array', async () => {
     const enhancer = new AIEnhancer({
       apiKey: 'test-key',
