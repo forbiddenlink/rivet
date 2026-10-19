@@ -53,9 +53,9 @@
     "@types/node": "20.19.43",
     "fta-cli": "3.1.0",
     "tsup": "8.5.1",
-    "turbo": "2.11.7",
+    "turbo": "2.11.8",
     "typescript": "6.0.3",
-    "vitest": "4.1.11",
+    "vitest": "4.1.12",
     "vite": "8.3.4"
   },
   "packageManager": "pnpm@10.34.6",
