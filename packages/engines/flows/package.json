@@ -1,6 +1,7 @@
 {
   "name": "@rivet/engine-flows",
   "version": "0.1.0",
+  "private": true,
   "description": "Flow testing analysis engine for RIVET",
   "type": "module",
   "main": "./dist/index.cjs",

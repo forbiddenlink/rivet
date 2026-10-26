@@ -1,6 +1,7 @@
 {
   "name": "@rivet/cli",
   "version": "0.1.0",
+  "private": true,
   "description": "Command-line interface for RIVET code quality analysis",
   "bin": {
     "rivet": "./dist/index.js"
