@@ -1,6 +1,7 @@
 {
   "name": "@rivet/ai",
   "version": "0.1.0",
+  "private": true,
   "description": "AI-powered code quality explanations and suggestions",
   "type": "module",
   "exports": {

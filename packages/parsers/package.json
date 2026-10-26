@@ -1,6 +1,7 @@
 {
   "name": "@rivet/parsers",
   "version": "0.1.0",
+  "private": true,
   "description": "AST parsing and type extraction for multiple languages",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

@@ -1,6 +1,7 @@
 {
   "name": "@rivet/engine-bugs",
   "version": "0.1.0",
+  "private": true,
   "description": "Bug detection engine for RIVET",
   "type": "module",
   "exports": {
