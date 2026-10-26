@@ -1,6 +1,7 @@
 {
   "name": "@rivet/core",
   "version": "0.1.0",
+  "private": true,
   "description": "Core orchestration engine for RIVET analysis",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
