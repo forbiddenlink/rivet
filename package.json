@@ -53,10 +53,10 @@
     "@types/node": "20.19.43",
     "fta-cli": "3.1.0",
     "tsup": "8.5.1",
-    "turbo": "2.11.8",
+    "turbo": "2.11.10",
     "typescript": "6.0.3",
     "vitest": "4.1.12",
-    "vite": "8.3.4"
+    "vite": "8.3.5"
   },
   "packageManager": "pnpm@10.34.7",
   "engines": {
