@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@rivet/parsers": "workspace:*",
-    "glob": "^11.0.0",
+    "glob": "^14.0.0",
     "ignore": "^7.0.10"
   },
   "devDependencies": {
