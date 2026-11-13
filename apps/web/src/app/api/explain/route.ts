@@ -1,7 +1,7 @@
 import { DEFAULT_EXPLAIN_MODEL } from '@rivet/core'
 import { type NextRequest, NextResponse } from 'next/server'
 
-import { clientKey, rateLimit, rateLimitHeaders } from '@/lib/rate-limit'
+import { clientKey, rateLimit, rateLimitDurable, rateLimitHeaders } from '@/lib/rate-limit'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -11,6 +11,8 @@ export const maxDuration = 30
 // built-in guide instead of an error. The guide is a table lookup, so its own cap
 // only stops a single client hammering the route.
 const AI_RATE_LIMIT = { limit: 6, windowMs: 60_000 }
+// Backstop across all callers: at most 200 model calls per hour.
+const AI_GLOBAL_RATE_LIMIT = { limit: 200, windowMs: 3_600_000 }
 const GUIDE_RATE_LIMIT = { limit: 60, windowMs: 60_000 }
 
 // The detection fields are pasted straight into the model prompt, so they are
@@ -129,7 +131,16 @@ export async function POST(
     }
 
     const apiKey = process.env.OPENAI_API_KEY
-    if (!(body.ai === true && apiKey && rateLimit(`explain-ai:${caller}`, AI_RATE_LIMIT).ok)) {
+    if (!(body.ai === true && apiKey)) {
+      return NextResponse.json(localExplanation(detection))
+    }
+    // Spend path: durable limit (Upstash when configured), plus a global cap so
+    // rotating client IPs cannot multiply the per-caller quota.
+    const aiLimit = await rateLimitDurable(`explain-ai:${caller}`, AI_RATE_LIMIT)
+    const globalLimit = aiLimit.ok
+      ? await rateLimitDurable('explain-ai:global', AI_GLOBAL_RATE_LIMIT)
+      : aiLimit
+    if (!(aiLimit.ok && globalLimit.ok)) {
       return NextResponse.json(localExplanation(detection))
     }
 
