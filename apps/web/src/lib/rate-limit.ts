@@ -132,7 +132,11 @@ function getDurableLimiter(options: RateLimitOptions): Promise<DurableLimiter> {
         prefix: 'rivet:rl',
         timeout: 2000,
       })
-    })()
+    })().catch((error: unknown) => {
+      // Drop a failed init so the next call retries instead of reusing the rejection.
+      durableLimiters.delete(id)
+      throw error
+    })
     durableLimiters.set(id, limiter)
   }
   return limiter
