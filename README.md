@@ -4,7 +4,7 @@ RIVET is an early-stage TypeScript/JavaScript static-analysis tool with a local 
 
 ## First run from source
 
-Use **Node.js 24** (the `.nvmrc` default; minimum **22.12.0**) and **pnpm 10.34.5**. The CLI is not published as a standalone npm package.
+Use **Node.js 24** (the `.nvmrc` default; minimum **22.12.0**) and **pnpm 10.34.7**. The CLI is not published as a standalone npm package.
 
 ```bash
 git clone https://github.com/forbiddenlink/rivet.git
@@ -64,5 +64,5 @@ pnpm lint
 - [CLI design and current command reference](docs/CLI_SPEC.md)
 - [AI setup and data disclosure](docs/AI_ENHANCEMENT.md)
 - [Contributing](CONTRIBUTING.md)
-- [Roadmap — planned work](docs/ROADMAP.md)
+- [Roadmap: planned work](docs/ROADMAP.md)
 - [MIT license](LICENSE)

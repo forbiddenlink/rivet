@@ -10,7 +10,7 @@ Repo: github.com/forbiddenlink/rivet. Vercel project: `rivet` (team
 
 ## Stack
 
-- Turborepo monorepo with pnpm-managed workspaces (`pnpm@10.34.5`, Node >=22.12.0 (24 recommended))
+- Turborepo monorepo with pnpm-managed workspaces (`pnpm@10.34.7`, Node >=22.12.0 (24 recommended))
 - TypeScript 6, Biome 2 (lint + format, not ESLint/Prettier)
 - `apps/web`: Next.js 16, React 19
 - `apps/cli`: Commander-based CLI, built with tsup (CJS + dts)

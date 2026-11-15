@@ -32,31 +32,29 @@ The dashboard will work without the API key, but AI explanations will use mock f
 
 ## Configuration
 
-The deployment is configured via [`vercel.json`](../vercel.json):
+The deployment is configured via [`apps/web/vercel.json`](../apps/web/vercel.json):
 
 ```json
 {
-  "buildCommand": "pnpm build --filter=@rivet/web",
-  "devCommand": "pnpm dev --filter=@rivet/web",
-  "installCommand": "pnpm install",
-  "framework": null,
-  "outputDirectory": "apps/web/.next"
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "installCommand": "cd ../.. && corepack enable && pnpm install --frozen-lockfile",
+  "buildCommand": "cd ../.. && pnpm build --filter=@rivet/web",
+  "devCommand": "cd ../.. && pnpm dev --filter=@rivet/web"
 }
 ```
 
 ## Vercel Project Settings
 
-- **Root Directory**: Leave as root (monorepo setup)
-- **Framework Preset**: None (uses custom build command)
-- **Build Command**: Automatically uses `vercel.json` config
-- **Output Directory**: `apps/web/.next`
-- **Install Command**: `pnpm install`
+- **Root Directory**: `apps/web`. Every command in `vercel.json` starts with `cd ../..`, so it assumes it runs from `apps/web`. Check this setting in the Vercel project.
+- **Framework Preset**: Next.js
+- **Build, Install and Dev commands**: taken from `apps/web/vercel.json`
 
 ## Monorepo Considerations
 
 RIVET uses **Turborepo** with pnpm workspaces. The build process:
 
-1. Vercel runs `pnpm install` (installs all workspace dependencies)
+1. Vercel runs `pnpm install --frozen-lockfile` from the repo root (installs all workspace dependencies)
 2. Turbo builds dependencies first (parsers → core → engines)
 3. Finally builds `@rivet/web` with all dependencies available
 
