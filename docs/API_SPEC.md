@@ -2,6 +2,8 @@
 
 REST API for the web dashboard (Phase 2).
 
+> Status as of 2026-11-15: design only. The web app implements two routes, `POST /api/analyze` and `POST /api/explain` (`apps/web/src/app/api/`). The projects, scans, issues, fixes, dependencies and authentication endpoints below are not implemented; see [README](../README.md) and [Features](FEATURES.md) for the current surface.
+
 ---
 
 ## 📋 Table of Contents

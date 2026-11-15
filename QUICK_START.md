@@ -1,7 +1,7 @@
 # Quick Start
 
 RIVET runs from this repository; it is not yet published as a standalone package.
-Use Node.js **24** (recommended by `.nvmrc`; minimum **22.12.0**) and pnpm **10.34.5**.
+Use Node.js **24** (recommended by `.nvmrc`; minimum **22.12.0**) and pnpm **10.34.7**.
 Commander 15 requires Node 22.12.0 or newer; Node 20 is not supported.
 
 ## Install, build and scan
