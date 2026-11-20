@@ -21,6 +21,7 @@
     "@rivet/engine-security": "workspace:*",
     "@rivet/engine-smells": "workspace:*",
     "@rivet/parsers": "workspace:*",
+    "@sentry/nextjs": "^10.78.0",
     "@upstash/ratelimit": "^2.2.0",
     "@upstash/redis": "^1.41.0",
     "next": "^16.4.5",
